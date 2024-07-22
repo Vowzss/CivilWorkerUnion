@@ -1,9 +1,9 @@
-package com.oneliferp.cwu.modules.report.misc;
+package com.oneliferp.cwu.modules.session.misc;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public enum ReportButtonType {
+public enum SessionButtonType {
     START("cwu_start_report"),
     CANCEL("cwu_cancel_report"),
     SUBMIT("cwu_submit_report"),
@@ -15,13 +15,13 @@ public enum ReportButtonType {
     /*
     Perform easy lookup
     */
-    private static final Map<String, ReportButtonType> IDS = new HashMap<>();
+    private static final Map<String, SessionButtonType> IDS = new HashMap<>();
     static {
         for (final var type : values()) {
             IDS.put(type.getId(), type);
         }
     }
-    public static ReportButtonType fromId(final String id) {
+    public static SessionButtonType fromId(final String id) {
         final var type = IDS.get(id);
         if (type == null) throw new IllegalArgumentException("No enum constant with id " + id);
         return type;
@@ -29,7 +29,7 @@ public enum ReportButtonType {
 
     private final String id;
 
-    ReportButtonType(final String id) {
+    SessionButtonType(final String id) {
         this.id = id;
     }
 

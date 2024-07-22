@@ -9,7 +9,6 @@ import com.oneliferp.cwu.modules.profile.utils.OptionUtils;
 import com.oneliferp.cwu.modules.profile.utils.ProfileBuilderUtils;
 import com.oneliferp.cwu.modules.profile.misc.ProfileButtonType;
 import com.oneliferp.cwu.modules.profile.misc.ProfileCommandType;
-import com.oneliferp.cwu.modules.report.utils.ReportFeedbackUtils;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;

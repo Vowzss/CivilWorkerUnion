@@ -36,7 +36,7 @@ public class ProfileBuilderUtils {
                 **Identité:** %s
                 **Rapport(s) totaux/mensuel/hebdomadaire:** %d/%d/%d
                 """, cwu.getIdentity(),
-                cwu.getTotalReportCount(), cwu.getMonthlyReportCount(), cwu.getWeeklyReportCount()
+                cwu.getSessionCount(), cwu.getMonthlySessionCount(), cwu.getWeeklySessionCount()
         ));
         return embed.build();
     }

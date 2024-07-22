@@ -4,17 +4,17 @@ import com.oneliferp.cwu.Models.SessionModel;
 
 import java.util.HashMap;
 
-public class ReportCache {
-    private static ReportCache instance;
+public class SessionCache {
+    private static SessionCache instance;
 
-    public static ReportCache getInstance() {
-        if (instance == null) instance = new ReportCache();
+    public static SessionCache getInstance() {
+        if (instance == null) instance = new SessionCache();
         return instance;
     }
 
     private final HashMap<Long, SessionModel> reportMap;
 
-    public ReportCache() {
+    public SessionCache() {
         this.reportMap = new HashMap<>();
     }
 

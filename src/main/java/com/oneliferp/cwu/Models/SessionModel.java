@@ -1,41 +1,66 @@
 package com.oneliferp.cwu.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oneliferp.cwu.Utils.SimpleDate;
 import com.oneliferp.cwu.misc.PageType;
 import com.oneliferp.cwu.misc.SessionType;
 import com.oneliferp.cwu.misc.ParticipantType;
 import com.oneliferp.cwu.misc.ZoneType;
 
+import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
 public class SessionModel {
+
     private final CwuModel cwu;
 
+    @JsonProperty("loyalists")
     private final HashMap<String, String> loyalists;
+
+    @JsonProperty("citizens")
     private final HashMap<String, String> citizens;
+
+    @JsonProperty("vortigaunts")
     private final HashMap<String, String> vortigaunts;
 
+    @JsonProperty("anti_citizens")
     private final HashMap<String, String> antiCitizens;
 
-    private final Instant startDate;
-    private Instant endDate;
+    @JsonProperty("startedAt")
+    private final SimpleDate startedAt;
 
+    @JsonProperty("endedAt")
+    private SimpleDate endedAt;
+
+    @JsonIgnore()
     private Duration duration;
 
+    @JsonProperty("type")
     private SessionType type;
+
+    @JsonProperty("zone")
     private ZoneType zone;
 
+    @JsonProperty("information")
     private String info = "";
 
+    @JsonIgnore
     private int earnings = 0;
+
+    @JsonIgnore
     private int wages = 0;
+
+    @JsonIgnore
     private int deposit = 0;
 
+    @JsonIgnore
     public PageType currentPage;
 
     public SessionModel(final CwuModel cwu) {
-        this.startDate = Instant.now();
+        this.startedAt = SimpleDate.now();
 
         this.cwu = cwu;
         this.loyalists = new HashMap<>();
@@ -93,6 +118,11 @@ public class SessionModel {
     /*
     Getters
     */
+
+    public CwuModel getCwu() {
+        return this.cwu;
+    }
+
     public HashMap<String, String> getLoyalists() {
         return this.loyalists;
     }
@@ -125,19 +155,21 @@ public class SessionModel {
         return this.earnings;
     }
 
+    public boolean isWithinWeek() {
+        return this.startedAt.isWithinWeek();
+    }
+
+    public boolean isWithinMonth() {
+        return this.startedAt.isWithinMonth();
+    }
+
     /*
     Methods
     */
-    public boolean validate() {
-        final int citizenCount = loyalists.size() + citizens.size() + vortigaunts.size();
-        final int antiCitizenCount = antiCitizens.size();
+    public boolean isValid() {
+        this.endedAt = SimpleDate.now();
+        this.duration = SimpleDate.between(this.startedAt, this.endedAt);
 
-        this.wages = citizenCount * 60 + antiCitizenCount * 40;
-        this.deposit = this.earnings - this.wages;
-
-        this.endDate = Instant.now();
-        this.duration = Duration.between(this.startDate, this.endDate);
-
-        return this.cwu != null && this.type != null && this.zone != null;
+        return this.cwu != null && this.type != null && this.zone != null && (!this.loyalists.isEmpty() || !this.citizens.isEmpty() || !this.vortigaunts.isEmpty() || !this.antiCitizens.isEmpty());
     }
 }

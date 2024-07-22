@@ -5,7 +5,7 @@ import com.oneliferp.cwu.Commands.CwuCommand;
 import com.oneliferp.cwu.modules.profile.commands.ProfileCommand;
 import com.oneliferp.cwu.Listeners.SlashCommandListener;
 import com.oneliferp.cwu.Utils.Environment;
-import com.oneliferp.cwu.modules.report.commands.ReportCommand;
+import com.oneliferp.cwu.modules.session.commands.SessionCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -35,7 +35,7 @@ public class CivilWorkerUnion {
         final List<CwuCommand> commands = new ArrayList<>();
         commands.add(new ClearCommand());
         commands.add(new ProfileCommand());
-        commands.add(new ReportCommand());
+        commands.add(new SessionCommand());
 
         commands.forEach(cmd -> nameToCommandMap.put(cmd.getName(), cmd));
 

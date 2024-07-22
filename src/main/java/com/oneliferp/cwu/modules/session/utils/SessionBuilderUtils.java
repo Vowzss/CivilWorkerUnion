@@ -1,11 +1,11 @@
-package com.oneliferp.cwu.modules.report.utils;
+package com.oneliferp.cwu.modules.session.utils;
 
 import com.oneliferp.cwu.Models.SessionModel;
 import com.oneliferp.cwu.Utils.EmbedUtils;
 import com.oneliferp.cwu.Utils.Toolbox;
 import com.oneliferp.cwu.misc.PageType;
 import com.oneliferp.cwu.misc.SessionType;
-import com.oneliferp.cwu.modules.report.misc.ReportButtonType;
+import com.oneliferp.cwu.modules.session.misc.SessionButtonType;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.MessageEmbed.Field;
@@ -16,7 +16,7 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
-public class ReportBuilderUtils {
+public class SessionBuilderUtils {
     /*
     Messages
     */
@@ -91,28 +91,28 @@ public class ReportBuilderUtils {
     Buttons
     */
     private static Button confirmButton() {
-        return Button.primary(ReportButtonType.PREVIEW.getId(), "Apperçu");
+        return Button.primary(SessionButtonType.PREVIEW.getId(), "Apperçu");
     }
     private static Button editButton() {
-        return Button.secondary(ReportButtonType.EDIT.getId(), "Modifier");
+        return Button.secondary(SessionButtonType.EDIT.getId(), "Modifier");
     }
     private static Button startButton(final SessionType sessionType) {
-        return Button.primary(ReportButtonType.START.getId() + ":" + sessionType.name().toLowerCase(), "Commencer");
+        return Button.primary(SessionButtonType.START.getId() + ":" + sessionType.name().toLowerCase(), "Commencer");
     }
     private static Button cancelButton() {
-        return Button.danger(ReportButtonType.CANCEL.getId(), "Abandonner");
+        return Button.danger(SessionButtonType.CANCEL.getId(), "Abandonner");
     }
     private static Button clearButton() {
-        return Button.danger(ReportButtonType.CLEAR.getId(), "Effacer");
+        return Button.danger(SessionButtonType.CLEAR.getId(), "Effacer");
     }
     private static Button submitButton() {
-        return Button.primary(ReportButtonType.SUBMIT.getId(), "Envoyer");
+        return Button.primary(SessionButtonType.SUBMIT.getId(), "Envoyer");
     }
     private static Button nextButton() {
-        return Button.secondary(ReportButtonType.PAGE.getId() + ":next", Emoji.fromUnicode("\u27A1"));
+        return Button.secondary(SessionButtonType.PAGE.getId() + ":next", Emoji.fromUnicode("\u27A1"));
     }
     private static Button prevButton() {
-        return Button.secondary(ReportButtonType.PAGE.getId() + ":prev", Emoji.fromUnicode("\u2B05"));
+        return Button.secondary(SessionButtonType.PAGE.getId() + ":prev", Emoji.fromUnicode("\u2B05"));
     }
 
     /*

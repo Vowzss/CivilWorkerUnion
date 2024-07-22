@@ -16,7 +16,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class JsonDatabase<T> {
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Gson GSON = new GsonBuilder()
+            .setPrettyPrinting()
+            .excludeFieldsWithoutExposeAnnotation()
+            .create();
 
     private final Type type;
     private final File file;
@@ -52,6 +55,8 @@ public abstract class JsonDatabase<T> {
     }
 
     protected final void readFromCache() {
+        if (!file.exists()) return;
+
         try (final FileReader reader = new FileReader(this.file)){
             this.objects = GSON.fromJson(reader, type);
         } catch (IOException e) {

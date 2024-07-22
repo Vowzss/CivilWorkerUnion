@@ -1,6 +1,6 @@
-package com.oneliferp.cwu.modules.report.commands;
+package com.oneliferp.cwu.modules.session.commands;
 
-import com.oneliferp.cwu.Cache.ReportCache;
+import com.oneliferp.cwu.Cache.SessionCache;
 import com.oneliferp.cwu.Commands.ClearCommand;
 import com.oneliferp.cwu.Commands.CwuCommand;
 import com.oneliferp.cwu.Database.CwuDatabase;
@@ -10,10 +10,10 @@ import com.oneliferp.cwu.Utils.RegexUtils;
 import com.oneliferp.cwu.misc.PageType;
 import com.oneliferp.cwu.misc.ParticipantType;
 import com.oneliferp.cwu.misc.SessionType;
-import com.oneliferp.cwu.modules.report.misc.ReportButtonType;
-import com.oneliferp.cwu.modules.report.misc.ReportCommandType;
-import com.oneliferp.cwu.modules.report.utils.ReportBuilderUtils;
-import com.oneliferp.cwu.modules.report.utils.ReportFeedbackUtils;
+import com.oneliferp.cwu.modules.session.misc.SessionButtonType;
+import com.oneliferp.cwu.modules.session.misc.SessionCommandType;
+import com.oneliferp.cwu.modules.session.utils.SessionBuilderUtils;
+import com.oneliferp.cwu.modules.session.utils.SessionFeedbackUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.concrete.PrivateChannel;
@@ -25,14 +25,14 @@ import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.oneliferp.cwu.modules.report.misc.ReportCommandType.RATION;
+import static com.oneliferp.cwu.modules.session.misc.SessionCommandType.RATION;
 
-public class ReportCommand extends CwuCommand {
-    protected final ReportCache reportCache;
+public class SessionCommand extends CwuCommand {
+    protected final SessionCache sessionCache;
 
-    public ReportCommand() {
-        super(ReportCommandType.BASE.getId(), "Vous permet de créer des raports de session.");
-        this.reportCache = ReportCache.getInstance();
+    public SessionCommand() {
+        super(SessionCommandType.BASE.getId(), "Vous permet de créer des raports de session.");
+        this.sessionCache = SessionCache.getInstance();
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ReportCommand extends CwuCommand {
     public void handleCommandEvent(final SlashCommandInteractionEvent event) {
         final SessionType sessionType = SessionType.RATION;
 
-        switch (ReportCommandType.fromId(event.getSubcommandName())) {
+        switch (SessionCommandType.fromId(event.getSubcommandName())) {
             default -> throw new IllegalArgumentException();
             case RATION -> {
 
@@ -61,8 +61,8 @@ public class ReportCommand extends CwuCommand {
 
         final User user = event.getUser();
 
-        // Delete user existing report if any
-        this.reportCache.remove(user.getIdLong());
+        // Delete user existing session if any
+        this.sessionCache.remove(user.getIdLong());
 
         if (!event.isFromGuild()) {
             // Delete all previous messages from bot to avoid misleading events
@@ -72,8 +72,8 @@ public class ReportCommand extends CwuCommand {
             });
 
             // Command triggered from private message
-            event.replyEmbeds(ReportBuilderUtils.startMessage(sessionType))
-                    .setActionRow(ReportBuilderUtils.startAndCancelRow(sessionType))
+            event.replyEmbeds(SessionBuilderUtils.startMessage(sessionType))
+                    .setActionRow(SessionBuilderUtils.startAndCancelRow(sessionType))
                     .queue();
         } else {
             // Command triggered from guild
@@ -83,11 +83,11 @@ public class ReportCommand extends CwuCommand {
                     ClearCommand.deleteBotHistory(channel, history, event.getUser().getIdLong());
                 });
 
-                // Send report creation feedback
-                channel.sendMessageEmbeds(ReportBuilderUtils.startMessage(sessionType))
-                        .setActionRow(ReportBuilderUtils.startAndCancelRow(sessionType))
-                        .queue(success -> ReportFeedbackUtils.sessionCreationSuccess(event, channel).queue(),
-                                failure -> ReportFeedbackUtils.sessionCreationFailure(event).queue()
+                // Send session creation feedback
+                channel.sendMessageEmbeds(SessionBuilderUtils.startMessage(sessionType))
+                        .setActionRow(SessionBuilderUtils.startAndCancelRow(sessionType))
+                        .queue(success -> SessionFeedbackUtils.sessionCreationSuccess(event, channel).queue(),
+                                failure -> SessionFeedbackUtils.sessionCreationFailure(event).queue()
                         );
             });
         }
@@ -101,14 +101,15 @@ public class ReportCommand extends CwuCommand {
         }
 
         final List<String> parts = Arrays.asList(buttonID.split(":"));
-        final SessionModel session = this.reportCache.get(event.getUser().getIdLong());
+        final SessionModel session = this.sessionCache.get(event.getUser().getIdLong());
 
-        switch (ReportButtonType.fromId(parts.get(0))) {
+        switch (SessionButtonType.fromId(parts.get(0))) {
             default -> throw new IllegalArgumentException();
             case START -> this.handleStartButton(event, SessionType.valueOf(parts.get(1).toUpperCase()));
             case CANCEL -> this.handleCancelButton(event, session.getType());
             case PREVIEW -> this.handlePreviewButton(event, session);
             case CLEAR -> this.handleClearButton(event, session);
+            case SUBMIT -> this.handleSubmitButton(event, session);
         }
     }
 
@@ -117,9 +118,9 @@ public class ReportCommand extends CwuCommand {
         // Skip event other than pagination
         if (!buttonID.contains("page")) return;
 
-        // Check if user has ongoing report
-        final SessionModel report = this.reportCache.get(message.getAuthor().getIdLong());
-        if (report == null) {
+        // Check if user has ongoing session
+        final SessionModel session = this.sessionCache.get(message.getAuthor().getIdLong());
+        if (session == null) {
             message.reply("Aucun rapport n'est en cours de rédaction.").queue();
             message.delete().queue();
             return;
@@ -132,36 +133,36 @@ public class ReportCommand extends CwuCommand {
         // Get message content
         final String content = message.getContentRaw();
 
-        // Assign content depending on report page and display feedback
-        switch (report.currentPage) {
+        // Assign content depending on session page and display feedback
+        switch (session.currentPage) {
             case LOYALISTS: {
-                RegexUtils.parseApply(content).forEach(report::addLoyalist);
-                ReportFeedbackUtils.loyalist(reference, report).queue();
+                RegexUtils.parseApply(content).forEach(session::addLoyalist);
+                SessionFeedbackUtils.loyalist(reference, session).queue();
                 break;
             }
             case CITIZENS: {
-                RegexUtils.parseApply(content).forEach(report::addCitizen);
-                ReportFeedbackUtils.citizen(reference, report).queue();
+                RegexUtils.parseApply(content).forEach(session::addCitizen);
+                SessionFeedbackUtils.citizen(reference, session).queue();
                 break;
             }
             case VORTIGAUNTS: {
-                RegexUtils.parseApply(content).forEach(report::addVortigaunt);
-                ReportFeedbackUtils.vortigaunt(reference, report).queue();
+                RegexUtils.parseApply(content).forEach(session::addVortigaunt);
+                SessionFeedbackUtils.vortigaunt(reference, session).queue();
                 break;
             }
             case ANTI_CITIZENS: {
-                RegexUtils.parseApply(content).forEach(report::addAntiCitizen);
-                ReportFeedbackUtils.antiCitizen(reference, report).queue();
+                RegexUtils.parseApply(content).forEach(session::addAntiCitizen);
+                SessionFeedbackUtils.antiCitizen(reference, session).queue();
                 break;
             }
             case INFO: {
-                report.setInfo(content);
-                ReportFeedbackUtils.info(reference, report).queue();
+                session.setInfo(content);
+                SessionFeedbackUtils.info(reference, session).queue();
                 break;
             }
             case EARNINGS: {
-                report.setEarnings(RegexUtils.parseEarnings(content));
-                ReportFeedbackUtils.earnings(reference, report).queue();
+                session.setEarnings(RegexUtils.parseEarnings(content));
+                SessionFeedbackUtils.earnings(reference, session).queue();
                 break;
             }
         }
@@ -179,93 +180,101 @@ public class ReportCommand extends CwuCommand {
         }
 
         // Create rapport and set default values
-        final SessionModel report = new SessionModel(cwu);
-        report.setType(sessionType);
-        report.setZone(sessionType.getZone());
+        final SessionModel session = new SessionModel(cwu);
+        session.setType(sessionType);
+        session.setZone(sessionType.getZone());
 
-        // Save report in cache
-        this.reportCache.add(event.getUser().getIdLong(), report);
+        // Save session in cache
+        this.sessionCache.add(event.getUser().getIdLong(), session);
 
         // Handle event
-        this.goToPage(event, report);
+        this.goToPage(event, session);
     }
 
     private void handleCancelButton(final ButtonInteractionEvent event, final SessionType sessionType) {
-        // Delete user ongoing report
-        this.reportCache.remove(event.getUser().getIdLong());
+        // Delete user ongoing session
+        this.sessionCache.remove(event.getUser().getIdLong());
 
         // Send feedback
         event.getMessage().delete().queue();
-        event.replyEmbeds(ReportBuilderUtils.cancelMessage(sessionType)).queue();
+        event.replyEmbeds(SessionBuilderUtils.cancelMessage(sessionType)).queue();
     }
 
-    private void handleClearButton(final ButtonInteractionEvent event, final SessionModel report) {
-        final PageType currentPage = report.currentPage;
+    private void handleClearButton(final ButtonInteractionEvent event, final SessionModel session) {
+        final PageType currentPage = session.currentPage;
 
         switch (currentPage) {
-            case INFO -> report.setInfo(null);
-            case EARNINGS -> report.setEarnings(null);
-            default -> report.clearParticipants(ParticipantType.getFromPage(currentPage));
+            case INFO -> session.setInfo(null);
+            case EARNINGS -> session.setEarnings(null);
+            default -> session.clearParticipants(ParticipantType.getFromPage(currentPage));
         }
 
         // Send feedback
-        this.goToPage(event, report);
+        this.goToPage(event, session);
     }
 
-    private void handlePreviewButton(final ButtonInteractionEvent event, final SessionModel report) {
-        final boolean isReportValid = report.validate();
-
-        report.currentPage = PageType.PREVIEW;
+    private void handlePreviewButton(final ButtonInteractionEvent event, final SessionModel session) {
+        session.currentPage = PageType.PREVIEW;
 
         // Send feedback
-        this.goToPage(event, report);
+        this.goToPage(event, session);
+    }
+
+    private void handleSubmitButton(final ButtonInteractionEvent event, final SessionModel session) {
+        if (!session.isValid()) {
+            event.reply("La génération du rapport a échoué car des données sont manquantes.").queue();
+            return;
+        }
+
+        session.getCwu().addSession(session);
+        event.reply("Le rapport à été transmit avec succès.").queue();
     }
 
     private void handlePageButton(final ButtonInteractionEvent event, final String buttonID) {
-        // Check if user has ongoing report
-        if (!this.reportCache.contains(event.getUser().getIdLong())) {
+        // Check if user has ongoing session
+        if (!this.sessionCache.contains(event.getUser().getIdLong())) {
             event.getMessage().delete().queue();
             event.reply("Aucun rapport n'est en cours de rédaction.").setEphemeral(true).queue();
             return;
         }
 
-        final SessionModel report = this.reportCache.get(event.getUser().getIdLong());
-        final PageType currentPage = report.currentPage;
-        report.currentPage = buttonID.contains("next") ? currentPage.getNext() : currentPage.getPrevious();
+        final SessionModel session = this.sessionCache.get(event.getUser().getIdLong());
+        final PageType currentPage = session.currentPage;
+        session.currentPage = buttonID.contains("next") ? currentPage.getNext() : currentPage.getPrevious();
 
-        this.goToPage(event, report);
+        this.goToPage(event, session);
     }
 
-    protected void goToPage(final ButtonInteractionEvent event, final SessionModel report) {
+    protected void goToPage(final ButtonInteractionEvent event, final SessionModel session) {
         event.getMessage().delete().queue();
 
-        switch (report.currentPage) {
+        switch (session.currentPage) {
             case LOYALISTS: {
-                ReportFeedbackUtils.loyalist(event, report).queue();
+                SessionFeedbackUtils.loyalist(event, session).queue();
                 break;
             }
             case CITIZENS: {
-                ReportFeedbackUtils.citizen(event, report).queue();
+                SessionFeedbackUtils.citizen(event, session).queue();
                 break;
             }
             case VORTIGAUNTS: {
-                ReportFeedbackUtils.vortigaunt(event, report).queue();
+                SessionFeedbackUtils.vortigaunt(event, session).queue();
                 break;
             }
             case ANTI_CITIZENS: {
-                ReportFeedbackUtils.antiCitizen(event, report).queue();
+                SessionFeedbackUtils.antiCitizen(event, session).queue();
                 break;
             }
             case INFO: {
-                ReportFeedbackUtils.info(event, report).queue();
+                SessionFeedbackUtils.info(event, session).queue();
                 break;
             }
             case EARNINGS: {
-                ReportFeedbackUtils.earnings(event, report).queue();
+                SessionFeedbackUtils.earnings(event, session).queue();
                 break;
             }
             case PREVIEW: {
-                ReportFeedbackUtils.preview(event, report).queue();
+                SessionFeedbackUtils.preview(event, session).queue();
                 break;
             }
         }

@@ -4,8 +4,8 @@ import com.oneliferp.cwu.CivilWorkerUnion;
 import com.oneliferp.cwu.Commands.CwuCommand;
 import com.oneliferp.cwu.modules.profile.commands.ProfileCommand;
 import com.oneliferp.cwu.modules.profile.misc.ProfileCommandType;
-import com.oneliferp.cwu.modules.report.commands.ReportCommand;
-import com.oneliferp.cwu.modules.report.misc.ReportCommandType;
+import com.oneliferp.cwu.modules.session.commands.SessionCommand;
+import com.oneliferp.cwu.modules.session.misc.SessionCommandType;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageReference;
 import net.dv8tion.jda.api.entities.MessageType;
@@ -52,7 +52,7 @@ public class SlashCommandListener extends ListenerAdapter {
 
         // Resolve correct handler from button id
         if (buttonID.contains("report")) {
-            final ReportCommand command = CivilWorkerUnion.get().getCommand(ReportCommandType.BASE.getId());
+            final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
             command.handleReplyEvent(event.getMessage(), buttonID);
         } else if (buttonID.contains("profile")) {
             final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());
@@ -69,7 +69,7 @@ public class SlashCommandListener extends ListenerAdapter {
 
         try {
             if (buttonID.contains("report")) {
-                final ReportCommand command = CivilWorkerUnion.get().getCommand(ReportCommandType.BASE.getId());
+                final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
                 command.handleButtonEvent(event, buttonID);
             } else if (buttonID.contains("profile")) {
                 final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());

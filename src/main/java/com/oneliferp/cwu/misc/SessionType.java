@@ -7,7 +7,7 @@ public enum SessionType {
     CARDBOARD("Carton", "\uD83D\uDCE6"),
     CANS ("Canettes", "\uD83E\uDD64"),
     LAUNDRY("Laverie", "\uD83E\uDDFC"),
-    PRINTING("Imprimerie", "\uD83D\uDDA8️"),
+    PRINTING("Imprimerie", "\uD83D\uDDA8"),
     CLEANING("Nettoyage", "\uD83E\uDDF9"),
     RENOVATION("Rénovation", "\uD83E\uDDF1"),
     GARDENING("Jardinage", "\uD83C\uDF3F"),

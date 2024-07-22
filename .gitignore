@@ -4,6 +4,7 @@
 # Ignore project related files
 Databases/*
 .env
+.idea
 
 .gradle
 **/build/
