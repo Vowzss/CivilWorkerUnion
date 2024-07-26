@@ -23,14 +23,14 @@ public class SessionBuilderUtils {
     public static MessageEmbed startMessage(final SessionType sessionType) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(String.format("%s  Session - %s", sessionType.getEmoji(), sessionType.getLabel()));
-        embed.setDescription("Vous allez procéder au remplissage des informations.\nS'ensuivra un résumé de votre rapport.");
+        embed.setDescription("Vous allez procéder au remplissage des informations.\nS'ensuivra un résumé de votre session.");
         return embed.build();
     }
 
     public static MessageEmbed cancelMessage(final SessionType sessionType) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(String.format("%s  Session - %s", sessionType.getEmoji(), sessionType.getLabel()));
-        embed.setDescription("Vous avez annuler la création de votre rapport.");
+        embed.setDescription("Vous avez annuler votre session de travail.");
         return embed.build();
     }
 
@@ -90,47 +90,50 @@ public class SessionBuilderUtils {
     /*
     Buttons
     */
-    private static Button confirmButton() {
-        return Button.primary(SessionButtonType.PREVIEW.getId(), "Apperçu");
+    private static Button confirmButton(final String cid) {
+        return Button.primary(SessionButtonType.PREVIEW.getId() + String.format(":%s", cid), "Apperçu");
     }
-    private static Button editButton() {
-        return Button.secondary(SessionButtonType.EDIT.getId(), "Modifier");
+    private static Button editButton(final String cid) {
+        return Button.secondary(SessionButtonType.EDIT.getId() + String.format(":%s", cid), "Modifier");
     }
-    private static Button startButton(final SessionType sessionType) {
-        return Button.primary(SessionButtonType.START.getId() + ":" + sessionType.name().toLowerCase(), "Commencer");
+    private static Button startButton(final String cid, final SessionType sessionType) {
+        return Button.primary(SessionButtonType.START.getId() + String.format(".%s:%s", ":" + sessionType.name().toLowerCase(), cid), "Commencer");
     }
-    private static Button cancelButton() {
-        return Button.danger(SessionButtonType.CANCEL.getId(), "Abandonner");
+    private static Button cancelButton(final String cid) {
+        return Button.danger(SessionButtonType.CANCEL.getId() + String.format(":%s", cid), "Abandonner");
     }
-    private static Button clearButton() {
-        return Button.danger(SessionButtonType.CLEAR.getId(), "Effacer");
+    private static Button clearButton(final String cid) {
+        return Button.danger(SessionButtonType.CLEAR.getId() + String.format(":%s", cid), "Effacer");
     }
-    private static Button submitButton() {
-        return Button.primary(SessionButtonType.SUBMIT.getId(), "Envoyer");
+    private static Button submitButton(final String cid) {
+        return Button.primary(SessionButtonType.SUBMIT.getId() + String.format(":%s", cid), "Envoyer");
     }
-    private static Button nextButton() {
-        return Button.secondary(SessionButtonType.PAGE.getId() + ":next", Emoji.fromUnicode("\u27A1"));
+    private static Button nextButton(final String cid) {
+        return Button.secondary(SessionButtonType.PAGE.getId() + String.format(".next:%s", cid), Emoji.fromUnicode("\u27A1"));
     }
-    private static Button prevButton() {
-        return Button.secondary(SessionButtonType.PAGE.getId() + ":prev", Emoji.fromUnicode("\u2B05"));
+    private static Button prevButton(final String cid) {
+        return Button.secondary(SessionButtonType.PAGE.getId() + String.format(".prev:%s", cid), Emoji.fromUnicode("\u2B05"));
+    }
+    private static Button fillButton(final String cid) {
+        return Button.primary(SessionButtonType.FILL.getId() + String.format(":%s", cid), "Remplir");
     }
 
     /*
     Utils
     */
-    public static List<Button> startAndCancelRow(final SessionType sessionType) {
-        return List.of(startButton(sessionType), cancelButton());
+    public static List<Button> startAndCancelRow(final String cid, final SessionType sessionType) {
+        return List.of(startButton(cid, sessionType), cancelButton(cid));
     }
-    public static List<Button> nextRow() {
-        return List.of(clearButton(), nextButton());
+    public static List<Button> nextRow(final String cid) {
+        return List.of(fillButton(cid), clearButton(cid), nextButton(cid));
     }
-    public static List<Button> prevRow() {
-        return List.of(confirmButton(), clearButton(), prevButton());
+    public static List<Button> prevRow(final String cid) {
+        return List.of(fillButton(cid),confirmButton(cid), clearButton(cid), prevButton(cid));
     }
-    public static List<Button> submitOrEditRow() {
-        return List.of(submitButton(), editButton());
+    public static List<Button> submitOrEditRow(final String cid) {
+        return List.of(submitButton(cid), editButton(cid));
     }
-    public static List<Button> prevAndNextRow() {
-        return List.of(clearButton(), prevButton(), nextButton());
+    public static List<Button> prevAndNextRow(final String cid) {
+        return List.of(fillButton(cid),clearButton(cid), prevButton(cid), nextButton(cid));
     }
 }

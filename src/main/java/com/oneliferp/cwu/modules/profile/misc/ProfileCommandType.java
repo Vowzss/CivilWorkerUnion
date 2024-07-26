@@ -18,6 +18,7 @@ public enum ProfileCommandType {
             IDS.put(type.getId(), type);
         }
     }
+
     public static ProfileCommandType fromId(final String id) {
         final var type = IDS.get(id);
         if (type == null) throw new IllegalArgumentException("No enum constant with id " + id);

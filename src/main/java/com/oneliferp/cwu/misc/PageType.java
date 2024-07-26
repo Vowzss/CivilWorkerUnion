@@ -7,7 +7,7 @@ public enum PageType {
     ANTI_CITIZENS("anticitizens", "Anti Citoyens(s) présent(s):"),
     INFO("info", "Informations supplémentaires:"),
     EARNINGS("earnings", "Gain de la session:"),
-    PREVIEW("preview", "Apperçu du rapport");
+    PREVIEW("preview", "Apperçu de la session");
 
     private final String id;
     private final String description;

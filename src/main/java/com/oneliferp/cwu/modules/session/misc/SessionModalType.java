@@ -3,27 +3,22 @@ package com.oneliferp.cwu.modules.session.misc;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum SessionButtonType {
-    START("cwu_session_start"),
-    CANCEL("cwu_session_cancel"),
-    SUBMIT("cwu_session_submit"),
-    EDIT("cwu_session_edit"),
-    PREVIEW("cwu_session_preview"),
-    CLEAR("cwu_session_clear"),
-    PAGE("cwu_session_page"),
-    FILL("cwu_session_fill");
+public enum SessionModalType {
+    PARTICIPANTS("cwu_session_fill_participants"),
+    INFO("cwu_session_fill_info"),
+    EARNINGS("cwu_session_fill_earnings");
 
     /*
     Perform easy lookup
     */
-    private static final Map<String, SessionButtonType> IDS = new HashMap<>();
+    private static final Map<String, SessionModalType> IDS = new HashMap<>();
     static {
         for (final var type : values()) {
             IDS.put(type.getId(), type);
         }
     }
 
-    public static SessionButtonType fromId(final String id) {
+    public static SessionModalType fromId(final String id) {
         final var type = IDS.get(id);
         if (type == null) throw new IllegalArgumentException("No enum constant with id " + id);
         return type;
@@ -31,7 +26,7 @@ public enum SessionButtonType {
 
     private final String id;
 
-    SessionButtonType(final String id) {
+    SessionModalType(final String id) {
         this.id = id;
     }
 

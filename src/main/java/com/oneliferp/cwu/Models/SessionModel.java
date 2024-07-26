@@ -2,11 +2,14 @@ package com.oneliferp.cwu.Models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
 import com.oneliferp.cwu.Utils.SimpleDate;
 import com.oneliferp.cwu.misc.PageType;
 import com.oneliferp.cwu.misc.SessionType;
 import com.oneliferp.cwu.misc.ParticipantType;
 import com.oneliferp.cwu.misc.ZoneType;
+import jdk.jfr.Name;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -14,55 +17,60 @@ import java.time.Instant;
 import java.util.*;
 
 public class SessionModel {
+    @Expose
+    @SerializedName("cwu")
+    private final String cwuIdentity;
 
-    private final CwuModel cwu;
-
-    @JsonProperty("loyalists")
+    @Expose
+    @SerializedName("loyalists")
     private final HashMap<String, String> loyalists;
 
-    @JsonProperty("citizens")
+    @Expose
+    @SerializedName("citizens")
     private final HashMap<String, String> citizens;
 
-    @JsonProperty("vortigaunts")
+    @Expose
+    @SerializedName("vortigaunts")
     private final HashMap<String, String> vortigaunts;
 
-    @JsonProperty("anti_citizens")
+    @Expose
+    @SerializedName("anti_citizens")
     private final HashMap<String, String> antiCitizens;
 
-    @JsonProperty("startedAt")
+    @Expose
+    @SerializedName("startedAt")
     private final SimpleDate startedAt;
 
-    @JsonProperty("endedAt")
+    @Expose
+    @SerializedName("endedAt")
     private SimpleDate endedAt;
 
-    @JsonIgnore()
     private Duration duration;
 
-    @JsonProperty("type")
+    @Expose
+    @SerializedName("type")
     private SessionType type;
 
-    @JsonProperty("zone")
+    @Expose
+    @SerializedName("zone")
     private ZoneType zone;
 
-    @JsonProperty("information")
+    @Expose
+    @SerializedName("information")
     private String info = "";
 
-    @JsonIgnore
     private int earnings = 0;
 
-    @JsonIgnore
     private int wages = 0;
 
-    @JsonIgnore
     private int deposit = 0;
 
-    @JsonIgnore
     public PageType currentPage;
 
     public SessionModel(final CwuModel cwu) {
         this.startedAt = SimpleDate.now();
 
-        this.cwu = cwu;
+        this.cwuIdentity = cwu.getIdentity();
         this.loyalists = new HashMap<>();
         this.citizens = new HashMap<>();
         this.vortigaunts = new HashMap<>();
@@ -119,8 +127,8 @@ public class SessionModel {
     Getters
     */
 
-    public CwuModel getCwu() {
-        return this.cwu;
+    public String getCwuIdentity() {
+        return this.cwuIdentity;
     }
 
     public HashMap<String, String> getLoyalists() {
@@ -170,6 +178,6 @@ public class SessionModel {
         this.endedAt = SimpleDate.now();
         this.duration = SimpleDate.between(this.startedAt, this.endedAt);
 
-        return this.cwu != null && this.type != null && this.zone != null && (!this.loyalists.isEmpty() || !this.citizens.isEmpty() || !this.vortigaunts.isEmpty() || !this.antiCitizens.isEmpty());
+        return this.cwuIdentity != null && this.type != null && this.zone != null && (!this.loyalists.isEmpty() || !this.citizens.isEmpty() || !this.vortigaunts.isEmpty() || !this.antiCitizens.isEmpty());
     }
 }

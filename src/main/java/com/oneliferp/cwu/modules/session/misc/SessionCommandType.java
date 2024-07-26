@@ -17,6 +17,7 @@ public enum SessionCommandType {
             IDS.put(type.getId(), type);
         }
     }
+
     public static SessionCommandType fromId(final String id) {
         final var type = IDS.get(id);
         if (type == null) throw new IllegalArgumentException("No enum constant with id " + id);

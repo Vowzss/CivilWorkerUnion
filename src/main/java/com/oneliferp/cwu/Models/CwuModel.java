@@ -1,30 +1,19 @@
 package com.oneliferp.cwu.Models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.oneliferp.cwu.Database.SessionDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CwuModel {
     @Expose
     @SerializedName("id")
-    private Long userID;
+    private Long id;
 
     @Expose
-    @SerializedName("firstname")
-    private String firstName;
-
-    @Expose
-    @SerializedName("lastname")
-    private String lastName;
-
-    @Expose
-    @SerializedName("cid")
-    private String cid;
+    @SerializedName("identity")
+    private IdentityModel identity;
 
     @Expose
     @SerializedName("branch")
@@ -34,81 +23,57 @@ public class CwuModel {
     @SerializedName("rank")
     private CwuRank rank;
 
-    public List<SessionModel> sessions;
-
-    public CwuModel(final Long userID, final String firstName, final String lastName, final String cid, final CwuBranch branch, final CwuRank rank) {
-        this.userID = userID;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.cid = cid.contains("#") ? cid.substring(0, cid.indexOf("#")) : cid;
+    public CwuModel(final IdentityModel identity, final CwuBranch branch, final CwuRank rank) {
+        this.identity = identity;
         this.branch = branch;
         this.rank = rank;
-
-        this.sessions = new ArrayList<>();
-    }
-
-    public CwuModel() {
-        this.sessions = new ArrayList<>();
     }
 
     /*
     Getters
     */
-    @JsonIgnore
-    public Long getUserID() {
-        return this.userID;
-    }
+    public Long getId() { return this.id; }
 
-    @JsonIgnore
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    @JsonIgnore
-    public String getLastName() {
-        return this.lastName;
-    }
-
-    @JsonIgnore
     public String getCid() {
-        return this.cid;
+        return this.identity.cid;
     }
 
-    @JsonIgnore
+    public boolean isLinked() {
+        return this.id != null;
+    }
+
     public String getIdentity() {
-        return String.format("%s %s #%s", this.firstName, this.lastName, this.cid);
+        return identity.toString();
     }
 
-    @JsonIgnore
     public CwuBranch getBranch() {
         return this.branch;
     }
 
-    @JsonIgnore
     public CwuRank getRank() {
         return this.rank;
     }
 
-    @JsonIgnore
     public int getSessionCount() {
-        return this.sessions.size();
+        return SessionDatabase.get().getSessionsByCwu(this).size();
     }
-
-    @JsonIgnore
-    public int getWeeklySessionCount() {
-        return this.sessions.stream().filter(SessionModel::isWithinWeek).toList().size();
-    }
-
-    @JsonIgnore
     public int getMonthlySessionCount() {
-        return this.sessions.stream().filter(SessionModel::isWithinMonth).toList().size();
+        return SessionDatabase.get().getSessionsByCwu(this)
+                .stream().filter(SessionModel::isWithinMonth)
+                .toList().size();
+    }
+
+    public int getWeeklySessionCount() {
+        return SessionDatabase.get().getSessionsByCwu(this)
+                .stream().filter(SessionModel::isWithinWeek)
+                .toList().size();
     }
 
     /*
     Setters
     */
-    public void addSession(final SessionModel session) {
-        this.sessions.add(session);
+    public void setId(final Long id) {
+        this.id = id;
     }
 }
 

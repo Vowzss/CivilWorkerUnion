@@ -23,7 +23,7 @@ public abstract class JsonDatabase<T> {
 
     private final Type type;
     private final File file;
-    private List<T> objects;
+    protected final List<T> objects;
 
     protected JsonDatabase(final Class<T> type, final String fileName) {
         this.type = TypeToken.getParameterized(List.class, type).getType();
@@ -36,39 +36,49 @@ public abstract class JsonDatabase<T> {
 
         this.file = new File(directoryPath.toFile(), fileName);
         this.objects = new ArrayList<>();
+
+        this.readFromCache();
     }
 
-    protected void saveOne(final T object) {
+    /*
+    Update methods
+    */
+    public void addOne(final T object) {
         this.objects.add(object);
     }
 
-    protected void saveMany(final List<T> objectList) {
+    public void addMany(final List<T> objectList) {
         this.objects.addAll(objectList);
     }
 
-    protected void removeOne(final T object) {
+    public void removeOne(final T object) {
         this.objects.remove(object);
     }
 
-    protected final List<T> getAll() {
+    public final List<T> getAll() {
         return this.objects;
     }
 
-    protected final void readFromCache() {
+    /*
+    Persistence methods
+    */
+    private void readFromCache() {
         if (!file.exists()) return;
 
         try (final FileReader reader = new FileReader(this.file)){
-            this.objects = GSON.fromJson(reader, type);
+            this.objects.addAll(GSON.fromJson(reader, type));
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public final void writeToCache() {
-        try (final FileWriter writer = new FileWriter(file)) {
-            GSON.toJson(objects, writer);
-        } catch (IOException e) {
-            e.printStackTrace();
+        synchronized (this.objects) {
+            try (final FileWriter writer = new FileWriter(file)) {
+                GSON.toJson(objects, writer);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

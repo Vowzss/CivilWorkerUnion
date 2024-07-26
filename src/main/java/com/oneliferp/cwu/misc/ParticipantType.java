@@ -4,7 +4,7 @@ public enum ParticipantType {
     LOYALIST,
     CITIZEN,
     VORTIGAUNT,
-    ANTI_CITIZEN,;
+    ANTI_CITIZEN;
 
     public static ParticipantType getFromPage(final PageType type) {
         return switch (type) {

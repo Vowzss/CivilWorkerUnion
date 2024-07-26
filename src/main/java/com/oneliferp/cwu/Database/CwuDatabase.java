@@ -7,50 +7,47 @@ import java.util.List;
 
 public class CwuDatabase extends JsonDatabase<CwuModel> {
     private static CwuDatabase instance;
-    public static CwuDatabase getInstance() {
+    public static CwuDatabase get() {
         if (instance == null) instance = new CwuDatabase();
         return instance;
     }
 
-    private final HashMap<Long, CwuModel> cwuMap;
+    private final HashMap<String, CwuModel> cwuMap;
 
     private CwuDatabase() {
         super(CwuModel.class, "cwu_data.json");
         this.cwuMap = new HashMap<>();
 
-        this.readFromCache();
-        this.getAll().forEach(cwu -> this.cwuMap.put(cwu.getUserID(), cwu));
+        this.getAll().forEach(cwu -> {
+            this.cwuMap.put(cwu.getCid(), cwu);
+        });
     }
 
     @Override
-    public void saveOne(final CwuModel cwu) {
-        super.saveOne(cwu);
-        this.cwuMap.put(cwu.getUserID(), cwu);
+    public void addOne(final CwuModel cwu) {
+        super.addOne(cwu);
+        this.cwuMap.put(cwu.getCid(), cwu);
     }
 
     @Override
-    public void saveMany(final List<CwuModel> cwuList) {
-        super.saveMany(cwuList);
-        cwuList.forEach(this::saveOne);
+    public void addMany(final List<CwuModel> cwuList) {
+        super.addMany(cwuList);
+        cwuList.forEach(this::addOne);
     }
 
     /*
     Getters
     */
-    public CwuModel getByUserId(final Long userID) {
-        return this.cwuMap.get(userID);
+    public CwuModel get(final String cid) {
+        return this.cwuMap.get(cid);
     }
 
-    public CwuModel getByCid(final String cid) {
-        return this.cwuMap.entrySet().stream().filter(entry -> entry.getValue().getCid().equals(cid)).findFirst().get().getValue();
-    }
-
-    public void remove(final Long userID) {
-        final CwuModel cwu = this.cwuMap.remove(userID);
+    public void removeOne(final String cid) {
+        final CwuModel cwu = this.cwuMap.remove(cid);
         this.removeOne(cwu);
     }
 
-    public boolean contains(final Long userID) {
-        return this.cwuMap.containsKey(userID);
+    public boolean contains(final String cid) {
+        return this.cwuMap.containsKey(cid);
     }
 }

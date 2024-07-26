@@ -1,6 +1,7 @@
 package com.oneliferp.cwu.Commands;
 
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
@@ -22,22 +23,22 @@ public abstract class CwuCommand {
     /*
     Handlers
     */
-    public void handleCommandEvent(final SlashCommandInteractionEvent event) {
+    public void handleCommandEvent(final SlashCommandInteractionEvent event) throws Exception {
         event.reply("Command not yet implemented.").setEphemeral(true).queue();
     }
 
-    public void handleButtonEvent(final ButtonInteractionEvent event, final String buttonID) {
+    public void handleButtonEvent(final ButtonInteractionEvent event, final String buttonID) throws Exception {
         event.reply("Button not yet implemented.").setEphemeral(true).queue();
     }
 
-    public void handleReplyEvent(final Message message, final String buttonID) {
+    public void handleModalEvent(final ModalInteractionEvent event, final String modalID) throws Exception {
+        event.reply("Interface not yet implemented.").setEphemeral(true).queue();
     }
 
     /*
     Getters
     */
     public final String getName() { return this.name; }
-    public final String getDescription() { return this.description; }
 
     /*
     Utils
