@@ -1,23 +1,26 @@
 package com.oneliferp.cwu.modules.session.commands;
 
-import com.oneliferp.cwu.Cache.SessionCache;
-import com.oneliferp.cwu.Commands.CwuCommand;
-import com.oneliferp.cwu.Database.CwuDatabase;
-import com.oneliferp.cwu.Database.SessionDatabase;
-import com.oneliferp.cwu.Models.CwuModel;
-import com.oneliferp.cwu.Models.SessionModel;
-import com.oneliferp.cwu.Utils.Toolbox;
+import com.oneliferp.cwu.cache.SessionCache;
+import com.oneliferp.cwu.commands.CwuCommand;
+import com.oneliferp.cwu.database.CwuDatabase;
+import com.oneliferp.cwu.database.SessionDatabase;
+import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.models.SessionModel;
+import com.oneliferp.cwu.utils.RegexUtils;
+import com.oneliferp.cwu.utils.Toolbox;
+import com.oneliferp.cwu.exceptions.CwuException;
+import com.oneliferp.cwu.misc.EventTypeData;
 import com.oneliferp.cwu.misc.PageType;
 import com.oneliferp.cwu.misc.ParticipantType;
 import com.oneliferp.cwu.misc.SessionType;
 import com.oneliferp.cwu.modules.profile.exceptions.ProfileNotFoundException;
-import com.oneliferp.cwu.modules.session.exceptions.ReportValidationException;
+import com.oneliferp.cwu.modules.session.exceptions.SessionValidationException;
 import com.oneliferp.cwu.modules.session.exceptions.SessionNotFoundException;
 import com.oneliferp.cwu.modules.session.misc.SessionButtonType;
 import com.oneliferp.cwu.modules.session.misc.SessionCommandType;
 import com.oneliferp.cwu.modules.session.misc.SessionModalType;
 import com.oneliferp.cwu.modules.session.utils.SessionBuilderUtils;
-import com.oneliferp.cwu.modules.session.utils.SessionFeedbackUtils;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -29,19 +32,20 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput.Builder;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
-import java.util.Arrays;
-import java.util.List;
-
 import static com.oneliferp.cwu.modules.session.misc.SessionCommandType.RATION;
 
 public class SessionCommand extends CwuCommand {
     private final SessionCache sessionCache;
     private final SessionDatabase sessionDatabase;
 
+    private final CwuDatabase cwuDatabase;
+
     public SessionCommand() {
         super(SessionCommandType.BASE.getId(), "Vous permet de créer des raports de session.");
         this.sessionCache = SessionCache.get();
         this.sessionDatabase = SessionDatabase.get();
+
+        this.cwuDatabase = CwuDatabase.getInstance();
     }
 
     @Override
@@ -57,6 +61,9 @@ public class SessionCommand extends CwuCommand {
     */
     @Override
     public void handleCommandEvent(final SlashCommandInteractionEvent event) throws Exception {
+        final CwuModel cwu = this.cwuDatabase.getFromId(event.getUser().getIdLong());
+        if (cwu == null) throw new ProfileNotFoundException();
+
         SessionType sessionType;
         switch (SessionCommandType.fromId(event.getSubcommandName())) {
             default -> throw new IllegalArgumentException();
@@ -64,131 +71,83 @@ public class SessionCommand extends CwuCommand {
             case LAUNDRY -> sessionType = SessionType.LAUNDRY;
         }
 
-        final String cid = ""; //this.profileCache.get(event.getUser().getIdLong());
-        if (cid == null) throw new ProfileNotFoundException();
-
-        this.sessionCache.remove(cid);
-
-        event.replyEmbeds(SessionBuilderUtils.startMessage(sessionType))
-                .setActionRow(SessionBuilderUtils.startAndCancelRow(cid, sessionType))
-                .setEphemeral(true).queue();
-    }
-
-    @Override
-    public void handleButtonEvent(final ButtonInteractionEvent event, final String buttonID) {
-        try {
-            if (buttonID.contains("page")) {
-                this.handlePageButton(event, buttonID);
-                return;
-            }
-
-            final List<String> parts = Arrays.asList(buttonID.split("\\."));
-            final String cid = parts.get(1).split(":")[1];
-
-            switch (SessionButtonType.fromId(parts.get(0))) {
-                default -> throw new IllegalArgumentException();
-                case START -> this.handleStartButton(event, cid, SessionType.valueOf(parts.get(1).toUpperCase()));
-                case CANCEL -> this.handleCancelButton(event, cid);
-                case FILL -> this.handleFillButton(event, cid);
-                case PREVIEW -> this.handlePreviewButton(event, cid);
-                case CLEAR -> this.handleClearButton(event, cid);
-                case SUBMIT -> this.handleSubmitButton(event, cid);
-            }
-        } catch (Exception e) {
-            event.reply(e.getMessage()).setEphemeral(true).queue();
-        }
-    }
-
-    @Override
-    public void handleModalEvent(final ModalInteractionEvent event, final String modalID) {
-        final List<String> parts = Arrays.asList(modalID.split(":"));
-
-        switch (SessionModalType.fromId(parts.get(0))) {
-            default -> throw new IllegalArgumentException();
-            case PARTICIPANTS -> {
-
-            }
-            case INFO -> {
-            }
-            case EARNINGS -> {
-            }
-        }
-    }
-
-    /*
-    @Override
-    public void handleReplyEvent(final Message message, final String buttonID) {
-        // Skip event other than pagination
-        if (!buttonID.contains("page")) return;
-
-        // Check if user has ongoing session
-        final SessionModel session = this.sessionCache.get(message.getAuthor().getIdLong());
-        if (session == null) {
-            message.reply("Vous n'avez aucune session de travail en cours.").queue();
-            message.delete().queue();
+        final SessionModel ongoingSession = this.sessionCache.get(cwu.getCid());
+        if (ongoingSession != null) {
+            event.replyEmbeds(SessionBuilderUtils.ongoingMessage(ongoingSession.getType()))
+                    .setActionRow(SessionBuilderUtils.resumeOrCancelRow(cwu.getCid()))
+                    .setEphemeral(true).queue();
             return;
         }
-
-        // Delete previous message to avoid misleading instructions
-        final Message reference = message.getReferencedMessage();
-        reference.delete().queue();
-
-        // Get message content
-        final String content = message.getContentRaw();
-
-        // Assign content depending on session page and display feedback
-        switch (session.currentPage) {
-            case LOYALISTS: {
-                RegexUtils.parseApply(content).forEach(session::addLoyalist);
-                SessionFeedbackUtils.loyalist(reference, session).queue();
-                break;
-            }
-            case CITIZENS: {
-                RegexUtils.parseApply(content).forEach(session::addCitizen);
-                SessionFeedbackUtils.citizen(reference, session).queue();
-                break;
-            }
-            case VORTIGAUNTS: {
-                RegexUtils.parseApply(content).forEach(session::addVortigaunt);
-                SessionFeedbackUtils.vortigaunt(reference, session).queue();
-                break;
-            }
-            case ANTI_CITIZENS: {
-                RegexUtils.parseApply(content).forEach(session::addAntiCitizen);
-                SessionFeedbackUtils.antiCitizen(reference, session).queue();
-                break;
-            }
-            case INFO: {
-                session.setInfo(content);
-                SessionFeedbackUtils.info(reference, session).queue();
-                break;
-            }
-            case EARNINGS: {
-                session.setEarnings(RegexUtils.parseEarnings(content));
-                SessionFeedbackUtils.earnings(reference, session).queue();
-                break;
-            }
-        }
-    }
-*/
-
-    /*
-    Specific handlers
-    */
-    protected void handleStartButton(final ButtonInteractionEvent event, final String cid, final SessionType sessionType) throws ProfileNotFoundException {
-        final CwuModel cwu = CwuDatabase.get().get(cid);
-        if (cwu == null) throw new ProfileNotFoundException();
 
         // Create rapport and set default values
         final SessionModel session = new SessionModel(cwu);
         session.setType(sessionType);
         session.setZone(sessionType.getZone());
-
         this.sessionCache.add(cwu.getCid(), session);
 
-        this.goToPage(event, session);
+        event.replyEmbeds(SessionBuilderUtils.startMessage(sessionType))
+                .setActionRow(SessionBuilderUtils.startAndCancelRow(cwu.getCid()))
+                .setEphemeral(true).queue();
     }
 
+    @Override
+    public void handleButtonEvent(final ButtonInteractionEvent event, final String buttonID) throws CwuException {
+        final EventTypeData eventType = new EventTypeData(buttonID);
+
+        final String cid = eventType.id;
+        final SessionModel session = this.sessionCache.get(cid);
+        if (session == null) throw new SessionNotFoundException();
+
+        switch ((SessionButtonType) eventType.enumType) {
+            default -> throw new IllegalArgumentException();
+            case START -> this.handleStartButton(event, cid);
+            case CANCEL -> this.handleCancelButton(event, cid);
+            case RESUME -> this.handleResumeButton(event, cid);
+            case EDIT -> this.handleEditButton(event, cid);
+            case SUBMIT -> this.handleSubmitButton(event, cid);
+            case CLEAR -> this.handleClearButton(event, cid);
+            case FILL -> this.handleFillButton(event, cid);
+            case PREVIEW -> this.handlePreviewButton(event, cid);
+            case PAGE_NEXT -> this.handlePageButton(event, cid, true);
+            case PAGE_PREV -> this.handlePageButton(event, cid, false);
+        }
+    }
+
+    @Override
+    public void handleModalEvent(final ModalInteractionEvent event, final String modalID) throws CwuException {
+        final EventTypeData eventType = new EventTypeData(modalID);
+
+        final SessionModel session = this.sessionCache.get(eventType.id);
+        if (session == null) throw new SessionNotFoundException();
+
+        final String content = event.getValue("cwu_session.fill/data%" + session.currentPage.getID()).getAsString();
+
+        switch ((SessionModalType) eventType.enumType) {
+            default -> throw new IllegalArgumentException();
+            case FILL_PARTICIPANTS -> {
+                session.addParticipants(ParticipantType.fromPage(session.currentPage), RegexUtils.parseIdentities(content));
+                event.editMessageEmbeds(SessionBuilderUtils.participantMessage(session))
+                        .setActionRow(SessionBuilderUtils.pageRow(session))
+                        .queue();
+            }
+            case FILL_INFO -> {
+                session.setInfo(content);
+                event.editMessageEmbeds(SessionBuilderUtils.infoMessage(session))
+                        .setActionRow(SessionBuilderUtils.pageRow(session))
+                        .queue();
+            }
+            case FILL_EARNINGS -> {
+                session.setEarnings(RegexUtils.parseEarnings(content));
+                event.editMessageEmbeds(SessionBuilderUtils.earningsMessage(session))
+                        .setActionRow(SessionBuilderUtils.pageRow(session))
+                        .queue();
+            }
+        }
+    }
+
+    /*
+    Button Handlers
+    */
     private void handleCancelButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
@@ -196,72 +155,64 @@ public class SessionCommand extends CwuCommand {
         this.sessionCache.remove(cid);
 
         event.getMessage().delete().queue();
-        event.replyEmbeds(SessionBuilderUtils.cancelMessage(session.getType()))
+        event.reply("❌ Vous avez annuler votre session de travail.")
                 .setEphemeral(true).queue();
+    }
+
+    private void handleEditButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException {
+        final SessionModel session = this.sessionCache.get(cid);
+        if (session == null) throw new SessionNotFoundException();
+
+        session.currentPage = PageType.LOYALISTS;
+        this.goToPage(event, session);
+    }
+
+    private void handleResumeButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException {
+        final SessionModel session = this.sessionCache.get(cid);
+        if (session == null) throw new SessionNotFoundException();
+
+        session.currentPage = PageType.PREVIEW;
+        this.goToPage(event, session);
     }
 
     private void handleFillButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        final Builder inputBuilder = TextInput.create("cwu_session_fill_data", session.currentPage.getDescription(), TextInputStyle.PARAGRAPH)
-                .setPlaceholder("ex: Lavrenti Casela, #21105")
+        final Builder inputBuilder = TextInput.create("cwu_session.fill/data%" + session.currentPage.getID(), session.currentPage.getDescription(), TextInputStyle.PARAGRAPH)
                 .setRequired(true);
 
         // Fill input if data exist at page
         SessionModalType modalType;
         switch (session.currentPage) {
             default -> throw new IllegalArgumentException();
-            case LOYALISTS -> {
-                modalType = SessionModalType.PARTICIPANTS;
+            case LOYALISTS, CITIZENS, VORTIGAUNTS, ANTI_CITIZENS -> {
+                modalType = SessionModalType.FILL_PARTICIPANTS;
+                inputBuilder.setPlaceholder("Nom Prénom, #12345");
 
-                final var participants = session.getLoyalists();
+                final var participants = session.getParticipants(ParticipantType.fromPage(session.currentPage));
                 if (participants.isEmpty()) break;
                 inputBuilder.setValue(Toolbox.flatten(participants));
-
-            }
-            case CITIZENS -> {
-                modalType = SessionModalType.PARTICIPANTS;
-
-                final var participants = session.getCitizens();
-                if (participants.isEmpty()) break;
-                inputBuilder.setValue(Toolbox.flatten(participants));
-
-            }
-            case VORTIGAUNTS -> {
-                modalType = SessionModalType.PARTICIPANTS;
-
-                final var participants = session.getVortigaunts();
-                if (participants.isEmpty()) break;
-                inputBuilder.setValue(Toolbox.flatten(participants));
-
-            }
-            case ANTI_CITIZENS -> {
-                modalType = SessionModalType.PARTICIPANTS;
-
-                final var participants = session.getAntiCitizens();
-                if (participants.isEmpty()) break;
-                inputBuilder.setValue(Toolbox.flatten(participants));
-
             }
             case INFO -> {
-                modalType = SessionModalType.INFO;
+                modalType = SessionModalType.FILL_INFO;
+                inputBuilder.setPlaceholder("Rien à signaler.");
 
                 final var info = session.getInfo();
-                if (info.isBlank()) break;
+                if (info == null) break;
                 inputBuilder.setValue(info);
-
             }
             case EARNINGS -> {
-                modalType = SessionModalType.EARNINGS;
+                modalType = SessionModalType.FILL_EARNINGS;
+                inputBuilder.setPlaceholder("ex: 1438");
 
-                final var earnings = session.getEarnings();
+                final var earnings = session.getIncome().getEarnings();
                 if (earnings == null) break;
                 inputBuilder.setValue(earnings.toString());
             }
         }
 
-        final Modal modal = Modal.create(modalType.getId() + ":" + session.currentPage.getID(), "Ajout des informations")
+        final Modal modal = Modal.create(modalType.build(session.getManagerCid()), "Ajout des informations")
                 .addComponents(ActionRow.of(inputBuilder.build()))
                 .build();
 
@@ -276,8 +227,18 @@ public class SessionCommand extends CwuCommand {
         switch (currentPage) {
             case INFO -> session.setInfo(null);
             case EARNINGS -> session.setEarnings(null);
-            default -> session.clearParticipants(ParticipantType.getFromPage(currentPage));
+            default -> session.clearParticipants(ParticipantType.fromPage(currentPage));
         }
+
+        this.goToPage(event, session);
+    }
+
+    protected void handleStartButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException {
+        final SessionModel session = this.sessionCache.get(cid);
+        if (session == null) throw new SessionNotFoundException();
+
+        // Setup session data
+        session.begin();
 
         this.goToPage(event, session);
     }
@@ -287,14 +248,16 @@ public class SessionCommand extends CwuCommand {
         if (session == null) throw new SessionNotFoundException();
 
         session.currentPage = PageType.PREVIEW;
-
         this.goToPage(event, session);
     }
 
-    private void handleSubmitButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException, ReportValidationException {
+    private void handleSubmitButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException, SessionValidationException {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
-        if (!session.isValid()) throw new ReportValidationException();
+        if (!session.isValid()) throw new SessionValidationException();
+
+        // Compute session data
+        session.end();
 
         this.sessionCache.remove(cid);
 
@@ -302,31 +265,32 @@ public class SessionCommand extends CwuCommand {
         this.sessionDatabase.addOne(session);
         this.sessionDatabase.writeToCache();
 
-        event.reply("Le rapport à été transmit avec succès.")
-                .setEphemeral(true).queue();
+        event.editMessageEmbeds(SessionBuilderUtils.submitMessage(session))
+                .queue();
     }
 
-    private void handlePageButton(final ButtonInteractionEvent event, final String buttonID) throws SessionNotFoundException {
-        final SessionModel session = this.sessionCache.get("");
+    private void handlePageButton(final ButtonInteractionEvent event, final String cid, final boolean isNext) throws SessionNotFoundException {
+        final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
         final PageType currentPage = session.currentPage;
-        session.currentPage = buttonID.contains("next") ? currentPage.getNext() : currentPage.getPrevious();
-
+        session.currentPage = isNext ? currentPage.getNext() : currentPage.getPrevious();
         this.goToPage(event, session);
     }
 
+    /*
+    Utils
+    */
     protected void goToPage(final ButtonInteractionEvent event, final SessionModel session) {
-        event.getMessage().delete().queue();
+        final MessageEmbed embed = (switch (session.currentPage) {
+            case LOYALISTS, CITIZENS, VORTIGAUNTS, ANTI_CITIZENS -> SessionBuilderUtils.participantMessage(session);
+            case INFO -> SessionBuilderUtils.infoMessage(session);
+            case EARNINGS -> SessionBuilderUtils.earningsMessage(session);
+            case PREVIEW -> SessionBuilderUtils.previewMessage(session);
+        });
 
-        (switch (session.currentPage) {
-            case LOYALISTS -> SessionFeedbackUtils.loyalist(event, session);
-            case CITIZENS -> SessionFeedbackUtils.citizen(event, session);
-            case VORTIGAUNTS -> SessionFeedbackUtils.vortigaunt(event, session);
-            case ANTI_CITIZENS -> SessionFeedbackUtils.antiCitizen(event, session);
-            case INFO -> SessionFeedbackUtils.info(event, session);
-            case EARNINGS -> SessionFeedbackUtils.earnings(event, session);
-            case PREVIEW -> SessionFeedbackUtils.preview(event, session);
-        }).setEphemeral(true).queue();
+        event.editMessageEmbeds(embed)
+                .setActionRow(SessionBuilderUtils.pageRow(session))
+                .queue();
     }
 }

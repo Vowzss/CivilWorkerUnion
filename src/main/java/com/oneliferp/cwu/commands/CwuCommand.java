@@ -1,16 +1,10 @@
-package com.oneliferp.cwu.Commands;
+package com.oneliferp.cwu.commands;
 
-import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public abstract class CwuCommand {
     private final String name;
@@ -24,15 +18,15 @@ public abstract class CwuCommand {
     Handlers
     */
     public void handleCommandEvent(final SlashCommandInteractionEvent event) throws Exception {
-        event.reply("Command not yet implemented.").setEphemeral(true).queue();
+        event.reply("\uD83D\uDCA5 " + "Command not yet implemented.").setEphemeral(true).queue();
     }
 
     public void handleButtonEvent(final ButtonInteractionEvent event, final String buttonID) throws Exception {
-        event.reply("Button not yet implemented.").setEphemeral(true).queue();
+        event.reply("\uD83D\uDCA5 " + "Button not yet implemented.").setEphemeral(true).queue();
     }
 
     public void handleModalEvent(final ModalInteractionEvent event, final String modalID) throws Exception {
-        event.reply("Interface not yet implemented.").setEphemeral(true).queue();
+        event.reply("\uD83D\uDCA5 " + "Interface not yet implemented.").setEphemeral(true).queue();
     }
 
     /*

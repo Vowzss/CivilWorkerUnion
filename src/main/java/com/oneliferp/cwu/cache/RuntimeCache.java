@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.Cache;
+package com.oneliferp.cwu.cache;
 
 import java.util.HashMap;
 

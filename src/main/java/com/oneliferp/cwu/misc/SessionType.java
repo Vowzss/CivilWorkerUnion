@@ -1,7 +1,5 @@
 package com.oneliferp.cwu.misc;
 
-import net.dv8tion.jda.api.entities.emoji.Emoji;
-
 public enum SessionType {
     RATION("Ration", "\uD83E\uDD61"),
     CARDBOARD("Carton", "\uD83D\uDCE6"),
@@ -22,11 +20,11 @@ public enum SessionType {
     }
 
     public String getLabel() {
-        return label;
+        return this.label;
     }
 
     public String getEmoji() {
-        return emoji;
+        return this.emoji;
     }
 
     public ZoneType getZone() {

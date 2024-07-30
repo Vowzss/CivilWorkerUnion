@@ -1,47 +1,21 @@
 package com.oneliferp.cwu.modules.profile.misc;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public enum ProfileButtonType {
-    STATS("cwu_profile_stats"),
-    RETURN("cwu_profile_return"),
-    LINK("cwu_profile_link"),
-    UNLINK("cwu_profile_unlink"),
-    DELETE("cwu_profile_delete"),
+    STATS("btn$cwu_profile", "stats"),
+    RETURN("btn$cwu_profile", "return"),
+    DELETE("btn$cwu_profile", "delete"),
+    DELETE_CONFIRM("btn$cwu_profile", "delete/confirm"),
+    DELETE_CANCEL("btn$cwu_profile", "delete/cancel");
 
-    CONFIRM_LINK("cwu_profile_confirm.link"),
-    CANCEL_LINK("cwu_profile_cancel.link"),
+    public final String root;
+    public final String action;
 
-    CONFIRM_UNLINK("cwu_profile_confirm.unlink"),
-    CANCEL_UNLINK("cwu_profile_cancel.unlink"),
-
-    CONFIRM_DELETE("cwu_profile_confirm.delete"),
-    CANCEL_DELETE("cwu_profile_cancel.delete");
-
-    /*
-    Perform easy lookup
-    */
-    private static final Map<String, ProfileButtonType> IDS = new HashMap<>();
-    static {
-        for (final var type : values()) {
-            IDS.put(type.getId(), type);
-        }
+    ProfileButtonType(final String root, final String action) {
+        this.root = root;
+        this.action = action;
     }
 
-    public static ProfileButtonType fromId(final String id) {
-        final var type = IDS.get(id);
-        if (type == null) throw new IllegalArgumentException("No enum constant with id " + id);
-        return type;
-    }
-
-    private final String id;
-
-    ProfileButtonType(final String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return this.id;
+    public String build(final String id) {
+        return String.format("%s.%s:%s", this.root, this.action, id);
     }
 }

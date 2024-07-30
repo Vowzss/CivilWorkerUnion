@@ -1,37 +1,30 @@
-package com.oneliferp.cwu.Listeners;
+package com.oneliferp.cwu.listeners;
 
 import com.oneliferp.cwu.CivilWorkerUnion;
-import com.oneliferp.cwu.Commands.CwuCommand;
+import com.oneliferp.cwu.commands.CwuCommand;
 import com.oneliferp.cwu.exceptions.CommandNotFoundException;
 import com.oneliferp.cwu.modules.profile.commands.ProfileCommand;
 import com.oneliferp.cwu.modules.profile.misc.ProfileCommandType;
 import com.oneliferp.cwu.modules.session.commands.SessionCommand;
 import com.oneliferp.cwu.modules.session.misc.SessionCommandType;
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.MessageReference;
-import net.dv8tion.jda.api.entities.MessageType;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-
-import java.util.List;
 
 public class SlashCommandListener extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(final SlashCommandInteractionEvent event) {
         final String commandName = event.getName();
-        System.out.println(commandName);
 
         try {
             final CwuCommand command = CivilWorkerUnion.get().getCommand(commandName);
             if (command == null) throw new CommandNotFoundException();
-
             command.handleCommandEvent(event);
         } catch (Exception ex) {
-            event.reply(ex.getMessage()).setEphemeral(true).queue();
+            event.reply("\uD83D\uDCA5 " + ex.getMessage())
+                    .setEphemeral(true).queue();
+
             System.out.println(ex.getMessage());
         }
     }
@@ -50,7 +43,9 @@ public class SlashCommandListener extends ListenerAdapter {
                 command.handleButtonEvent(event, buttonID);
             } else throw new IllegalArgumentException();
         } catch (Exception ex) {
-            event.reply(ex.getMessage()).setEphemeral(true).queue();
+            event.reply(ex.getMessage())
+                    .setEphemeral(true).queue();
+
             System.out.println(ex.getMessage());
         }
     }
@@ -68,7 +63,9 @@ public class SlashCommandListener extends ListenerAdapter {
                 command.handleModalEvent(event, modalID);
             } else throw new IllegalArgumentException();
         } catch (Exception ex) {
-            event.reply(ex.getMessage()).setEphemeral(true).queue();
+            event.reply("\uD83D\uDCA5 " + ex.getMessage())
+                    .setEphemeral(true).queue();
+
             System.out.println(ex.getMessage());
         }
     }

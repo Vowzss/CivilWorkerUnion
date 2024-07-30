@@ -1,13 +1,17 @@
-package com.oneliferp.cwu.Database;
+package com.oneliferp.cwu.database;
 
-import com.oneliferp.cwu.Models.CwuModel;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.oneliferp.cwu.models.CwuModel;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 public class CwuDatabase extends JsonDatabase<CwuModel> {
     private static CwuDatabase instance;
-    public static CwuDatabase get() {
+
+    public static CwuDatabase getInstance() {
         if (instance == null) instance = new CwuDatabase();
         return instance;
     }
@@ -15,12 +19,10 @@ public class CwuDatabase extends JsonDatabase<CwuModel> {
     private final HashMap<String, CwuModel> cwuMap;
 
     private CwuDatabase() {
-        super(CwuModel.class, "cwu_data.json");
-        this.cwuMap = new HashMap<>();
+        super(new TypeReference<>() {}, "cwu_data.json");
 
-        this.getAll().forEach(cwu -> {
-            this.cwuMap.put(cwu.getCid(), cwu);
-        });
+        this.cwuMap = new HashMap<>();
+        this.getAll() .forEach(cwu -> this.cwuMap.put(cwu.getCid(), cwu));
     }
 
     @Override
@@ -38,8 +40,13 @@ public class CwuDatabase extends JsonDatabase<CwuModel> {
     /*
     Getters
     */
-    public CwuModel get(final String cid) {
+    public CwuModel getFromCid(final String cid) {
         return this.cwuMap.get(cid);
+    }
+
+    public CwuModel getFromId(final long id) {
+        final var option = this.cwuMap.entrySet().stream().filter(cwu -> Objects.equals(cwu.getValue().getId(), id)).findFirst();
+        return option.map(Map.Entry::getValue).orElse(null);
     }
 
     public void removeOne(final String cid) {

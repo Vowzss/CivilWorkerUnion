@@ -1,8 +1,9 @@
 package com.oneliferp.cwu.modules.profile.exceptions;
 
+import com.oneliferp.cwu.exceptions.CwuException;
 import net.dv8tion.jda.api.entities.User;
 
-public class ProfileAlreadyLinkedException extends ProfileException {
+public class ProfileAlreadyLinkedException extends CwuException {
     final User user;
 
     public ProfileAlreadyLinkedException(final User user) {

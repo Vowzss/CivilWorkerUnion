@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.Utils;
+package com.oneliferp.cwu.utils;
 
 import io.github.cdimascio.dotenv.Dotenv;
 

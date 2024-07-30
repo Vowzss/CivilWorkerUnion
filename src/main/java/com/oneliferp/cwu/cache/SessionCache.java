@@ -1,6 +1,6 @@
-package com.oneliferp.cwu.Cache;
+package com.oneliferp.cwu.cache;
 
-import com.oneliferp.cwu.Models.SessionModel;
+import com.oneliferp.cwu.models.SessionModel;
 
 public class SessionCache extends RuntimeCache<String, SessionModel> {
     private static SessionCache instance;

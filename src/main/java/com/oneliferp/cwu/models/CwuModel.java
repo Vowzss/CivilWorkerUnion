@@ -1,49 +1,54 @@
-package com.oneliferp.cwu.Models;
+package com.oneliferp.cwu.models;
 
-import com.google.gson.annotations.Expose;
-import com.google.gson.annotations.SerializedName;
-import com.oneliferp.cwu.Database.SessionDatabase;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oneliferp.cwu.database.SessionDatabase;
+import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 
 public class CwuModel {
-    @Expose
-    @SerializedName("id")
+    @JsonProperty("id")
     private Long id;
 
-    @Expose
-    @SerializedName("identity")
+    @JsonProperty("identity")
     private IdentityModel identity;
 
-    @Expose
-    @SerializedName("branch")
+    @JsonProperty("branch")
     private CwuBranch branch;
 
-    @Expose
-    @SerializedName("rank")
+    @JsonProperty("rank")
     private CwuRank rank;
 
-    public CwuModel(final IdentityModel identity, final CwuBranch branch, final CwuRank rank) {
+    @JsonProperty("joinedAt")
+    private SimpleDate joinedAt;
+
+    public CwuModel() {}
+
+    public CwuModel(final long id, final IdentityModel identity, final CwuBranch branch, final CwuRank rank) {
+        this.id = id;
         this.identity = identity;
         this.branch = branch;
         this.rank = rank;
+        this.joinedAt = SimpleDate.now();
     }
 
     /*
     Getters
     */
-    public Long getId() { return this.id; }
+    public Long getId() {
+        return this.id;
+    }
 
     public String getCid() {
         return this.identity.cid;
     }
 
-    public boolean isLinked() {
-        return this.id != null;
+    public IdentityModel getIdentity() {
+        return this.identity;
     }
 
-    public String getIdentity() {
-        return identity.toString();
+    public SimpleDate getJoinedAt() {
+        return this.joinedAt;
     }
 
     public CwuBranch getBranch() {
@@ -54,9 +59,13 @@ public class CwuModel {
         return this.rank;
     }
 
+    /*
+    Utils
+    */
     public int getSessionCount() {
         return SessionDatabase.get().getSessionsByCwu(this).size();
     }
+
     public int getMonthlySessionCount() {
         return SessionDatabase.get().getSessionsByCwu(this)
                 .stream().filter(SessionModel::isWithinMonth)
@@ -67,13 +76,6 @@ public class CwuModel {
         return SessionDatabase.get().getSessionsByCwu(this)
                 .stream().filter(SessionModel::isWithinWeek)
                 .toList().size();
-    }
-
-    /*
-    Setters
-    */
-    public void setId(final Long id) {
-        this.id = id;
     }
 }
 
