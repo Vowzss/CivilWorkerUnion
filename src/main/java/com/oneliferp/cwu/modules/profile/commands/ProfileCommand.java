@@ -55,7 +55,7 @@ public class ProfileCommand extends CwuCommand {
     }
 
     @Override
-    public void handleCommandEvent(final SlashCommandInteractionEvent event) throws Exception {
+    public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws Exception {
         switch (ProfileCommandType.fromId(event.getSubcommandName())) {
             default: {
                 throw new IllegalArgumentException();
@@ -90,10 +90,10 @@ public class ProfileCommand extends CwuCommand {
     }
 
     @Override
-    public void handleButtonEvent(final ButtonInteractionEvent event, final String buttonID) throws CwuException {
-        final EventTypeData buttonType = new EventTypeData(buttonID);
+    public void handleButtonInteraction(final ButtonInteractionEvent event, final String eventID) throws CwuException {
+        final EventTypeData buttonType = new EventTypeData(eventID);
 
-        final CwuModel cwu = this.cwuDatabase.getFromCid(buttonType.id);
+        final CwuModel cwu = this.cwuDatabase.getFromCid(buttonType.getCid());
         if (cwu == null) throw new ProfileNotFoundException();
 
         switch ((ProfileButtonType) buttonType.enumType) {

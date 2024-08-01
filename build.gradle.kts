@@ -25,6 +25,10 @@ dependencies {
 
     // https://mvnrepository.com/artifact/io.github.cdimascio/dotenv-java
     implementation("io.github.cdimascio:dotenv-java:3.0.1")
+
+    // https://mvnrepository.com/artifact/org.javatuples/javatuples
+    implementation("org.javatuples:javatuples:1.2")
+
 }
 
 tasks.withType<JavaCompile> {

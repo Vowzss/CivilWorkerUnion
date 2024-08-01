@@ -1,8 +1,9 @@
 package com.oneliferp.cwu.modules.profile.utils;
 
 import com.oneliferp.cwu.models.CwuModel;
-import com.oneliferp.cwu.utils.EmbedUtils;
+import com.oneliferp.cwu.models.SessionModel;
 import com.oneliferp.cwu.modules.profile.misc.ProfileButtonType;
+import com.oneliferp.cwu.utils.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
@@ -14,35 +15,37 @@ public class ProfileBuilderUtils {
     Messages
     */
     public static MessageEmbed profileMessage(final CwuModel cwu) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("**Identité:** %s\n", cwu.getIdentity()));
+        sb.append("\n");
+        sb.append(String.format("**Division:** %s (%s)\n", cwu.getBranch(), cwu.getBranch().getMeaning()));
+        sb.append(String.format("**Grade:** %s\n", cwu.getRank().getLabel()));
+        sb.append("\n");
+        sb.append(String.format("**Associé à:** <@%d>", cwu.getId()));
+
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDD0E  Informations du profil");
-
-        final String content = String.format("""
-                        **Identité:** %s
-                        **Division:** %s (%s)
-                        **Grade:** %s
-                                        
-                        **Associé à:** <@%d>
-                        """, cwu.getIdentity(),
-                cwu.getBranch(), cwu.getBranch().getMeaning(),
-                cwu.getRank().getLabel(), cwu.getId()
-        );
-
-        embed.setDescription(content);
+        embed.setDescription(sb.toString());
         return embed.build();
     }
 
     public static MessageEmbed statsMessage(final CwuModel cwu) {
+        final SessionModel latestSession = cwu.getLatestSession();
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("**Rejoint le:** %s\n", cwu.getJoinedAt().getDate()));
+        sb.append("\n");
+        if (latestSession != null) {
+            sb.append(String.format("**Dernière session le:** %s\n", latestSession.getPeriod().getStartedAt().getDate()));
+            sb.append(String.format("**Type de session:** %s\n", latestSession.getType().getLabel()));
+            sb.append("\n");
+        }
+        sb.append(String.format("**Rapport(s) totaux:** %d\n", cwu.getSessionCount()));
+        sb.append(String.format("**Rapport(s) hebdomadaire:** %d", cwu.getWeeklySessionCount()));
+
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDCCA  Statistiques du profil");
-        embed.setDescription(String.format("""
-                        **Rejoint le:** %s
-                        
-                        **Rapport(s) totaux:** %d
-                        **Rapport(s) hebdomadaire:** %d
-                        """, cwu.getJoinedAt().date,
-                cwu.getSessionCount(), cwu.getWeeklySessionCount()
-        ));
+        embed.setDescription(sb.toString());
         return embed.build();
     }
 

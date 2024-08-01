@@ -9,4 +9,11 @@ public class Toolbox {
                 .map(T::toString)
                 .collect(Collectors.joining("\n"));
     }
+
+    public static <T> List<T> merge(final Collection<T> collection1, final Collection<T> collection2) {
+        final List<T> collection = new ArrayList<>();
+        collection.addAll(collection1);
+        collection.addAll(collection2);
+        return collection;
+    }
 }

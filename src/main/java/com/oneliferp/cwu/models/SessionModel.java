@@ -9,8 +9,8 @@ import com.oneliferp.cwu.misc.SessionType;
 import com.oneliferp.cwu.misc.ZoneType;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,7 +19,7 @@ public class SessionModel {
     private IdentityModel manager;
 
     @JsonProperty("participants")
-    private HashMap<ParticipantType, List<IdentityModel>> participants;
+    private HashMap<ParticipantType, HashSet<IdentityModel>> participants;
 
     @JsonProperty("type")
     private SessionType type;
@@ -37,7 +37,10 @@ public class SessionModel {
     private IncomeModel income;
 
     @JsonIgnore
-    public PageType currentPage;
+    private PageType currentPage;
+
+    @JsonIgnore
+    private boolean canSelectZone;
 
     public SessionModel() {
     }
@@ -52,12 +55,12 @@ public class SessionModel {
     /*
     Setters
     */
-    public void addParticipant(final ParticipantType type, final IdentityModel identity) {
-        this.participants.get(type).add(identity);
-    }
-
     public void addParticipants(final ParticipantType type, final List<IdentityModel> identities) {
-        this.participants.get(type).addAll(identities);
+        final var entries = this.participants.get(type);
+        for (final IdentityModel identity : identities) {
+            if (entries.contains(identity)) continue;
+            entries.add(identity);
+        }
     }
 
     public void clearParticipants(final ParticipantType type) {
@@ -70,6 +73,7 @@ public class SessionModel {
 
     public void setZone(final ZoneType zone) {
         this.zone = zone;
+        this.canSelectZone = zone == ZoneType.UNKNOWN;
     }
 
     public void setInfo(@Nullable final String info) {
@@ -80,6 +84,10 @@ public class SessionModel {
         this.income.setEarnings(earnings);
     }
 
+    public void setCurrentPage(final PageType page) {
+        this.currentPage = page;
+    }
+
     /*
     Getters
     */
@@ -87,7 +95,7 @@ public class SessionModel {
         return this.manager.cid;
     }
 
-    public List<IdentityModel> getParticipants(final ParticipantType type) {
+    public HashSet<IdentityModel> getParticipants(final ParticipantType type) {
         return this.participants.get(type);
     }
 
@@ -111,6 +119,18 @@ public class SessionModel {
         return this.income;
     }
 
+    public PageType getCurrentPage() {
+        return this.currentPage;
+    }
+
+    public int getCurrentStep() {
+        return this.canSelectZone ? currentPage.ordinal() + 1 : currentPage.ordinal();
+    }
+
+    public int getMaxSteps() {
+        return PageType.values().length - (this.canSelectZone ? 1 : 2) - (this.type.isProfitable() ? 0 : 1);
+    }
+
     /*
     Methods
     */
@@ -121,14 +141,19 @@ public class SessionModel {
 
         // Prefill participants with available types
         for (final ParticipantType type : ParticipantType.values()) {
-            this.participants.put(type, new ArrayList<>());
+            this.participants.put(type, new HashSet<>());
         }
 
-        this.currentPage = PageType.LOYALISTS;
+        this.currentPage = this.canSelectZone ? PageType.ZONE : PageType.LOYALISTS;
     }
 
     public void end() {
         this.period.end();
+
+        if (this.income.getEarnings() == null) {
+            this.income.setEarnings(0);
+        }
+
         this.computeWages();
         this.computeDeposit();
     }
@@ -148,7 +173,8 @@ public class SessionModel {
     }
 
     public void computeDeposit() {
-        this.income.setDeposit(this.income.getDeposit() - this.income.getWages());
+        final Integer earnings = income.getEarnings();
+        this.income.setDeposit(earnings == null ? 0 : earnings - this.income.getWages());
     }
 
     /*
@@ -178,10 +204,10 @@ public class SessionModel {
     }
 
     public boolean isFirstPage() {
-        return this.currentPage.ordinal() == 0;
+        return this.currentPage.ordinal() == (this.canSelectZone ? 0 : 1);
     }
 
     public boolean isLastPage() {
-        return this.currentPage.ordinal() == PageType.values().length - 2;
+        return this.currentPage.ordinal() == PageType.values().length - (this.type.isProfitable() ? 2 : 3);
     }
 }

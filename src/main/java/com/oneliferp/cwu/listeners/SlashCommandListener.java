@@ -10,6 +10,7 @@ import com.oneliferp.cwu.modules.session.misc.SessionCommandType;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
 public class SlashCommandListener extends ListenerAdapter {
@@ -20,53 +21,73 @@ public class SlashCommandListener extends ListenerAdapter {
         try {
             final CwuCommand command = CivilWorkerUnion.get().getCommand(commandName);
             if (command == null) throw new CommandNotFoundException();
-            command.handleCommandEvent(event);
+            command.handleCommandInteraction(event);
         } catch (Exception ex) {
             event.reply("\uD83D\uDCA5 " + ex.getMessage())
                     .setEphemeral(true).queue();
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 
     @Override
-    public void onButtonInteraction(final ButtonInteractionEvent event) {
-        final String buttonID = event.getButton().getId();
-        if (buttonID == null) throw new IllegalArgumentException();
+    public void onStringSelectInteraction(final StringSelectInteractionEvent event) {
+        final String ID = event.getComponentId();
 
         try {
-            if (buttonID.contains(SessionCommandType.BASE.getId())) {
+            if (ID.contains(SessionCommandType.BASE.getId())) {
                 final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
-                command.handleButtonEvent(event, buttonID);
-            } else if (buttonID.contains(ProfileCommandType.BASE.getId())) {
+                command.handleSelectionInteraction(event, ID);
+            } else if (ID.contains(ProfileCommandType.BASE.getId())) {
                 final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());
-                command.handleButtonEvent(event, buttonID);
+                command.handleSelectionInteraction(event, ID);
             } else throw new IllegalArgumentException();
         } catch (Exception ex) {
             event.reply(ex.getMessage())
                     .setEphemeral(true).queue();
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onButtonInteraction(final ButtonInteractionEvent event) {
+        final String ID = event.getButton().getId();
+        if (ID == null) throw new IllegalArgumentException();
+
+        try {
+            if (ID.contains(SessionCommandType.BASE.getId())) {
+                final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
+                command.handleButtonInteraction(event, ID);
+            } else if (ID.contains(ProfileCommandType.BASE.getId())) {
+                final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());
+                command.handleButtonInteraction(event, ID);
+            } else throw new IllegalArgumentException();
+        } catch (Exception ex) {
+            event.reply(ex.getMessage())
+                    .setEphemeral(true).queue();
+
+            ex.printStackTrace();
         }
     }
 
     @Override
     public void onModalInteraction(final ModalInteractionEvent event) {
-        final String modalID = event.getModalId();
+        final String ID = event.getModalId();
 
         try {
-            if (modalID.contains(SessionCommandType.BASE.getId())) {
+            if (ID.contains(SessionCommandType.BASE.getId())) {
                 final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
-                command.handleModalEvent(event, modalID);
-            } else if (modalID.contains(ProfileCommandType.BASE.getId())) {
+                command.handleModalInteraction(event, ID);
+            } else if (ID.contains(ProfileCommandType.BASE.getId())) {
                 final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());
-                command.handleModalEvent(event, modalID);
+                command.handleModalInteraction(event, ID);
             } else throw new IllegalArgumentException();
         } catch (Exception ex) {
             event.reply("\uD83D\uDCA5 " + ex.getMessage())
                     .setEphemeral(true).queue();
 
-            System.out.println(ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }

@@ -16,7 +16,7 @@ public class IncomeModel {
     Setters
     */
     public void setEarnings(final Integer earnings) {
-        this.earnings = earnings == 0 ? null : earnings;
+        this.earnings = earnings;
     }
 
     public void setWages(final int wages) {

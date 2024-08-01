@@ -4,11 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.*;
-import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjusters;
 
 
-public class SimpleDate {
+public class SimpleDate implements Comparable<SimpleDate> {
     @JsonIgnore
     private final int day;
 
@@ -25,10 +24,10 @@ public class SimpleDate {
     private final int minute;
 
     @JsonProperty("date")
-    public final String date;
+    private final String date;
 
     @JsonProperty("time")
-    public final String time;
+    private final String time;
 
     public SimpleDate(final int day, final int month, final int year, final int hour, final int minute) {
         this.day = day;
@@ -54,9 +53,17 @@ public class SimpleDate {
         this.time = String.format("%02d:%02d", hour, minute);
     }
 
+    public String getDate() {
+        return this.date;
+    }
+
+    public String getTime() {
+        return this.time;
+    }
+
     /*
-    Utils
-    */
+            Utils
+            */
     public static SimpleDate now() {
         final LocalDateTime currentDateTime = LocalDateTime.now();
         return new SimpleDate(currentDateTime.getDayOfMonth(), currentDateTime.getMonthValue(), currentDateTime.getYear(), currentDateTime.getHour(), currentDateTime.getMinute());
@@ -87,10 +94,21 @@ public class SimpleDate {
                (date.isEqual(lastMonthDay) || date.isBefore(lastMonthDay));
     }
 
+    public boolean isAfter(final SimpleDate other) {
+        return this.compareTo(other) > 0;
+    }
+
+    public boolean isBefore(final SimpleDate other) {
+        return this.compareTo(other) < 0;
+    }
+
+    private boolean isEqual(final SimpleDate other) {
+        return this.compareTo(other) == 0;
+    }
+
     /*
     Helpers
     */
-
     public static LocalDate getFirstMonthDay() {
         return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
     }
@@ -105,5 +123,22 @@ public class SimpleDate {
 
     public static LocalDate getLastWeekDay() {
         return LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
+    }
+
+    @Override
+    public int compareTo(final SimpleDate other) {
+        if (this.year != other.year) {
+            return Integer.compare(this.year, other.year);
+        }
+        if (this.month != other.month) {
+            return Integer.compare(this.month, other.month);
+        }
+        if (this.day != other.day) {
+            return Integer.compare(this.day, other.day);
+        }
+        if (this.hour != other.hour) {
+            return Integer.compare(this.hour, other.hour);
+        }
+        return Integer.compare(this.minute, other.minute);
     }
 }

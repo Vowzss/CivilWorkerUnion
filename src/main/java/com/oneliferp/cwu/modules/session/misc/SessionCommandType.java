@@ -5,8 +5,15 @@ import java.util.Map;
 
 public enum SessionCommandType {
     BASE("session", null),
-    RATION("ration", "Permet de créer un rapport de session ration."),
-    LAUNDRY("laverie", "Permet de créer un rapport de session laverie.");
+    RATION("ration", "Permet de créer une session à l'usine à ration."),
+    DISTILLERY("distillerie", "Permet de créer une session à la distillerie."),
+    LAUNDRY("laverie", "Permet de créer une session à la laverie."),
+    RECYCLING("decheterie", "Permet de créer une session à la déchèterie."),
+    PRINTING("imprimerie", "Permet de créer une session d'impression d'affiche."),
+    CLEANING("nettoyage", "Permet de créer une session de nettoyage."),
+    RENOVATION("renovation", "Permet de créer une session de rénovation."),
+    GARDENING("jardinage", "Permet de créer une session de jardinage."),
+    OTHER("autre", "Permet de créer une session personalisé.");
 
     /*
     Perform easy lookup

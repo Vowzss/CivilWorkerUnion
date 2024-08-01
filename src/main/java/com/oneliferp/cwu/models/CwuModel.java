@@ -6,6 +6,8 @@ import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 
+import java.util.Comparator;
+
 public class CwuModel {
     @JsonProperty("id")
     private Long id;
@@ -62,6 +64,13 @@ public class CwuModel {
     /*
     Utils
     */
+    public SessionModel getLatestSession() {
+        return SessionDatabase.get().getSessionsByCwu(this).stream()
+                .filter(session -> session.getPeriod().getStartedAt() != null)
+                .max(Comparator.comparing(session -> session.getPeriod().getStartedAt()))
+                .orElse(null);
+    }
+
     public int getSessionCount() {
         return SessionDatabase.get().getSessionsByCwu(this).size();
     }

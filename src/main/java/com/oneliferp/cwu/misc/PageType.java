@@ -1,6 +1,7 @@
 package com.oneliferp.cwu.misc;
 
 public enum PageType {
+    ZONE("zone", "Emplacement de la session:"),
     LOYALISTS("loyalists", "Loyaliste(s) présent(s):"),
     CITIZENS("citizens", "Citoyen(s) présent(s):"),
     VORTIGAUNTS("vortigaunts", "Vortigaunt(s) présent(s):"),
@@ -32,7 +33,7 @@ public enum PageType {
     }
 
     public PageType getPrevious() {
-        if (this == LOYALISTS) throw new IllegalStateException();
+        if (this.ordinal() == 0) throw new IllegalStateException();
         final PageType[] types = PageType.values();
         return types[(this.ordinal() - 1) % types.length];
     }
