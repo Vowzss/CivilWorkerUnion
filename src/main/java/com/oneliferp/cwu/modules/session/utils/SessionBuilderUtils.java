@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.modules.session.utils;
 
-import com.oneliferp.cwu.misc.PageType;
+import com.oneliferp.cwu.modules.session.misc.SessionPageType;
 import com.oneliferp.cwu.misc.ParticipantType;
 import com.oneliferp.cwu.misc.SessionType;
 import com.oneliferp.cwu.misc.ZoneType;
@@ -27,9 +27,9 @@ public class SessionBuilderUtils {
     /*
     Messages
     */
-    public static MessageEmbed startMessage(final SessionType sessionType) {
+    public static MessageEmbed startMessage(final SessionType type) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle(String.format("%s  Session - %s", sessionType.getEmoji(), sessionType.getLabel()));
+        embed.setTitle(String.format("%s  Session - %s", type.getEmoji(), type.getLabel()));
         embed.setDescription("Vous allez procéder au remplissage des informations.\nS'ensuivra un résumé de votre session.");
         return embed.build();
     }
@@ -58,7 +58,7 @@ public class SessionBuilderUtils {
 
     public static MessageEmbed participantMessage(final SessionModel session) {
         final SessionType type = session.getType();
-        final PageType page = session.getCurrentPage();
+        final SessionPageType page = session.getCurrentPage();
         final var value = session.getParticipants(ParticipantType.fromPage(page));
 
         final EmbedBuilder embed = EmbedUtils.createDefault();
@@ -69,7 +69,7 @@ public class SessionBuilderUtils {
 
     public static MessageEmbed infoMessage(final SessionModel session) {
         final SessionType type = session.getType();
-        final PageType page = session.getCurrentPage();
+        final SessionPageType page = session.getCurrentPage();
         final var value = session.getInfo();
 
         final EmbedBuilder embed = EmbedUtils.createDefault();
@@ -81,7 +81,7 @@ public class SessionBuilderUtils {
 
     public static MessageEmbed earningsMessage(final SessionModel session) {
         final SessionType type = session.getType();
-        final PageType page = session.getCurrentPage();
+        final SessionPageType page = session.getCurrentPage();
         final var value = session.getIncome().getEarnings();
 
         final EmbedBuilder embed = EmbedUtils.createDefault();
@@ -99,32 +99,32 @@ public class SessionBuilderUtils {
         {
             final var participants = session.getParticipants(ParticipantType.LOYALIST);
             final String value = participants.isEmpty() ? "Aucun." : Toolbox.flatten(participants);
-            embed.addField(new Field(PageType.LOYALISTS.getDescription(), value, false));
+            embed.addField(new Field(SessionPageType.LOYALISTS.getDescription(), value, false));
         }
         {
             final var participants = session.getParticipants(ParticipantType.CITIZEN);
             final String value = participants.isEmpty() ? "Aucun." : Toolbox.flatten(participants);
-            embed.addField(new Field(PageType.CITIZENS.getDescription(), value, false));
+            embed.addField(new Field(SessionPageType.CITIZENS.getDescription(), value, false));
         }
         {
             final var participants = session.getParticipants(ParticipantType.VORTIGAUNT);
             final String value = participants.isEmpty() ? "Aucun." : Toolbox.flatten(participants);
-            embed.addField(new Field(PageType.VORTIGAUNTS.getDescription(), value, false));
+            embed.addField(new Field(SessionPageType.VORTIGAUNTS.getDescription(), value, false));
         }
         {
             final var participants = session.getParticipants(ParticipantType.ANTI_CITIZEN);
             final String value = participants.isEmpty() ? "Aucun." : Toolbox.flatten(participants);
-            embed.addField(new Field(PageType.ANTI_CITIZENS.getDescription(), value, false));
+            embed.addField(new Field(SessionPageType.ANTI_CITIZENS.getDescription(), value, false));
         }
         {
             final var info = session.getInfo();
             final String value = info == null ? "Rien à signaler." : info;
-            embed.addField(new Field(PageType.INFO.getDescription(), value, false));
+            embed.addField(new Field(SessionPageType.INFO.getDescription(), value, false));
         }
         {
             final var earnings = session.getIncome().getEarnings();
             final Integer value = earnings == null ? 0 : earnings;
-            embed.addField(new Field(PageType.EARNINGS.getDescription(), String.format("%d Tokens.", value), false));
+            embed.addField(new Field(SessionPageType.EARNINGS.getDescription(), String.format("%d Tokens.", value), false));
         }
 
         return embed.build();
@@ -149,7 +149,7 @@ public class SessionBuilderUtils {
 
     public static MessageEmbed zoneMessage(SessionModel session) {
         final SessionType type = session.getType();
-        final PageType page = session.getCurrentPage();
+        final SessionPageType page = session.getCurrentPage();
         final var value = session.getZone();
 
         final EmbedBuilder embed = EmbedUtils.createDefault();
@@ -257,7 +257,7 @@ public class SessionBuilderUtils {
     public static ActionRow pageRow(final SessionModel session) {
         final String cid = session.getManagerCid();
 
-        if (session.getCurrentPage() == PageType.PREVIEW) {
+        if (session.getCurrentPage() == SessionPageType.PREVIEW) {
             return SessionBuilderUtils.submitOrEditRow(cid);
         }
 

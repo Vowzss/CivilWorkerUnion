@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.oneliferp.cwu.models.CwuModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.utils.SimpleDuration;
 import com.oneliferp.cwu.utils.json.SimpleDateDeserializer;
@@ -18,10 +19,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public abstract class JsonDatabase<T> {
+public abstract class JsonDatabase<A, B> {
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
 
@@ -36,12 +36,12 @@ public abstract class JsonDatabase<T> {
         MAPPER.registerModule(module);
     }
 
-    private final TypeReference<List<T>> typeRef;
-
+    private final TypeReference<List<B>> typeRef;
     private final File file;
-    protected final List<T> objects;
 
-    protected JsonDatabase(final TypeReference<List<T>> typeRef, final String fileName) {
+    protected final HashMap<A, B> map;
+
+    protected JsonDatabase(final TypeReference<List<B>> typeRef, final String fileName) {
         this.typeRef = typeRef;
 
         final Path directoryPath = Paths.get("Databases");
@@ -51,50 +51,63 @@ public abstract class JsonDatabase<T> {
         }
 
         this.file = new File(directoryPath.toFile(), fileName);
-        this.objects = new ArrayList<>();
-
-        this.readFromCache();
+        this.map = new HashMap<>();
     }
 
     /*
     Update methods
     */
-    public void addOne(final T object) {
-        this.objects.add(object);
+    public abstract void addOne(final B value);
+
+    public void addMany(final List<B> values) {
+        values.forEach(this::addOne);
     }
 
-    public void addMany(final List<T> objectList) {
-        this.objects.addAll(objectList);
+    public void removeOne(final A cid) {
+        this.map.remove(cid);
     }
 
-    public void removeOne(final T object) {
-        this.objects.remove(object);
+    public boolean exist(final A cid) {
+        return this.map.containsKey(cid);
     }
 
-    public final List<T> getAll() {
-        return this.objects;
+    public Collection<B> getAll() {
+        return this.map.values();
     }
 
     /*
     Persistence methods
     */
-    private void readFromCache() {
-        if (!file.exists()) return;
+    public Collection<B> readFromCache() {
+        if (!file.exists()) return new ArrayList<>();
 
-        try (final FileReader reader = new FileReader(this.file)) {
-            this.objects.addAll(MAPPER.readValue(reader, typeRef));
+        try (final FileReader fr = new FileReader(this.file)) {
+            return MAPPER.readValue(fr, typeRef);
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new ArrayList<>();
+    }
+
+    public void save() {
+        this.writeToCache(this.getAll());
+    }
+
+    public void erase() {
+        try (final FileWriter fw = new FileWriter(this.file)) {
+            fw.flush();
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public final void writeToCache() {
-        synchronized (this.objects) {
-            try (final FileWriter writer = new FileWriter(file)) {
-                MAPPER.writeValue(writer, this.objects);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+    public final void writeToCache(final Collection<B> objects) {
+        try (final FileWriter fw = new FileWriter(this.file)) {
+            MAPPER.writeValue(fw, objects);
+            System.out.printf("Saved %d objects%n", objects.size());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

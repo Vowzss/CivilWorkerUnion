@@ -2,6 +2,7 @@ package com.oneliferp.cwu.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.SessionDatabase;
+import com.oneliferp.cwu.misc.ReportType;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;

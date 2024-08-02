@@ -1,6 +1,6 @@
-package com.oneliferp.cwu.misc;
+package com.oneliferp.cwu.modules.session.misc;
 
-public enum PageType {
+public enum SessionPageType {
     ZONE("zone", "Emplacement de la session:"),
     LOYALISTS("loyalists", "Loyaliste(s) présent(s):"),
     CITIZENS("citizens", "Citoyen(s) présent(s):"),
@@ -13,7 +13,7 @@ public enum PageType {
     private final String id;
     private final String description;
 
-    PageType(final String id, final String description) {
+    SessionPageType(final String id, final String description) {
         this.id = id;
         this.description = description;
     }
@@ -26,15 +26,13 @@ public enum PageType {
         return this.description;
     }
 
-    public PageType getNext() {
-        if (this == EARNINGS) throw new IllegalStateException();
-        final PageType[] types = PageType.values();
+    public SessionPageType getNext() {
+        final SessionPageType[] types = SessionPageType.values();
         return types[(this.ordinal() + 1) % types.length];
     }
 
-    public PageType getPrevious() {
-        if (this.ordinal() == 0) throw new IllegalStateException();
-        final PageType[] types = PageType.values();
+    public SessionPageType getPrevious() {
+        final SessionPageType[] types = SessionPageType.values();
         return types[(this.ordinal() - 1) % types.length];
     }
 }

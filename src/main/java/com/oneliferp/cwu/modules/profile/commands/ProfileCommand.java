@@ -28,8 +28,8 @@ public class ProfileCommand extends CwuCommand {
     private final CwuDatabase cwuDatabase;
 
     public ProfileCommand() {
-        super(ProfileCommandType.BASE.getId(), "Vous permet de gérer les profiles CWU.");
-        this.cwuDatabase = CwuDatabase.getInstance();
+        super(ProfileCommandType.BASE.getId(),ProfileCommandType.BASE.getDescription());
+        this.cwuDatabase = CwuDatabase.get();
     }
 
     @Override
@@ -62,11 +62,11 @@ public class ProfileCommand extends CwuCommand {
             }
             case CREATE: {
                 final CwuModel cwu = OptionUtils.createCwu(event);
-                if (this.cwuDatabase.contains(cwu.getCid())) throw new ProfileFoundException();
+                if (this.cwuDatabase.exist(cwu.getCid())) throw new ProfileFoundException();
 
                 // Update & save cwu database state
                 this.cwuDatabase.addOne(cwu);
-                this.cwuDatabase.writeToCache();
+                this.cwuDatabase.save();
 
                 event.replyEmbeds(ProfileBuilderUtils.profileMessage(cwu))
                         .setActionRow(ProfileBuilderUtils.statsAndDeleteRow(cwu.getCid()))
@@ -115,7 +115,7 @@ public class ProfileCommand extends CwuCommand {
             case DELETE_CONFIRM: {
                 // Update & save cwu database state
                 this.cwuDatabase.removeOne(cwu.getCid());
-                this.cwuDatabase.writeToCache();
+                this.cwuDatabase.save();
 
                 event.editMessage(String.format("Le profil **(%s)** vient d'être supprimé avec succès.", cwu.getIdentity()))
                         .queue();

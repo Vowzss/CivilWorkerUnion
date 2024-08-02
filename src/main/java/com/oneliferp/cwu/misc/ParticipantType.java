@@ -1,6 +1,7 @@
 package com.oneliferp.cwu.misc;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oneliferp.cwu.modules.session.misc.SessionPageType;
 
 public enum ParticipantType {
     @JsonProperty("loyalists")
@@ -28,7 +29,7 @@ public enum ParticipantType {
     /*
         Utils
         */
-    public static ParticipantType fromPage(final PageType type) {
+    public static ParticipantType fromPage(final SessionPageType type) {
         return switch (type) {
             default -> throw new IllegalArgumentException();
             case LOYALISTS -> ParticipantType.LOYALIST;

@@ -14,6 +14,7 @@ import com.oneliferp.cwu.modules.session.exceptions.SessionValidationException;
 import com.oneliferp.cwu.modules.session.misc.SessionButtonType;
 import com.oneliferp.cwu.modules.session.misc.SessionCommandType;
 import com.oneliferp.cwu.modules.session.misc.SessionModalType;
+import com.oneliferp.cwu.modules.session.misc.SessionPageType;
 import com.oneliferp.cwu.modules.session.utils.SessionBuilderUtils;
 import com.oneliferp.cwu.utils.RegexUtils;
 import com.oneliferp.cwu.utils.Toolbox;
@@ -35,17 +36,17 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SessionCommand extends CwuCommand {
-    private final SessionCache sessionCache;
     private final SessionDatabase sessionDatabase;
+    private final SessionCache sessionCache;
 
     private final CwuDatabase cwuDatabase;
 
     public SessionCommand() {
-        super(SessionCommandType.BASE.getId(), "Vous permet de créer des raports de session.");
-        this.sessionCache = SessionCache.get();
+        super(SessionCommandType.BASE.getId(), SessionCommandType.BASE.getDescription());
         this.sessionDatabase = SessionDatabase.get();
+        this.sessionCache = SessionCache.get();
 
-        this.cwuDatabase = CwuDatabase.getInstance();
+        this.cwuDatabase = CwuDatabase.get();
     }
 
     @Override
@@ -76,7 +77,7 @@ public class SessionCommand extends CwuCommand {
             return;
         }
 
-        // Create rapport and set default values
+        // Create session and set default values
         final SessionModel session = new SessionModel(cwu);
         session.setType(sessionType);
         session.setZone(sessionType.getZone());
@@ -118,7 +119,7 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = this.sessionCache.get(eventType.getCid());
         if (session == null) throw new SessionNotFoundException();
 
-        final PageType currentPage = session.getCurrentPage();
+        final SessionPageType currentPage = session.getCurrentPage();
         final String content = event.getValue("cwu_session.fill/data").getAsString();
 
         switch ((SessionModalType) eventType.enumType) {
@@ -160,8 +161,8 @@ public class SessionCommand extends CwuCommand {
     }
 
     /*
-        Button Handlers
-        */
+    Button handlers
+    */
     private void handleCancelButton(final ButtonInteractionEvent event, final String cid) throws SessionNotFoundException {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
@@ -176,7 +177,7 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        session.setCurrentPage(PageType.LOYALISTS);
+        session.setCurrentPage(SessionPageType.LOYALISTS);
         this.goToPage(event, session);
     }
 
@@ -198,7 +199,7 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        session.setCurrentPage(PageType.PREVIEW);
+        session.setCurrentPage(SessionPageType.PREVIEW);
         this.goToPage(event, session);
     }
 
@@ -206,7 +207,7 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        final PageType currentPage = session.getCurrentPage();
+        final SessionPageType currentPage = session.getCurrentPage();
 
         final Builder inputBuilder = TextInput.create("cwu_session.fill/data", currentPage.getDescription(), TextInputStyle.PARAGRAPH)
                 .setRequired(true);
@@ -252,7 +253,7 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        final PageType currentPage = session.getCurrentPage();
+        final SessionPageType currentPage = session.getCurrentPage();
         switch (currentPage) {
             case INFO -> session.setInfo(null);
             case EARNINGS -> session.setEarnings(null);
@@ -277,7 +278,7 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        session.setCurrentPage(PageType.PREVIEW);
+        session.setCurrentPage(SessionPageType.PREVIEW);
         this.goToPage(event, session);
     }
 
@@ -293,7 +294,7 @@ public class SessionCommand extends CwuCommand {
 
         // Save session within database
         this.sessionDatabase.addOne(session);
-        this.sessionDatabase.writeToCache();
+        this.sessionDatabase.save();
 
         event.editMessageEmbeds(SessionBuilderUtils.submitMessage(session))
                 .setComponents(new ArrayList<>())
@@ -304,7 +305,7 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        final PageType currentPage = session.getCurrentPage();
+        final SessionPageType currentPage = session.getCurrentPage();
         session.setCurrentPage(isNext ? currentPage.getNext() : currentPage.getPrevious());
         this.goToPage(event, session);
     }
@@ -313,7 +314,7 @@ public class SessionCommand extends CwuCommand {
     Utils
     */
     protected void goToPage(final ButtonInteractionEvent event, final SessionModel session) {
-        final PageType page = session.getCurrentPage();
+        final SessionPageType page = session.getCurrentPage();
 
         final MessageEmbed embed = (switch (page) {
             case ZONE -> SessionBuilderUtils.zoneMessage(session);
@@ -324,7 +325,7 @@ public class SessionCommand extends CwuCommand {
         });
 
         final var callback = event.editMessageEmbeds(embed);
-        if (page == PageType.ZONE) {
+        if (page == SessionPageType.ZONE) {
             callback.setComponents(SessionBuilderUtils.zoneRows(session));
         } else {
             callback.setComponents(SessionBuilderUtils.pageRow(session));

@@ -3,7 +3,7 @@ package com.oneliferp.cwu.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.CwuDatabase;
-import com.oneliferp.cwu.misc.PageType;
+import com.oneliferp.cwu.modules.session.misc.SessionPageType;
 import com.oneliferp.cwu.misc.ParticipantType;
 import com.oneliferp.cwu.misc.SessionType;
 import com.oneliferp.cwu.misc.ZoneType;
@@ -37,7 +37,7 @@ public class SessionModel {
     private IncomeModel income;
 
     @JsonIgnore
-    private PageType currentPage;
+    private SessionPageType currentPage;
 
     @JsonIgnore
     private boolean canSelectZone;
@@ -84,7 +84,7 @@ public class SessionModel {
         this.income.setEarnings(earnings);
     }
 
-    public void setCurrentPage(final PageType page) {
+    public void setCurrentPage(final SessionPageType page) {
         this.currentPage = page;
     }
 
@@ -119,16 +119,8 @@ public class SessionModel {
         return this.income;
     }
 
-    public PageType getCurrentPage() {
+    public SessionPageType getCurrentPage() {
         return this.currentPage;
-    }
-
-    public int getCurrentStep() {
-        return this.canSelectZone ? currentPage.ordinal() + 1 : currentPage.ordinal();
-    }
-
-    public int getMaxSteps() {
-        return PageType.values().length - (this.canSelectZone ? 1 : 2) - (this.type.isProfitable() ? 0 : 1);
     }
 
     /*
@@ -144,7 +136,7 @@ public class SessionModel {
             this.participants.put(type, new HashSet<>());
         }
 
-        this.currentPage = this.canSelectZone ? PageType.ZONE : PageType.LOYALISTS;
+        this.currentPage = this.canSelectZone ? SessionPageType.ZONE : SessionPageType.LOYALISTS;
     }
 
     public void end() {
@@ -180,6 +172,14 @@ public class SessionModel {
     /*
     Utils
     */
+    public int getCurrentStep() {
+        return this.canSelectZone ? currentPage.ordinal() + 1 : currentPage.ordinal();
+    }
+
+    public int getMaxSteps() {
+        return SessionPageType.values().length - (this.canSelectZone ? 1 : 2) - (this.type.isProfitable() ? 0 : 1);
+    }
+
     private boolean hasParticipants() {
         boolean isValid = false;
 
@@ -192,7 +192,7 @@ public class SessionModel {
     }
 
     public CwuModel resolveCwu() {
-        return CwuDatabase.getInstance().getFromCid(this.manager.cid);
+        return CwuDatabase.get().getFromCid(this.manager.cid);
     }
 
     public boolean isWithinWeek() {
@@ -208,6 +208,6 @@ public class SessionModel {
     }
 
     public boolean isLastPage() {
-        return this.currentPage.ordinal() == PageType.values().length - (this.type.isProfitable() ? 2 : 3);
+        return this.currentPage.ordinal() == SessionPageType.values().length - (this.type.isProfitable() ? 2 : 3);
     }
 }

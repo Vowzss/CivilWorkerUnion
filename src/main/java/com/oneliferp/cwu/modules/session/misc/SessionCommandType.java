@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public enum SessionCommandType {
-    BASE("session", null),
+    BASE("session", "Vous permet de créer des raports de session."),
     RATION("ration", "Permet de créer une session à l'usine à ration."),
     DISTILLERY("distillerie", "Permet de créer une session à la distillerie."),
     LAUNDRY("laverie", "Permet de créer une session à la laverie."),
