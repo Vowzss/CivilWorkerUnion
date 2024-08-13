@@ -11,10 +11,11 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import java.util.List;
 
 public class ProfileBuilderUtils {
-    /*
-    Messages
-    */
+    /* Messages */
     public static MessageEmbed profileMessage(final CwuModel cwu) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("\uD83D\uDD0E  Informations du profil");
+
         final StringBuilder sb = new StringBuilder();
         sb.append(String.format("**Identité:** %s\n", cwu.getIdentity()));
         sb.append("\n");
@@ -22,14 +23,14 @@ public class ProfileBuilderUtils {
         sb.append(String.format("**Grade:** %s\n", cwu.getRank().getLabel()));
         sb.append("\n");
         sb.append(String.format("**Associé à:** <@%d>", cwu.getId()));
-
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle("\uD83D\uDD0E  Informations du profil");
         embed.setDescription(sb.toString());
         return embed.build();
     }
 
     public static MessageEmbed statsMessage(final CwuModel cwu) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("\uD83D\uDCCA  Statistiques du profil");
+
         final SessionModel latestSession = cwu.getLatestSession();
 
         final StringBuilder sb = new StringBuilder();
@@ -42,9 +43,6 @@ public class ProfileBuilderUtils {
         }
         sb.append(String.format("**Rapport(s) totaux:** %d\n", cwu.getSessionCount()));
         sb.append(String.format("**Rapport(s) hebdomadaire:** %d", cwu.getWeeklySessionCount()));
-
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle("\uD83D\uDCCA  Statistiques du profil");
         embed.setDescription(sb.toString());
         return embed.build();
     }
@@ -57,9 +55,7 @@ public class ProfileBuilderUtils {
         return embed.build();
     }
 
-    /*
-    Buttons
-    */
+    /* Buttons */
     private static Button statsButton(final String cid) {
         return Button.primary(ProfileButtonType.STATS.build(cid), "Statistiques");
     }
@@ -80,14 +76,12 @@ public class ProfileBuilderUtils {
         return Button.primary(type.build(cid), "Annuler");
     }
 
-    /*
-    Utils
-    */
+    /* Rows */
     public static List<Button> statsAndDeleteRow(final String cid) {
-        return List.of(statsButton(cid), deleteButton(cid));
+        return List.of(deleteButton(cid), statsButton(cid));
     }
 
     public static List<Button> confirmAndCancelRow(final List<ProfileButtonType> types, final String cid) {
-        return List.of(confirmButton(types.get(0), cid), cancelButton(types.get(1), cid));
+        return List.of(cancelButton(types.get(1), cid), confirmButton(types.get(0), cid));
     }
 }

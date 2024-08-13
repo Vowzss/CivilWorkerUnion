@@ -1,11 +1,11 @@
 package com.oneliferp.cwu.modules.report.misc;
 
 public enum ReportPageType {
-    TYPE("type", "Type de rapport:"),
-    STOCK("stock", "Réapprovisionnement en:"),
-    TOKENS("tokens", null),
-    IDENTITY("identity", "Personne concernée:"),
-    INFO("info", "Informations supplémentaires:"),
+    TYPE("type", "Type de rapport :"),
+    STOCK("stock", "Réapprovisionnement en :"),
+    IDENTITY("identity", "Personne concernée :"),
+    TOKENS("tokens", "Somme à déclarer :"),
+    INFO("info", "Informations supplémentaires :"),
     PREVIEW("preview", "Apperçu du rapport");
 
     private final String id;
@@ -22,15 +22,5 @@ public enum ReportPageType {
 
     public String getDescription() {
         return this.description;
-    }
-
-    public ReportPageType getNext() {
-        final ReportPageType[] types = ReportPageType.values();
-        return types[(this.ordinal() + 1) % types.length];
-    }
-
-    public ReportPageType getPrevious() {
-        final ReportPageType[] types = ReportPageType.values();
-        return types[(this.ordinal() - 1) % types.length];
     }
 }

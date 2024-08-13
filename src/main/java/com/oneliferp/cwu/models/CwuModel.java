@@ -2,10 +2,12 @@ package com.oneliferp.cwu.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.SessionDatabase;
-import com.oneliferp.cwu.misc.ReportType;
+import com.oneliferp.cwu.exceptions.IdentityMalformedException;
+import com.oneliferp.cwu.utils.RegexUtils;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.Comparator;
 
@@ -35,9 +37,16 @@ public class CwuModel {
         this.joinedAt = SimpleDate.now();
     }
 
-    /*
-    Getters
-    */
+    public static CwuModel fromInput(final SlashCommandInteractionEvent event) throws IdentityMalformedException {
+        final IdentityModel identity = RegexUtils.parseIdentity(event.getOption("identity").getAsString());
+
+        final String branch = event.getOption("branch").getAsString();
+        final String rank = event.getOption("rank").getAsString();
+
+        return new CwuModel(event.getUser().getIdLong(), identity, CwuBranch.valueOf(branch), CwuRank.valueOf(rank));
+    }
+
+    /* Getters */
     public Long getId() {
         return this.id;
     }
@@ -62,9 +71,7 @@ public class CwuModel {
         return this.rank;
     }
 
-    /*
-    Utils
-    */
+    /* Utils */
     public SessionModel getLatestSession() {
         return SessionDatabase.get().getSessionsByCwu(this).stream()
                 .filter(session -> session.getPeriod().getStartedAt() != null)
@@ -83,6 +90,12 @@ public class CwuModel {
     }
 
     public int getWeeklySessionCount() {
+        return SessionDatabase.get().getSessionsByCwu(this)
+                .stream().filter(SessionModel::isWithinWeek)
+                .toList().size();
+    }
+
+    public int getWeeklyReportCount() {
         return SessionDatabase.get().getSessionsByCwu(this)
                 .stream().filter(SessionModel::isWithinWeek)
                 .toList().size();

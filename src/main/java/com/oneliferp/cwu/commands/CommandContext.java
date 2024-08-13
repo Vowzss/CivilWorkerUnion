@@ -1,25 +1,29 @@
-package com.oneliferp.cwu.misc;
+package com.oneliferp.cwu.commands;
 
+import com.oneliferp.cwu.misc.IButtonType;
 import com.oneliferp.cwu.modules.profile.misc.ProfileButtonType;
+import com.oneliferp.cwu.modules.report.misc.ReportButtonType;
+import com.oneliferp.cwu.modules.report.misc.ReportMenuType;
+import com.oneliferp.cwu.modules.report.misc.ReportModalType;
 import com.oneliferp.cwu.modules.session.misc.SessionButtonType;
 import com.oneliferp.cwu.modules.session.misc.SessionMenuType;
 import com.oneliferp.cwu.modules.session.misc.SessionModalType;
+import com.oneliferp.cwu.modules.session.misc.SessionType;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class EventTypeData {
+public class CommandContext {
     public final String type;
     public final String identifier;
     public final List<String> specifiers;
     public final HashMap<String, String> params;
 
+    public final IButtonType enumType;
 
-    public final Enum<?> enumType;
-
-    public EventTypeData(final String input) {
+    public CommandContext(final String input) {
         final String[] parts = input.split("#", 2);
         this.type = parts[0];
 
@@ -35,28 +39,7 @@ public class EventTypeData {
             this.params.put(pair[0], pair[1]);
         });
 
-        this.enumType = switch (this.getRoot()) {
-            default -> throw new RuntimeException("Unknown root: " + this.getRoot());
-            case "btn#cwu_session" -> Arrays.stream(SessionButtonType.values())
-                    .filter(v -> v.action.equals(flattenSpecifiers(specifiers)))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("No matching button found at: " + this.getRoot()));
-
-            case "mdl#cwu_session" -> Arrays.stream(SessionModalType.values())
-                    .filter(v -> v.action.equals(flattenSpecifiers(specifiers)))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("No matching modal found at: " + this.getRoot()));
-
-            case "mnu#cwu_session" -> Arrays.stream(SessionMenuType.values())
-                    .filter(v -> v.action.equals(flattenSpecifiers(specifiers)))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("No matching menu found at: " + this.getRoot()));
-
-            case "btn#cwu_profile" -> Arrays.stream(ProfileButtonType.values())
-                    .filter(v -> v.action.equals(flattenSpecifiers(specifiers)))
-                    .findFirst()
-                    .orElseThrow(() -> new RuntimeException("No matching button found at: " + this.getRoot()));
-        };
+        this.enumType = resolveEnumType();
 
         System.out.printf("""
                 Type: %s
@@ -82,6 +65,10 @@ public class EventTypeData {
         return this.params.get(key);
     }
 
+    public String getCommand() {
+        return this.identifier.split("_")[1];
+    }
+
     /*
     Utils
     */
@@ -97,5 +84,25 @@ public class EventTypeData {
 
     public static String flattenSpecifiers(final List<String> specifiers) {
         return specifiers.size() == 1 ? specifiers.get(0) : String.join("/", specifiers);
+    }
+
+    private <T extends Enum<T> & IButtonType> T resolveEnumType() {
+        final var enumClass = switch (this.getRoot()) {
+            default -> throw new RuntimeException("Unknown root: " + this.getRoot());
+            case "btn#cwu_session" -> SessionButtonType.class;
+            case "mdl#cwu_session" -> SessionModalType.class;
+            case "mnu#cwu_session" -> SessionMenuType.class;
+
+            case "btn#cwu_profile" -> ProfileButtonType.class;
+
+            case "btn#cwu_report" -> ReportButtonType.class;
+            case "mdl#cwu_report" -> ReportModalType.class;
+            case "mnu#cwu_report" -> ReportMenuType.class;
+        };
+
+        return Arrays.stream((T[]) enumClass.getEnumConstants())
+                .filter(v -> v.getAction().equals(flattenSpecifiers(this.specifiers)))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No matching enum found for root '" + this.getRoot() + "'"));
     }
 }

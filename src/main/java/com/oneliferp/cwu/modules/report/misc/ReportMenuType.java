@@ -1,15 +1,15 @@
-package com.oneliferp.cwu.modules.session.misc;
+package com.oneliferp.cwu.modules.report.misc;
 
 import com.oneliferp.cwu.misc.IButtonType;
 
-public enum SessionMenuType implements IButtonType {
-    SELECT_TYPE("mnu#cwu_session", "select/type"),
-    SELECT_ZONE("mnu#cwu_session", "select/zone");
+public enum ReportMenuType implements IButtonType {
+    SELECT_TYPE("mnu#cwu_report", "select/type"),
+    SELECT_STOCK("mnu#cwu_report", "select/stock");
 
     public final String root;
     public final String action;
 
-    SessionMenuType(final String root, final String action) {
+    ReportMenuType(final String root, final String action) {
         this.root = root;
         this.action = action;
     }

@@ -1,5 +1,8 @@
 package com.oneliferp.cwu.utils;
 
+import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,5 +18,11 @@ public class Toolbox {
         collection.addAll(collection1);
         collection.addAll(collection2);
         return collection;
+    }
+
+    public static void setDefaulMenuOption(final StringSelectMenu.Builder menu, final List<SelectOption> options, final String value) {
+        options.stream().filter(o -> o.getValue().equals(value))
+                .findFirst()
+                .ifPresent(menu::setDefaultOptions);
     }
 }

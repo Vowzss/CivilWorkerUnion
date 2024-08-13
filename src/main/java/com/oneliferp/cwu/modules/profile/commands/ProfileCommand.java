@@ -4,13 +4,12 @@ import com.oneliferp.cwu.commands.CwuCommand;
 import com.oneliferp.cwu.database.CwuDatabase;
 import com.oneliferp.cwu.models.CwuModel;
 import com.oneliferp.cwu.exceptions.CwuException;
-import com.oneliferp.cwu.misc.EventTypeData;
+import com.oneliferp.cwu.commands.CommandContext;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.modules.profile.exceptions.*;
 import com.oneliferp.cwu.modules.profile.misc.ProfileButtonType;
 import com.oneliferp.cwu.modules.profile.misc.ProfileCommandType;
-import com.oneliferp.cwu.modules.profile.utils.OptionUtils;
 import com.oneliferp.cwu.modules.profile.utils.ProfileBuilderUtils;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -28,13 +27,13 @@ public class ProfileCommand extends CwuCommand {
     private final CwuDatabase cwuDatabase;
 
     public ProfileCommand() {
-        super(ProfileCommandType.BASE.getId(),ProfileCommandType.BASE.getDescription());
+        super("profile", ProfileCommandType.BASE);
         this.cwuDatabase = CwuDatabase.get();
     }
 
     @Override
     public SlashCommandData configure(final SlashCommandData slashCommand) {
-        final SubcommandData createSubCommand = new SubcommandData(ProfileCommandType.CREATE.getId(), ProfileCommandType.CREATE.getDescription());
+        final SubcommandData createSubCommand = new SubcommandData(ProfileCommandType.CREATE.getName(), ProfileCommandType.CREATE.getDescription());
         createSubCommand.addOptions(
                 new OptionData(OptionType.STRING, "identity", "Identité (Nom Prénom, #12345)", true),
                 new OptionData(OptionType.STRING, "branch", "Branche", true)
@@ -47,7 +46,7 @@ public class ProfileCommand extends CwuCommand {
                                 .toArray(Command.Choice[]::new))
         );
 
-        final SubcommandData viewSubCommand = new SubcommandData(ProfileCommandType.VIEW.getId(), ProfileCommandType.VIEW.getDescription());
+        final SubcommandData viewSubCommand = new SubcommandData(ProfileCommandType.VIEW.getName(), ProfileCommandType.VIEW.getDescription());
         viewSubCommand.addOptions(new OptionData(OptionType.STRING, "cid", "CID associé au CWU.", false));
 
         slashCommand.addSubcommands(createSubCommand, viewSubCommand);
@@ -55,13 +54,13 @@ public class ProfileCommand extends CwuCommand {
     }
 
     @Override
-    public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws Exception {
-        switch (ProfileCommandType.fromId(event.getSubcommandName())) {
+    public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
+        switch (ProfileCommandType.resolveType(event.getSubcommandName())) {
             default: {
                 throw new IllegalArgumentException();
             }
             case CREATE: {
-                final CwuModel cwu = OptionUtils.createCwu(event);
+                final CwuModel cwu = CwuModel.fromInput(event);
                 if (this.cwuDatabase.exist(cwu.getCid())) throw new ProfileFoundException();
 
                 // Update & save cwu database state
@@ -70,7 +69,7 @@ public class ProfileCommand extends CwuCommand {
 
                 event.replyEmbeds(ProfileBuilderUtils.profileMessage(cwu))
                         .setActionRow(ProfileBuilderUtils.statsAndDeleteRow(cwu.getCid()))
-                        .setEphemeral(true).queue();
+                        .queue();
                 break;
             }
             case VIEW: {
@@ -83,20 +82,18 @@ public class ProfileCommand extends CwuCommand {
 
                 event.replyEmbeds(ProfileBuilderUtils.profileMessage(cwu))
                         .setActionRow(ProfileBuilderUtils.statsAndDeleteRow(cwu.getCid()))
-                        .setEphemeral(true).queue();
+                        .queue();
                 break;
             }
         }
     }
 
     @Override
-    public void handleButtonInteraction(final ButtonInteractionEvent event, final String eventID) throws CwuException {
-        final EventTypeData buttonType = new EventTypeData(eventID);
-
-        final CwuModel cwu = this.cwuDatabase.getFromCid(buttonType.getCid());
+    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext eventType) throws CwuException {
+        final CwuModel cwu = this.cwuDatabase.getFromCid(eventType.getCid());
         if (cwu == null) throw new ProfileNotFoundException();
 
-        switch ((ProfileButtonType) buttonType.enumType) {
+        switch ((ProfileButtonType) eventType.enumType) {
             default: {
                 throw new IllegalArgumentException();
             }

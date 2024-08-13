@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.modules.session.misc;
 
-import com.oneliferp.cwu.misc.EventTypeData;
+import com.oneliferp.cwu.misc.IButtonType;
 
-public enum SessionModalType {
+public enum SessionModalType implements IButtonType {
     FILL_PARTICIPANTS("mdl#cwu_session", "fill/participants"),
     FILL_INFO("mdl#cwu_session", "fill/info"),
     FILL_EARNINGS("mdl#cwu_session", "fill/earnings");
@@ -15,7 +15,13 @@ public enum SessionModalType {
         this.action = action;
     }
 
-    public String build(final String cid) {
-        return EventTypeData.buildPattern(this.root, this.action, cid);
+    @Override
+    public String getRoot() {
+        return this.root;
+    }
+
+    @Override
+    public String getAction() {
+        return this.action;
     }
 }

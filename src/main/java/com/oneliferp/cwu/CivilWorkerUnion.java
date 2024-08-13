@@ -1,6 +1,7 @@
 package com.oneliferp.cwu;
 
 import com.oneliferp.cwu.commands.CwuCommand;
+import com.oneliferp.cwu.exceptions.CommandNotFoundException;
 import com.oneliferp.cwu.modules.profile.commands.ProfileCommand;
 import com.oneliferp.cwu.listeners.SlashCommandListener;
 import com.oneliferp.cwu.modules.report.command.ReportCommand;
@@ -31,12 +32,25 @@ public class CivilWorkerUnion {
 
         List.of(new ProfileCommand(), new SessionCommand(), new ReportCommand()).forEach(command -> {
             this.commands.put(command.getName(), command);
-            this.jda.upsertCommand(command.configure(command.toSlashCommand())).queue();
+            final var cmd = command.configure(command.toSlashCommand());
+            this.jda.upsertCommand(cmd).queue();
         });
     }
 
-    public <T extends CwuCommand> T getCommand(final String name) {
-        return (T) commands.get(name);
+    public <T extends CwuCommand> T getCommandFromName(final String name) throws CommandNotFoundException {
+        try {
+            return (T) commands.get(name);
+        } catch (Exception ex) {
+            throw new CommandNotFoundException();
+        }
+    }
+
+    public <T extends CwuCommand> T getCommandFromId(final String id) throws CommandNotFoundException {
+        try {
+            return (T) this.commands.entrySet().stream().filter(c -> c.getValue().getID().equals(id)).findFirst().get().getValue();
+        } catch (Exception ex) {
+            throw new CommandNotFoundException();
+        }
     }
 
     public static void main(String[] args) {

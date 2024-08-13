@@ -3,9 +3,12 @@ package com.oneliferp.cwu.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.CwuDatabase;
+import com.oneliferp.cwu.misc.pagination.PaginationContext;
+import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
+import com.oneliferp.cwu.modules.report.misc.ReportPageType;
 import com.oneliferp.cwu.modules.session.misc.SessionPageType;
 import com.oneliferp.cwu.misc.ParticipantType;
-import com.oneliferp.cwu.misc.SessionType;
+import com.oneliferp.cwu.modules.session.misc.SessionType;
 import com.oneliferp.cwu.misc.ZoneType;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,10 +40,7 @@ public class SessionModel {
     private IncomeModel income;
 
     @JsonIgnore
-    private SessionPageType currentPage;
-
-    @JsonIgnore
-    private boolean canSelectZone;
+    private PaginationContext<SessionPageType> pagination;
 
     public SessionModel() {
     }
@@ -50,63 +50,33 @@ public class SessionModel {
         this.period.start();
 
         this.manager = cwu.getIdentity();
+        this.type = SessionType.UNKNOWN;
+        this.zone = ZoneType.UNKNOWN;
     }
 
-    /*
-    Setters
-    */
-    public void addParticipants(final ParticipantType type, final List<IdentityModel> identities) {
-        final var entries = this.participants.get(type);
-        for (final IdentityModel identity : identities) {
-            if (entries.contains(identity)) continue;
-            entries.add(identity);
-        }
-    }
-
-    public void clearParticipants(final ParticipantType type) {
-        this.participants.get(type).clear();
+    /* Getters & Setters */
+    public HashSet<IdentityModel> getParticipants(final ParticipantType type) {
+        return this.participants.get(type);
     }
 
     public void setType(final SessionType type) {
         this.type = type;
     }
 
+    public SessionType getType() {
+        return this.type;
+    }
+
     public void setZone(final ZoneType zone) {
         this.zone = zone;
-        this.canSelectZone = zone == ZoneType.UNKNOWN;
+    }
+    public ZoneType getZone() {
+        return this.zone;
     }
 
     public void setInfo(@Nullable final String info) {
         this.info = (info == null || info.isBlank()) ? null : info;
     }
-
-    public void setEarnings(final Integer earnings) {
-        this.income.setEarnings(earnings);
-    }
-
-    public void setCurrentPage(final SessionPageType page) {
-        this.currentPage = page;
-    }
-
-    /*
-    Getters
-    */
-    public String getManagerCid() {
-        return this.manager.cid;
-    }
-
-    public HashSet<IdentityModel> getParticipants(final ParticipantType type) {
-        return this.participants.get(type);
-    }
-
-    public SessionType getType() {
-        return this.type;
-    }
-
-    public ZoneType getZone() {
-        return this.zone;
-    }
-
     public String getInfo() {
         return this.info;
     }
@@ -119,24 +89,31 @@ public class SessionModel {
         return this.income;
     }
 
-    public SessionPageType getCurrentPage() {
-        return this.currentPage;
+    /* Methods */
+    public void addParticipants(final ParticipantType type, final List<IdentityModel> identities) {
+        final var entries = this.participants.computeIfAbsent(type, k -> new HashSet<>());
+        entries.addAll(identities);
     }
 
-    /*
-    Methods
-    */
+    public void clearParticipants(final ParticipantType type) {
+        this.participants.get(type).clear();
+    }
+
+    public void setEarnings(final Integer earnings) {
+        this.income.setEarnings(earnings);
+    }
+
     public void begin() {
         this.period.start();
         this.income = new IncomeModel();
         this.participants = new HashMap<>();
 
+        this.pagination = new PaginationContext<>(PaginationRegistry.getSessionPages(this.type), SessionPageType.PREVIEW);
+
         // Prefill participants with available types
         for (final ParticipantType type : ParticipantType.values()) {
             this.participants.put(type, new HashSet<>());
         }
-
-        this.currentPage = this.canSelectZone ? SessionPageType.ZONE : SessionPageType.LOYALISTS;
     }
 
     public void end() {
@@ -169,23 +146,55 @@ public class SessionModel {
         this.income.setDeposit(earnings == null ? 0 : earnings - this.income.getWages());
     }
 
-    /*
-    Utils
-    */
+    /* Page Metadata */
+    public SessionPageType getCurrentPage() {
+        return this.pagination.getCurrent();
+    }
+
+    public void goNextPage() {
+        this.pagination.setNext();
+    }
+    public void goPrevPage() {
+        this.pagination.setPrev();
+    }
+    public void goPreviewPage() {
+        this.pagination.setPreview();
+    }
+    public void goFirstPage() {
+        this.pagination.setFirst();
+    }
+
+    public boolean isFirstPage() {
+        return this.pagination.isFirst();
+    }
+    public boolean isLastPage() {
+        return this.pagination.isLast();
+    }
+
     public int getCurrentStep() {
-        return this.canSelectZone ? currentPage.ordinal() + 1 : currentPage.ordinal();
+        return this.pagination.getCurrentStep();
     }
-
     public int getMaxSteps() {
-        return SessionPageType.values().length - (this.canSelectZone ? 1 : 2) - (this.type.isProfitable() ? 0 : 1);
+        return this.pagination.getMaxSteps();
     }
 
-    private boolean hasParticipants() {
+    public boolean hasPage(final SessionPageType type) {
+        return this.pagination.contains(type);
+    }
+
+    /* Utils */
+    public String getManagerCid() {
+        return this.manager.cid;
+    }
+
+    public boolean hasParticipants() {
         boolean isValid = false;
 
         for (final ParticipantType type : ParticipantType.values()) {
             if (this.participants.get(type).isEmpty()) continue;
+
             isValid = true;
+            break;
         }
 
         return isValid;
@@ -201,13 +210,5 @@ public class SessionModel {
 
     public boolean isWithinMonth() {
         return this.period.getStartedAt().isWithinMonth();
-    }
-
-    public boolean isFirstPage() {
-        return this.currentPage.ordinal() == (this.canSelectZone ? 0 : 1);
-    }
-
-    public boolean isLastPage() {
-        return this.currentPage.ordinal() == SessionPageType.values().length - (this.type.isProfitable() ? 2 : 3);
     }
 }

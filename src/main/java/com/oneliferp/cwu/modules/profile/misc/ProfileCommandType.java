@@ -1,44 +1,44 @@
 package com.oneliferp.cwu.modules.profile.misc;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.oneliferp.cwu.misc.ICommandType;
 
-public enum ProfileCommandType {
-    BASE("profil",   "Vous permet de gérer les profiles CWU."),
-    CREATE("create", "Permet de créer un profil CWU."),
-    DELETE("delete", "Permet de supprimer un profil CWU."),
-    VIEW("view", "Permet de visualiser un profil CWU");
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+public enum ProfileCommandType implements ICommandType {
+    BASE("profil",  "Vous permet de gérer les profiles CWU."),
+    CREATE("ajouter", "Permet d'ajouter un profil CWU."),
+    DELETE("supprimer", "Permet de supprimer un profil CWU."),
+    VIEW("visualiser", "Permet de visualiser un profil CWU.");
 
     /*
     Perform easy lookup
     */
-    private static final Map<String, ProfileCommandType> IDS = new HashMap<>();
-    static {
-        for (final var type : values()) {
-            IDS.put(type.getId(), type);
-        }
-    }
+    private static final Map<String, ProfileCommandType> IDS = Arrays.stream(ProfileCommandType.values())
+            .skip(1).collect(Collectors.toMap(ProfileCommandType::getName, e -> e));
 
-    public static ProfileCommandType fromId(final String id) {
+    public static ProfileCommandType resolveType(final String id) {
         final var type = IDS.get(id);
         if (type == null) throw new IllegalArgumentException("No enum constant with id " + id);
         return type;
     }
 
-    private final String id;
+    private final String name;
     private final String description;
 
-    ProfileCommandType(final String id, final String description) {
-        this.id = id;
+    ProfileCommandType(final String name, final String description) {
+        this.name = name;
         this.description = description;
     }
 
-    public String getId() {
-        return this.id;
+    @Override
+    public String getName() {
+        return this.name;
     }
 
+    @Override
     public String getDescription() {
         return this.description;
     }
-
 }

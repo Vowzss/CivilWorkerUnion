@@ -14,7 +14,7 @@ public class CwuDatabase extends JsonDatabase<String, CwuModel> {
     }
 
     private CwuDatabase() {
-        super(new TypeReference<>() {}, "cwu_data.json");
+        super(new TypeReference<>() {}, "cwu_db.json");
         this.readFromCache().forEach(cwu -> map.put(cwu.getCid(), cwu));
     }
 

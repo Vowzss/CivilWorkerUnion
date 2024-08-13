@@ -2,29 +2,24 @@ package com.oneliferp.cwu.listeners;
 
 import com.oneliferp.cwu.CivilWorkerUnion;
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.exceptions.CommandNotFoundException;
-import com.oneliferp.cwu.modules.profile.commands.ProfileCommand;
-import com.oneliferp.cwu.modules.profile.misc.ProfileCommandType;
-import com.oneliferp.cwu.modules.session.commands.SessionCommand;
-import com.oneliferp.cwu.modules.session.misc.SessionCommandType;
+import com.oneliferp.cwu.exceptions.CwuException;
+import com.oneliferp.cwu.commands.CommandContext;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.jetbrains.annotations.NotNull;
 
 public class SlashCommandListener extends ListenerAdapter {
     @Override
-    public void onSlashCommandInteraction(final SlashCommandInteractionEvent event) {
-        final String commandName = event.getName();
-
+    public void onSlashCommandInteraction(@NotNull final SlashCommandInteractionEvent event) {
         try {
-            final CwuCommand command = CivilWorkerUnion.get().getCommand(commandName);
-            if (command == null) throw new CommandNotFoundException();
+            final CwuCommand command = CivilWorkerUnion.get().getCommandFromName(event.getName());
             command.handleCommandInteraction(event);
-        } catch (Exception ex) {
+        } catch (CwuException ex) {
             event.reply("\uD83D\uDCA5 " + ex.getMessage())
-                    .setEphemeral(true).queue();
+                    .queue();
 
             ex.printStackTrace();
         }
@@ -32,20 +27,13 @@ public class SlashCommandListener extends ListenerAdapter {
 
     @Override
     public void onStringSelectInteraction(final StringSelectInteractionEvent event) {
-        final String ID = event.getComponentId();
+        final CommandContext eventType = new CommandContext(event.getComponentId());
 
         try {
-            if (ID.contains(SessionCommandType.BASE.getId())) {
-                final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
-                command.handleSelectionInteraction(event, ID);
-            } else if (ID.contains(ProfileCommandType.BASE.getId())) {
-                final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());
-                command.handleSelectionInteraction(event, ID);
-            } else throw new IllegalArgumentException();
-        } catch (Exception ex) {
-            event.reply(ex.getMessage())
-                    .setEphemeral(true).queue();
-
+            final var command = CivilWorkerUnion.get().getCommandFromId(eventType.getCommand());
+            command.handleSelectionInteraction(event, eventType);
+        } catch (CwuException ex) {
+            event.reply(ex.getMessage()).queue();
             ex.printStackTrace();
         }
     }
@@ -54,18 +42,14 @@ public class SlashCommandListener extends ListenerAdapter {
     public void onButtonInteraction(final ButtonInteractionEvent event) {
         final String ID = event.getButton().getId();
         if (ID == null) throw new IllegalArgumentException();
+        final CommandContext eventType = new CommandContext(ID);
 
         try {
-            if (ID.contains(SessionCommandType.BASE.getId())) {
-                final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
-                command.handleButtonInteraction(event, ID);
-            } else if (ID.contains(ProfileCommandType.BASE.getId())) {
-                final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());
-                command.handleButtonInteraction(event, ID);
-            } else throw new IllegalArgumentException();
-        } catch (Exception ex) {
+            final var command = CivilWorkerUnion.get().getCommandFromId(eventType.getCommand());
+            command.handleButtonInteraction(event, eventType);
+        } catch (CwuException ex) {
             event.reply(ex.getMessage())
-                    .setEphemeral(true).queue();
+                    .queue();
 
             ex.printStackTrace();
         }
@@ -73,19 +57,15 @@ public class SlashCommandListener extends ListenerAdapter {
 
     @Override
     public void onModalInteraction(final ModalInteractionEvent event) {
-        final String ID = event.getModalId();
+        final CommandContext eventType = new CommandContext(event.getModalId());
 
         try {
-            if (ID.contains(SessionCommandType.BASE.getId())) {
-                final SessionCommand command = CivilWorkerUnion.get().getCommand(SessionCommandType.BASE.getId());
-                command.handleModalInteraction(event, ID);
-            } else if (ID.contains(ProfileCommandType.BASE.getId())) {
-                final ProfileCommand command = CivilWorkerUnion.get().getCommand(ProfileCommandType.BASE.getId());
-                command.handleModalInteraction(event, ID);
-            } else throw new IllegalArgumentException();
-        } catch (Exception ex) {
+            final var command = CivilWorkerUnion.get().getCommandFromId(eventType.getCommand());
+            System.out.println(eventType.getCommand());
+            command.handleModalInteraction(event, eventType);
+        } catch (CwuException ex) {
             event.reply("\uD83D\uDCA5 " + ex.getMessage())
-                    .setEphemeral(true).queue();
+                    .queue();
 
             ex.printStackTrace();
         }

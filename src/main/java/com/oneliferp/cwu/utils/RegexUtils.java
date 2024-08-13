@@ -36,7 +36,7 @@ public class RegexUtils {
         return list;
     }
 
-    public static Integer parseEarnings(final String input) {
+    public static Integer parseTokens(final String input) {
         try {
             final Matcher matcher = EARNINGS_PATTERN.matcher(input);
             if (!matcher.find()) return null;

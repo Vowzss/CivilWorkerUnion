@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.modules.profile.misc;
 
-import com.oneliferp.cwu.misc.EventTypeData;
+import com.oneliferp.cwu.misc.IButtonType;
 
-public enum ProfileButtonType {
+public enum ProfileButtonType implements IButtonType {
     STATS("btn#cwu_profile", "stats"),
     RETURN("btn#cwu_profile", "return"),
     DELETE("btn#cwu_profile", "delete"),
@@ -17,7 +17,13 @@ public enum ProfileButtonType {
         this.action = action;
     }
 
-    public String build(final String cid) {
-        return EventTypeData.buildPattern(this.root, this.action, cid);
+    @Override
+    public String getRoot() {
+        return this.root;
+    }
+
+    @Override
+    public String getAction() {
+        return this.action;
     }
 }

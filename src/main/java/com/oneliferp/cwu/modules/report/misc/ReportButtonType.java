@@ -1,35 +1,35 @@
 package com.oneliferp.cwu.modules.report.misc;
 
-import com.oneliferp.cwu.misc.EventTypeData;
+import com.oneliferp.cwu.misc.IButtonType;
 
-import java.util.Map;
-
-public enum ReportButtonType {
-    START("btn#cwu_report", "start"),
-    CANCEL("btn#cwu_report", "cancel"),
+public enum ReportButtonType implements IButtonType {
+    BEGIN("btn#cwu_report", "begin"),
+    ABORT("btn#cwu_report", "abort"),
     RESUME("btn#cwu_report", "resume"),
+    OVERWRITE("btn#cwu_report", "overwrite"),
     EDIT("btn#cwu_report", "edit"),
     SUBMIT("btn#cwu_report", "submit"),
     CLEAR("btn#cwu_report", "clear"),
     FILL("btn#cwu_report", "fill"),
     PREVIEW("btn#cwu_report", "preview"),
     PAGE_NEXT("btn#cwu_report", "page/next"),
-    PAGE_PREV("btn#cwu_report", "page/prev"),
-    REPLACE("btn#cwu_report", "replace");
+    PAGE_PREV("btn#cwu_report", "page/prev");
 
-    public final String root;
-    public final String action;
+    private final String root;
+    private final String action;
 
     ReportButtonType(final String root, final String action) {
         this.root = root;
         this.action = action;
     }
 
-    public String build(final String cid) {
-        return EventTypeData.buildPattern(this.root, this.action, cid);
+    @Override
+    public String getRoot() {
+        return this.root;
     }
 
-    public String build(final String cid, final Map<String, String> params) {
-        return EventTypeData.buildPatternWithArgs(this.root, this.action, cid, params);
+    @Override
+    public String getAction() {
+        return this.action;
     }
 }

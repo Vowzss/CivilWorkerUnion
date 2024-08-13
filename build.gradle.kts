@@ -29,6 +29,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.javatuples/javatuples
     implementation("org.javatuples:javatuples:1.2")
 
+    implementation("net.fellbaum:jemoji:1.3.4")
 }
 
 tasks.withType<JavaCompile> {
