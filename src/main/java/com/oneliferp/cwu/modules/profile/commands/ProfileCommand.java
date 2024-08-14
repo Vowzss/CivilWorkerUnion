@@ -30,7 +30,7 @@ public class ProfileCommand extends CwuCommand {
         super("profile", ProfileCommandType.BASE);
         this.cwuDatabase = CwuDatabase.get();
     }
-
+/*
     @Override
     public SlashCommandData configure(final SlashCommandData slashCommand) {
         final SubcommandData createSubCommand = new SubcommandData(ProfileCommandType.CREATE.getName(), ProfileCommandType.CREATE.getDescription());
@@ -52,9 +52,21 @@ public class ProfileCommand extends CwuCommand {
         slashCommand.addSubcommands(createSubCommand, viewSubCommand);
         return slashCommand;
     }
-
+*/
     @Override
     public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
+        // Obtain cid from command option or user id
+        final OptionMapping cidOption = event.getOption("cid");
+        final CwuModel cwu = cidOption == null ?
+                this.cwuDatabase.getFromId(event.getUser().getIdLong()) :
+                this.cwuDatabase.getFromCid(cidOption.getAsString());
+        if (cwu == null) throw new ProfileNotFoundException();
+
+        event.replyEmbeds(ProfileBuilderUtils.profileMessage(cwu))
+                .setActionRow(ProfileBuilderUtils.statsAndDeleteRow(cwu.getCid()))
+                .queue();
+
+        /*
         switch (ProfileCommandType.resolveType(event.getSubcommandName())) {
             default: {
                 throw new IllegalArgumentException();
@@ -85,7 +97,7 @@ public class ProfileCommand extends CwuCommand {
                         .queue();
                 break;
             }
-        }
+        }*/
     }
 
     @Override
