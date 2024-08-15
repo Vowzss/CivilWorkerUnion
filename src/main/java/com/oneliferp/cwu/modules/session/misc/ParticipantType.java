@@ -1,7 +1,7 @@
-package com.oneliferp.cwu.misc;
+package com.oneliferp.cwu.modules.session.misc;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.modules.session.misc.SessionPageType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionPageType;
 
 public enum ParticipantType {
     @JsonProperty("loyalists")

@@ -5,22 +5,14 @@ import com.oneliferp.cwu.database.CwuDatabase;
 import com.oneliferp.cwu.models.CwuModel;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.commands.CommandContext;
-import com.oneliferp.cwu.misc.CwuBranch;
-import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.modules.profile.exceptions.*;
-import com.oneliferp.cwu.modules.profile.misc.ProfileButtonType;
-import com.oneliferp.cwu.modules.profile.misc.ProfileCommandType;
+import com.oneliferp.cwu.modules.profile.misc.ids.ProfileButtonType;
+import com.oneliferp.cwu.modules.profile.misc.ids.ProfileCommandType;
 import com.oneliferp.cwu.modules.profile.utils.ProfileBuilderUtils;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class ProfileCommand extends CwuCommand {

@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.modules.session.misc;
 
-import com.oneliferp.cwu.misc.ZoneType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionPageType;
 import net.fellbaum.jemoji.EmojiManager;
 
 import java.util.List;

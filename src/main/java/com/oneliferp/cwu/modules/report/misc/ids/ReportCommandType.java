@@ -1,12 +1,6 @@
-package com.oneliferp.cwu.modules.report.misc;
+package com.oneliferp.cwu.modules.report.misc.ids;
 
 import com.oneliferp.cwu.misc.ICommandType;
-import com.oneliferp.cwu.modules.profile.misc.ProfileCommandType;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public enum ReportCommandType implements ICommandType {
     BASE("rapport", "Vous permet de créer un rapport.");

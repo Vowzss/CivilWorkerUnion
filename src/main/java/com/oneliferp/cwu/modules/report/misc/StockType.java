@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.misc;
+package com.oneliferp.cwu.modules.report.misc;
 
 public enum StockType {
     CARDBOARD("Cartons", 2),

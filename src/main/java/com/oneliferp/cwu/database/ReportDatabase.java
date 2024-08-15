@@ -2,7 +2,7 @@ package com.oneliferp.cwu.database;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.oneliferp.cwu.models.CwuModel;
-import com.oneliferp.cwu.models.ReportModel;
+import com.oneliferp.cwu.modules.report.models.ReportModel;
 import com.oneliferp.cwu.modules.report.misc.ReportType;
 
 import java.util.List;

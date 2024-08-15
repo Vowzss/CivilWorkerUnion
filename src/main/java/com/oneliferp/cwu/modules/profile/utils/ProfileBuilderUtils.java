@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.modules.profile.utils;
 
 import com.oneliferp.cwu.models.CwuModel;
-import com.oneliferp.cwu.models.SessionModel;
-import com.oneliferp.cwu.modules.profile.misc.ProfileButtonType;
+import com.oneliferp.cwu.modules.session.models.SessionModel;
+import com.oneliferp.cwu.modules.profile.misc.ids.ProfileButtonType;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;

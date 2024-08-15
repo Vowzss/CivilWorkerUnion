@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.modules.session.misc;
+package com.oneliferp.cwu.modules.session.misc.ids;
 
 import com.oneliferp.cwu.misc.IButtonType;
 

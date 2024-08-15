@@ -1,10 +1,6 @@
-package com.oneliferp.cwu.modules.session.misc;
+package com.oneliferp.cwu.modules.session.misc.ids;
 
 import com.oneliferp.cwu.misc.ICommandType;
-
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public enum SessionCommandType implements ICommandType {
     BASE("session", "Vous permet de créer des raports de session."),

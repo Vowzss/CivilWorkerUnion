@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.modules.report.misc;
+package com.oneliferp.cwu.modules.report.misc.ids;
 
 import com.oneliferp.cwu.misc.IButtonType;
 

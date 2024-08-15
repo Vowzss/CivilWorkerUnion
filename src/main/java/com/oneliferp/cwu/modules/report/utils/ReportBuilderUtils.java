@@ -1,14 +1,12 @@
 package com.oneliferp.cwu.modules.report.utils;
 
 import com.oneliferp.cwu.misc.CwuBranch;
-import com.oneliferp.cwu.misc.StockType;
-import com.oneliferp.cwu.models.ReportModel;
-import com.oneliferp.cwu.models.SessionModel;
-import com.oneliferp.cwu.modules.report.misc.ReportButtonType;
-import com.oneliferp.cwu.modules.report.misc.ReportMenuType;
-import com.oneliferp.cwu.modules.report.misc.ReportPageType;
+import com.oneliferp.cwu.modules.report.misc.StockType;
+import com.oneliferp.cwu.modules.report.models.ReportModel;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportButtonType;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportMenuType;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportPageType;
 import com.oneliferp.cwu.modules.report.misc.ReportType;
-import com.oneliferp.cwu.modules.session.misc.SessionType;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.Toolbox;

@@ -1,12 +1,12 @@
 package com.oneliferp.cwu.modules.session.utils;
 
-import com.oneliferp.cwu.modules.session.misc.SessionPageType;
-import com.oneliferp.cwu.misc.ParticipantType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionPageType;
+import com.oneliferp.cwu.modules.session.misc.ParticipantType;
 import com.oneliferp.cwu.modules.session.misc.SessionType;
-import com.oneliferp.cwu.misc.ZoneType;
-import com.oneliferp.cwu.models.SessionModel;
-import com.oneliferp.cwu.modules.session.misc.SessionButtonType;
-import com.oneliferp.cwu.modules.session.misc.SessionMenuType;
+import com.oneliferp.cwu.modules.session.misc.ZoneType;
+import com.oneliferp.cwu.modules.session.models.SessionModel;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionButtonType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionMenuType;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.SimpleDate;

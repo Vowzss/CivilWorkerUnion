@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.misc;
+package com.oneliferp.cwu.modules.session.misc;
 
 public enum ZoneType {
     UNKNOWN("Inconnu", null),

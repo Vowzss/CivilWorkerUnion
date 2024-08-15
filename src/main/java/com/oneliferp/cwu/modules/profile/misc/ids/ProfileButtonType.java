@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.modules.profile.misc;
+package com.oneliferp.cwu.modules.profile.misc.ids;
 
 import com.oneliferp.cwu.misc.IButtonType;
 

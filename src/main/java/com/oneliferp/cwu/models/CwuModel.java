@@ -3,6 +3,7 @@ package com.oneliferp.cwu.models;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
+import com.oneliferp.cwu.modules.session.models.SessionModel;
 import com.oneliferp.cwu.utils.RegexUtils;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.misc.CwuBranch;

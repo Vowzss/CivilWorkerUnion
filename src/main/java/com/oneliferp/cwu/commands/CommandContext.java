@@ -1,13 +1,13 @@
 package com.oneliferp.cwu.commands;
 
 import com.oneliferp.cwu.misc.IButtonType;
-import com.oneliferp.cwu.modules.profile.misc.ProfileButtonType;
-import com.oneliferp.cwu.modules.report.misc.ReportButtonType;
-import com.oneliferp.cwu.modules.report.misc.ReportMenuType;
-import com.oneliferp.cwu.modules.report.misc.ReportModalType;
-import com.oneliferp.cwu.modules.session.misc.SessionButtonType;
-import com.oneliferp.cwu.modules.session.misc.SessionMenuType;
-import com.oneliferp.cwu.modules.session.misc.SessionModalType;
+import com.oneliferp.cwu.modules.profile.misc.ids.ProfileButtonType;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportButtonType;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportMenuType;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportModalType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionButtonType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionMenuType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionModalType;
 import com.oneliferp.cwu.modules.session.misc.SessionType;
 
 import java.util.Arrays;

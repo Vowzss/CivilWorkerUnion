@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.modules.report.misc;
+package com.oneliferp.cwu.modules.report.misc.ids;
 
 public enum ReportPageType {
     TYPE("type", "Type de rapport :"),

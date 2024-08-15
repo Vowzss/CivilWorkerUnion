@@ -1,12 +1,14 @@
-package com.oneliferp.cwu.models;
+package com.oneliferp.cwu.modules.report.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.CwuDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
-import com.oneliferp.cwu.misc.StockType;
+import com.oneliferp.cwu.modules.report.misc.StockType;
+import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.modules.report.misc.ReportType;
-import com.oneliferp.cwu.modules.report.misc.ReportPageType;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportPageType;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import org.jetbrains.annotations.Nullable;

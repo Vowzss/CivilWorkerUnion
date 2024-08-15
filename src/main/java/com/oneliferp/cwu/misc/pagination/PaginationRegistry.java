@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.misc.pagination;
 
-import com.oneliferp.cwu.modules.report.misc.ReportPageType;
+import com.oneliferp.cwu.modules.report.misc.ids.ReportPageType;
 import com.oneliferp.cwu.modules.report.misc.ReportType;
-import com.oneliferp.cwu.modules.session.misc.SessionPageType;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionPageType;
 import com.oneliferp.cwu.modules.session.misc.SessionType;
 
 import java.util.Collections;

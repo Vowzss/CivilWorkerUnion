@@ -1,15 +1,18 @@
-package com.oneliferp.cwu.models;
+package com.oneliferp.cwu.modules.session.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.CwuDatabase;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
-import com.oneliferp.cwu.modules.report.misc.ReportPageType;
-import com.oneliferp.cwu.modules.session.misc.SessionPageType;
-import com.oneliferp.cwu.misc.ParticipantType;
+import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.IncomeModel;
+import com.oneliferp.cwu.models.PeriodModel;
+import com.oneliferp.cwu.modules.session.misc.ids.SessionPageType;
+import com.oneliferp.cwu.modules.session.misc.ParticipantType;
 import com.oneliferp.cwu.modules.session.misc.SessionType;
-import com.oneliferp.cwu.misc.ZoneType;
+import com.oneliferp.cwu.modules.session.misc.ZoneType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
