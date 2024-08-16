@@ -2,11 +2,14 @@ package com.oneliferp.cwu;
 
 import com.oneliferp.cwu.commands.CwuCommand;
 import com.oneliferp.cwu.exceptions.CommandNotFoundException;
-import com.oneliferp.cwu.modules.profile.commands.ProfileCommand;
-import com.oneliferp.cwu.listeners.SlashCommandListener;
-import com.oneliferp.cwu.modules.report.command.ReportCommand;
+import com.oneliferp.cwu.commands.profile.ProfileCommand;
+import com.oneliferp.cwu.listeners.ButtonListener;
+import com.oneliferp.cwu.listeners.CommandListener;
+import com.oneliferp.cwu.commands.report.ReportCommand;
+import com.oneliferp.cwu.listeners.MenuSelectionListener;
+import com.oneliferp.cwu.listeners.ModalListener;
 import com.oneliferp.cwu.utils.Environment;
-import com.oneliferp.cwu.modules.session.commands.SessionCommand;
+import com.oneliferp.cwu.commands.session.SessionCommand;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 
@@ -27,7 +30,7 @@ public class CivilWorkerUnion {
         commands = new HashMap<>();
 
         jda = JDABuilder.createLight(Environment.getToken())
-                .addEventListeners(new SlashCommandListener())
+                .addEventListeners(new CommandListener(), new ButtonListener(), new ModalListener(), new MenuSelectionListener())
                 .build();
 
         List.of(new ProfileCommand(), new SessionCommand(), new ReportCommand()).forEach(command -> {

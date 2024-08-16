@@ -1,9 +1,9 @@
 package com.oneliferp.cwu.misc.pagination;
 
-import com.oneliferp.cwu.modules.report.misc.ids.ReportPageType;
-import com.oneliferp.cwu.modules.report.misc.ReportType;
-import com.oneliferp.cwu.modules.session.misc.ids.SessionPageType;
-import com.oneliferp.cwu.modules.session.misc.SessionType;
+import com.oneliferp.cwu.commands.report.misc.ids.ReportPageType;
+import com.oneliferp.cwu.commands.report.misc.ReportType;
+import com.oneliferp.cwu.commands.session.misc.ids.SessionPageType;
+import com.oneliferp.cwu.commands.session.misc.SessionType;
 
 import java.util.Collections;
 import java.util.EnumMap;

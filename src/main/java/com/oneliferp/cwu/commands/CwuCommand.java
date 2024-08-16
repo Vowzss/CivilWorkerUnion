@@ -14,10 +14,10 @@ public abstract class CwuCommand {
     private final String name;
     private final String description;
 
-    protected CwuCommand(final String id, final ICommandType commandType) {
+    protected CwuCommand(final String id, final String name, final String description) {
         this.id = id;
-        this.name = commandType.getName();
-        this.description = commandType.getDescription();
+        this.name = name;
+        this.description = description;
     }
 
     /* Handlers */

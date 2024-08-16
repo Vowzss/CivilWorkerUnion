@@ -82,7 +82,9 @@ public abstract class JsonDatabase<A, B> {
         if (!file.exists()) return new ArrayList<>();
 
         try (final FileReader fr = new FileReader(this.file)) {
-            return MAPPER.readValue(fr, typeRef);
+            final var values = MAPPER.readValue(fr, typeRef);
+            System.out.println("Found " + values.size() + " values in " + this.file);
+            return values;
         } catch (Exception e) {
             e.printStackTrace();
         }

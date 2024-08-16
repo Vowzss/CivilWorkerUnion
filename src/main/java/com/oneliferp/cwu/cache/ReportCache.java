@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.cache;
 
-import com.oneliferp.cwu.modules.report.models.ReportModel;
+import com.oneliferp.cwu.commands.report.models.ReportModel;
 
 public class ReportCache extends RuntimeCache<String, ReportModel> {
     private static ReportCache instance;

@@ -1,9 +1,11 @@
 package com.oneliferp.cwu.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
-import com.oneliferp.cwu.modules.session.models.SessionModel;
+import com.oneliferp.cwu.commands.report.models.ReportModel;
+import com.oneliferp.cwu.commands.session.models.SessionModel;
 import com.oneliferp.cwu.utils.RegexUtils;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.misc.CwuBranch;
@@ -28,7 +30,7 @@ public class CwuModel {
     @JsonProperty("joinedAt")
     private SimpleDate joinedAt;
 
-    public CwuModel() {}
+    private CwuModel() {}
 
     public CwuModel(final long id, final IdentityModel identity, final CwuBranch branch, final CwuRank rank) {
         this.id = id;
@@ -74,31 +76,35 @@ public class CwuModel {
 
     /* Utils */
     public SessionModel getLatestSession() {
-        return SessionDatabase.get().getSessionsByCwu(this).stream()
+        return SessionDatabase.get().getSessionsByCwu(this.getCid()).stream()
                 .filter(session -> session.getPeriod().getStartedAt() != null)
                 .max(Comparator.comparing(session -> session.getPeriod().getStartedAt()))
                 .orElse(null);
     }
 
     public int getSessionCount() {
-        return SessionDatabase.get().getSessionsByCwu(this).size();
-    }
-
-    public int getMonthlySessionCount() {
-        return SessionDatabase.get().getSessionsByCwu(this)
-                .stream().filter(SessionModel::isWithinMonth)
-                .toList().size();
+        return SessionDatabase.get().getSessionsByCwu(this.getCid()).size();
     }
 
     public int getWeeklySessionCount() {
-        return SessionDatabase.get().getSessionsByCwu(this)
+        return SessionDatabase.get().getSessionsByCwu(this.getCid())
                 .stream().filter(SessionModel::isWithinWeek)
                 .toList().size();
     }
 
+    public ReportModel getLatestReport() {
+        return ReportDatabase.get().getReportsByCwu(this.getCid()).stream()
+                .max(Comparator.comparing(ReportModel::getCreatedAt))
+                .orElse(null);
+    }
+
+    public int getReportCount() {
+        return ReportDatabase.get().getReportsByCwu(this.getCid()).size();
+    }
+
     public int getWeeklyReportCount() {
-        return SessionDatabase.get().getSessionsByCwu(this)
-                .stream().filter(SessionModel::isWithinWeek)
+        return ReportDatabase.get().getReportsByCwu(this.getCid())
+                .stream().filter(ReportModel::isWithinWeek)
                 .toList().size();
     }
 }

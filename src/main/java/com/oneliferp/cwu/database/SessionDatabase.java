@@ -2,8 +2,8 @@ package com.oneliferp.cwu.database;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.oneliferp.cwu.models.CwuModel;
-import com.oneliferp.cwu.modules.session.models.SessionModel;
-import com.oneliferp.cwu.modules.session.misc.SessionType;
+import com.oneliferp.cwu.commands.session.models.SessionModel;
+import com.oneliferp.cwu.commands.session.misc.SessionType;
 
 import java.util.List;
 
@@ -32,9 +32,9 @@ public class SessionDatabase extends JsonDatabase<String, SessionModel> {
                 .toList();
     }
 
-    public List<SessionModel> getSessionsByCwu(final CwuModel cwu) {
+    public List<SessionModel> getSessionsByCwu(final String cid) {
         return this.map.values().stream()
-                .filter(o -> o.getManagerCid().equals(cwu.getCid()))
+                .filter(o -> o.getManagerCid().equals(cid))
                 .toList();
     }
 }
