@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.commands.report.misc.ids;
 
-import com.oneliferp.cwu.misc.IButtonType;
+import com.oneliferp.cwu.misc.IActionType;
 
-public enum ReportButtonType implements IButtonType {
+public enum ReportButtonType implements IActionType {
     BEGIN("btn#cwu_report", "begin"),
     ABORT("btn#cwu_report", "abort"),
     RESUME("btn#cwu_report", "resume"),

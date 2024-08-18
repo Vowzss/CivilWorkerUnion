@@ -2,10 +2,11 @@ package com.oneliferp.cwu.commands.report.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.database.CwuDatabase;
+import com.oneliferp.cwu.database.EmployeeDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.commands.report.misc.StockType;
-import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.misc.IdFactory;
+import com.oneliferp.cwu.models.EmployeeModel;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.commands.report.misc.ReportType;
 import com.oneliferp.cwu.commands.report.misc.ids.ReportPageType;
@@ -15,8 +16,11 @@ import com.oneliferp.cwu.utils.SimpleDate;
 import org.jetbrains.annotations.Nullable;
 
 public class ReportModel {
-    @JsonProperty("manager")
-    private IdentityModel manager;
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("employee")
+    private IdentityModel employee;
 
     @JsonProperty("branch")
     private CwuBranch branch;
@@ -44,14 +48,21 @@ public class ReportModel {
 
     private ReportModel() {}
 
-    public ReportModel(final CwuModel cwu) {
-        this.manager = cwu.getIdentity();
+    public ReportModel(final EmployeeModel cwu) {
+        this.id = IdFactory.get().generateID();
+
+        this.employee = cwu.getIdentity();
         this.createdAt = SimpleDate.now();
         this.branch = cwu.getBranch();
         this.type = ReportType.UNKNOWN;
     }
 
     /* Getters & Setters */
+
+    public String getId() {
+        return this.id;
+    }
+
     public CwuBranch getBranch() {
         return this.branch;
     }
@@ -106,7 +117,7 @@ public class ReportModel {
 
     public boolean isValid() {
         // FIX TO CHECK BASED OF SPECIFIC TYPE
-        return this.manager != null && this.type != null;
+        return this.employee != null && this.type != null;
     }
 
     /* Page Metadata */
@@ -150,8 +161,8 @@ public class ReportModel {
     }
 
     /* Utils */
-    public String getManagerCid() {
-        return this.manager.cid;
+    public String getEmployeeCid() {
+        return this.employee.cid;
     }
 
     public int computeStockItemCount() {
@@ -162,8 +173,8 @@ public class ReportModel {
         return this.tokens % this.stock.getPrice();
     }
 
-    public CwuModel resolveCwu() {
-        return CwuDatabase.get().getFromCid(this.manager.cid);
+    public EmployeeModel resolveEmployee() {
+        return EmployeeDatabase.get().getFromCid(this.employee.cid);
     }
 
     public boolean isWithinWeek() {

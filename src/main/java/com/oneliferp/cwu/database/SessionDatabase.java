@@ -1,11 +1,12 @@
 package com.oneliferp.cwu.database;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.oneliferp.cwu.models.CwuModel;
 import com.oneliferp.cwu.commands.session.models.SessionModel;
 import com.oneliferp.cwu.commands.session.misc.SessionType;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SessionDatabase extends JsonDatabase<String, SessionModel> {
     /* Singleton */
@@ -18,11 +19,13 @@ public class SessionDatabase extends JsonDatabase<String, SessionModel> {
     private SessionDatabase() {
         super(new TypeReference<>() {
         }, "session_db.json");
+
+        this.readFromCache().forEach(session -> map.put(session.getId(), session));
     }
 
     @Override
-    public void addOne(final SessionModel value) {
-        this.map.put(value.getManagerCid(), value);
+    public void addOne(final SessionModel session) {
+        this.map.put(session.getId(), session);
     }
 
     /* Utils */
@@ -34,7 +37,14 @@ public class SessionDatabase extends JsonDatabase<String, SessionModel> {
 
     public List<SessionModel> getSessionsByCwu(final String cid) {
         return this.map.values().stream()
-                .filter(o -> o.getManagerCid().equals(cid))
+                .filter(o -> o.getEmployeeCid().equals(cid))
+                .toList();
+    }
+
+    public List<SessionModel> getLatests(final int count) {
+        return this.map.values().stream()
+                .sorted(Comparator.comparing(v -> v.getPeriod().getEndedAt(), Comparator.reverseOrder()))
+                .limit(count)
                 .toList();
     }
 }

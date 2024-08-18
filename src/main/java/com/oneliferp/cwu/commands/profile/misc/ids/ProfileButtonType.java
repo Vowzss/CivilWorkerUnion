@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.commands.profile.misc.ids;
 
-import com.oneliferp.cwu.misc.IButtonType;
+import com.oneliferp.cwu.misc.IActionType;
 
-public enum ProfileButtonType implements IButtonType {
+public enum ProfileButtonType implements IActionType {
     STATS("btn#cwu_profile", "stats"),
     RETURN("btn#cwu_profile", "return"),
     DELETE("btn#cwu_profile", "delete"),

@@ -14,9 +14,9 @@ import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEve
 
 import java.util.Comparator;
 
-public class CwuModel {
+public class EmployeeModel {
     @JsonProperty("id")
-    private Long id;
+    private long id;
 
     @JsonProperty("identity")
     private IdentityModel identity;
@@ -30,9 +30,9 @@ public class CwuModel {
     @JsonProperty("joinedAt")
     private SimpleDate joinedAt;
 
-    private CwuModel() {}
+    private EmployeeModel() {}
 
-    public CwuModel(final long id, final IdentityModel identity, final CwuBranch branch, final CwuRank rank) {
+    public EmployeeModel(final long id, final IdentityModel identity, final CwuBranch branch, final CwuRank rank) {
         this.id = id;
         this.identity = identity;
         this.branch = branch;
@@ -40,13 +40,13 @@ public class CwuModel {
         this.joinedAt = SimpleDate.now();
     }
 
-    public static CwuModel fromInput(final SlashCommandInteractionEvent event) throws IdentityMalformedException {
+    public static EmployeeModel fromInput(final SlashCommandInteractionEvent event) throws IdentityMalformedException {
         final IdentityModel identity = RegexUtils.parseIdentity(event.getOption("identity").getAsString());
 
         final String branch = event.getOption("branch").getAsString();
         final String rank = event.getOption("rank").getAsString();
 
-        return new CwuModel(event.getUser().getIdLong(), identity, CwuBranch.valueOf(branch), CwuRank.valueOf(rank));
+        return new EmployeeModel(event.getUser().getIdLong(), identity, CwuBranch.valueOf(branch), CwuRank.valueOf(rank));
     }
 
     /* Getters */

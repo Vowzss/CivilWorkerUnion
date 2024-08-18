@@ -2,13 +2,13 @@ package com.oneliferp.cwu.commands.session;
 
 import com.oneliferp.cwu.cache.SessionCache;
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.database.CwuDatabase;
+import com.oneliferp.cwu.database.EmployeeDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.commands.CommandContext;
 import com.oneliferp.cwu.commands.session.misc.ParticipantType;
 import com.oneliferp.cwu.commands.session.misc.ZoneType;
-import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.models.EmployeeModel;
 import com.oneliferp.cwu.commands.session.misc.ids.*;
 import com.oneliferp.cwu.commands.session.models.SessionModel;
 import com.oneliferp.cwu.commands.profile.exceptions.ProfileNotFoundException;
@@ -35,14 +35,14 @@ public class SessionCommand extends CwuCommand {
     private final SessionDatabase sessionDatabase;
     private final SessionCache sessionCache;
 
-    private final CwuDatabase cwuDatabase;
+    private final EmployeeDatabase cwuDatabase;
 
     public SessionCommand() {
         super("session", "session", "Vous permet de créer des sessions de travail.");
         this.sessionDatabase = SessionDatabase.get();
         this.sessionCache = SessionCache.get();
 
-        this.cwuDatabase = CwuDatabase.get();
+        this.cwuDatabase = EmployeeDatabase.get();
     }
 
     /*
@@ -50,7 +50,7 @@ public class SessionCommand extends CwuCommand {
     */
     @Override
     public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
-        final CwuModel cwu = this.cwuDatabase.getFromId(event.getUser().getIdLong());
+        final EmployeeModel cwu = this.cwuDatabase.getFromId(event.getUser().getIdLong());
         if (cwu == null) throw new ProfileNotFoundException();
 
         final SessionModel ongoingSession = this.sessionCache.get(cwu.getCid());
@@ -71,12 +71,12 @@ public class SessionCommand extends CwuCommand {
     }
 
     @Override
-    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext eventType) throws CwuException {
-        final String cid = eventType.getCid();
+    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final String cid = ctx.getCid();
         final SessionModel session = this.sessionCache.get(cid);
         if (session == null) throw new SessionNotFoundException();
 
-        switch ((SessionButtonType) eventType.enumType) {
+        switch ((SessionButtonType) ctx.getEnumType()) {
             default -> throw new IllegalArgumentException();
             case BEGIN -> this.handleBeginButton(event, session);
             case ABORT -> this.handleCancelButton(event, session);
@@ -93,14 +93,14 @@ public class SessionCommand extends CwuCommand {
     }
 
     @Override
-    public void handleModalInteraction(final ModalInteractionEvent event, final CommandContext eventType) throws CwuException {
-        final SessionModel session = this.sessionCache.get(eventType.getCid());
+    public void handleModalInteraction(final ModalInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final SessionModel session = this.sessionCache.get(ctx.getCid());
         if (session == null) throw new SessionNotFoundException();
 
         final SessionPageType currentPage = session.getCurrentPage();
         final String content = event.getValue("cwu_session.fill/data").getAsString();
 
-        switch ((SessionModalType) eventType.enumType) {
+        switch ((SessionModalType) ctx.getEnumType()) {
             default -> throw new IllegalArgumentException();
             case FILL_PARTICIPANTS -> {
                 session.addParticipants(ParticipantType.fromPage(currentPage), RegexUtils.parseIdentities(content));
@@ -124,11 +124,11 @@ public class SessionCommand extends CwuCommand {
     }
 
     @Override
-    public void handleSelectionInteraction(final StringSelectInteractionEvent event, final CommandContext eventType) throws CwuException {
-        final SessionModel session = this.sessionCache.get(eventType.getCid());
+    public void handleSelectionInteraction(final StringSelectInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final SessionModel session = this.sessionCache.get(ctx.getCid());
         if (session == null) throw new SessionNotFoundException();
 
-        switch ((SessionMenuType) eventType.enumType) {
+        switch ((SessionMenuType) ctx.getEnumType()) {
             case SELECT_TYPE -> {
                 final SessionType type = SessionType.valueOf(event.getValues().get(0));
                 if (session.getType() != type) session.setType(type);
@@ -152,7 +152,7 @@ public class SessionCommand extends CwuCommand {
     Button handlers
     */
     private void handleCancelButton(final ButtonInteractionEvent event, final SessionModel session) {
-        this.sessionCache.remove(session.getManagerCid());
+        this.sessionCache.remove(session.getEmployeeCid());
 
         event.reply("❌ Vous avez annuler votre session de travail.")
                 .queue();
@@ -218,7 +218,7 @@ public class SessionCommand extends CwuCommand {
             }
         }
 
-        final Modal modal = Modal.create(modalType.build(session.getManagerCid()), "Ajout des informations")
+        final Modal modal = Modal.create(modalType.build(session.getEmployeeCid()), "Ajout des informations")
                 .addComponents(ActionRow.of(inputBuilder.build()))
                 .build();
 
@@ -256,7 +256,7 @@ public class SessionCommand extends CwuCommand {
         if (!session.isValid()) throw new SessionValidationException();
 
         session.end();
-        this.sessionCache.remove(session.getManagerCid());
+        this.sessionCache.remove(session.getEmployeeCid());
 
         // Save session within database
         this.sessionDatabase.addOne(session);

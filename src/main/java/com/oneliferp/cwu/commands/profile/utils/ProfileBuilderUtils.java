@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.commands.profile.utils;
 
-import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.models.EmployeeModel;
 import com.oneliferp.cwu.commands.report.models.ReportModel;
 import com.oneliferp.cwu.commands.session.models.SessionModel;
 import com.oneliferp.cwu.commands.profile.misc.ids.ProfileButtonType;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ProfileBuilderUtils {
     /* Messages */
-    public static MessageEmbed profileMessage(final CwuModel cwu) {
+    public static MessageEmbed profileMessage(final EmployeeModel cwu) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDD0E  Informations du profil");
 
@@ -28,7 +28,7 @@ public class ProfileBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed statsMessage(final CwuModel cwu) {
+    public static MessageEmbed statsMessage(final EmployeeModel cwu) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDCCA  Statistiques du profil");
 
@@ -58,7 +58,7 @@ public class ProfileBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed suppressMessage(final CwuModel cwu) {
+    public static MessageEmbed suppressMessage(final EmployeeModel cwu) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDDD1  Suppression du profil");
         embed.setDescription("Afin de terminer la procédure, veuillez confirmer votre choix.");

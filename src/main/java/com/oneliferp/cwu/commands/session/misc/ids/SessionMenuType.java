@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.commands.session.misc.ids;
 
-import com.oneliferp.cwu.misc.IButtonType;
+import com.oneliferp.cwu.misc.IActionType;
 
-public enum SessionMenuType implements IButtonType {
+public enum SessionMenuType implements IActionType {
     SELECT_TYPE("mnu#cwu_session", "select/type"),
     SELECT_ZONE("mnu#cwu_session", "select/zone");
 

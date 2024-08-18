@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.commands.session.misc.ids;
 
-import com.oneliferp.cwu.misc.IButtonType;
+import com.oneliferp.cwu.misc.IActionType;
 
-public enum SessionButtonType implements IButtonType {
+public enum SessionButtonType implements IActionType {
     BEGIN("btn#cwu_session", "begin"),
     ABORT("btn#cwu_session", "abort"),
     RESUME("btn#cwu_session", "resume"),

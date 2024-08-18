@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.commands.session.misc.ids;
 
-import com.oneliferp.cwu.misc.IButtonType;
+import com.oneliferp.cwu.misc.IActionType;
 
-public enum SessionModalType implements IButtonType {
+public enum SessionModalType implements IActionType {
     FILL_PARTICIPANTS("mdl#cwu_session", "fill/participants"),
     FILL_INFO("mdl#cwu_session", "fill/info"),
     FILL_EARNINGS("mdl#cwu_session", "fill/earnings");

@@ -6,7 +6,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.oneliferp.cwu.models.CwuModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.utils.SimpleDuration;
 import com.oneliferp.cwu.utils.json.SimpleDateDeserializer;

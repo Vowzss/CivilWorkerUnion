@@ -1,10 +1,11 @@
 package com.oneliferp.cwu.database;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.oneliferp.cwu.models.CwuModel;
 import com.oneliferp.cwu.commands.report.models.ReportModel;
 import com.oneliferp.cwu.commands.report.misc.ReportType;
+import com.oneliferp.cwu.commands.session.models.SessionModel;
 
+import java.util.Comparator;
 import java.util.List;
 
 public class ReportDatabase extends JsonDatabase<String, ReportModel> {
@@ -18,12 +19,13 @@ public class ReportDatabase extends JsonDatabase<String, ReportModel> {
     protected ReportDatabase() {
         super(new TypeReference<>() {
         }, "report_db.json");
-        this.readFromCache().forEach(report -> map.put(report.getManagerCid(), report));
+
+        this.readFromCache().forEach(report -> map.put(report.getId(), report));
     }
 
     @Override
-    public void addOne(final ReportModel value) {
-        this.map.put(value.getManagerCid(), value);
+    public void addOne(final ReportModel report) {
+        this.map.put(report.getId(), report);
     }
 
     /* Utils */
@@ -35,7 +37,14 @@ public class ReportDatabase extends JsonDatabase<String, ReportModel> {
 
     public List<ReportModel> getReportsByCwu(final String cid) {
         return this.map.values().stream()
-                .filter(o -> o.getManagerCid().equals(cid))
+                .filter(o -> o.getEmployeeCid().equals(cid))
+                .toList();
+    }
+
+    public List<ReportModel> getLatests(final int count) {
+        return this.map.values().stream()
+                .sorted(Comparator.comparing(ReportModel::getCreatedAt, Comparator.naturalOrder()))
+                .limit(count)
                 .toList();
     }
 }

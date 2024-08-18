@@ -1,6 +1,7 @@
 package com.oneliferp.cwu;
 
 import com.oneliferp.cwu.commands.CwuCommand;
+import com.oneliferp.cwu.commands.manage.ManageCommand;
 import com.oneliferp.cwu.exceptions.CommandNotFoundException;
 import com.oneliferp.cwu.commands.profile.ProfileCommand;
 import com.oneliferp.cwu.listeners.ButtonListener;
@@ -33,7 +34,7 @@ public class CivilWorkerUnion {
                 .addEventListeners(new CommandListener(), new ButtonListener(), new ModalListener(), new MenuSelectionListener())
                 .build();
 
-        List.of(new ProfileCommand(), new SessionCommand(), new ReportCommand()).forEach(command -> {
+        List.of(new ProfileCommand(), new SessionCommand(), new ReportCommand(), new ManageCommand()).forEach(command -> {
             this.commands.put(command.getName(), command);
             final var cmd = command.configure(command.toSlashCommand());
             this.jda.upsertCommand(cmd).queue();

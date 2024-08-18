@@ -1,15 +1,16 @@
-package com.oneliferp.cwu.commands.report.misc.ids;
+package com.oneliferp.cwu.commands.manage.misc.ids;
 
 import com.oneliferp.cwu.misc.IActionType;
 
-public enum ReportMenuType implements IActionType {
-    SELECT_TYPE("mnu#cwu_report", "select/type"),
-    SELECT_STOCK("mnu#cwu_report", "select/stock");
+public enum SessionChoiceType implements IActionType {
+    VIEW("", "session/view"),
+    DELETE("", "session/delete"),
+    EDIT("", "session/edit");
 
     public final String root;
     public final String action;
 
-    ReportMenuType(final String root, final String action) {
+    SessionChoiceType(final String root, final String action) {
         this.root = root;
         this.action = action;
     }

@@ -192,7 +192,7 @@ public class SessionBuilderUtils {
         sb.append(String.format("Somme à **déposer** dans la caisse commune: **%s Tokens**.\n", Math.max(session.getIncome().getDeposit(), 0)));
         sb.append(String.format("Somme à **verser** aux participants: **%s Tokens**.\n", session.getIncome().getWages()));
         sb.append("\n");
-        sb.append(String.format("Nombre de **session effectuée** cette semaine: %d.\n", session.resolveCwu().getWeeklySessionCount()));
+        sb.append(String.format("Nombre de **session effectuée** cette semaine: %d.\n", session.resolveEmployee().getWeeklySessionCount()));
         embed.setDescription(sb.toString());
         return embed.build();
     }
@@ -286,7 +286,7 @@ public class SessionBuilderUtils {
     }
 
     public static List<ActionRow> zoneRows(final SessionModel session) {
-        final String cid = session.getManagerCid();
+        final String cid = session.getEmployeeCid();
 
         return List.of(
             ActionRow.of(zoneMenu(cid, session.getZone())),
@@ -295,7 +295,7 @@ public class SessionBuilderUtils {
     }
 
     public static List<ActionRow> beginRow(final SessionModel session) {
-        final String cid = session.getManagerCid();
+        final String cid = session.getEmployeeCid();
 
         return List.of(
                 ActionRow.of(typeMenu(cid, session)),
@@ -304,7 +304,7 @@ public class SessionBuilderUtils {
     }
 
     public static ActionRow pageRow(final SessionModel session) {
-        final String cid = session.getManagerCid();
+        final String cid = session.getEmployeeCid();
 
         if (session.getCurrentPage() == SessionPageType.PREVIEW) {
             return SessionBuilderUtils.submitOrEditRow(cid);

@@ -2,10 +2,11 @@ package com.oneliferp.cwu.commands.session.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.database.CwuDatabase;
+import com.oneliferp.cwu.database.EmployeeDatabase;
+import com.oneliferp.cwu.misc.IdFactory;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
-import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.models.EmployeeModel;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.models.IncomeModel;
 import com.oneliferp.cwu.models.PeriodModel;
@@ -21,8 +22,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class SessionModel {
-    @JsonProperty("manager")
-    private IdentityModel manager;
+    @JsonProperty("id")
+    private String id;
+
+    @JsonProperty("employee")
+    private IdentityModel employee;
 
     @JsonProperty("participants")
     private HashMap<ParticipantType, HashSet<IdentityModel>> participants;
@@ -48,22 +52,40 @@ public class SessionModel {
     public SessionModel() {
     }
 
-    public SessionModel(final CwuModel cwu) {
+    public SessionModel(final EmployeeModel employee) {
+        this.id = IdFactory.get().generateID();
+
         this.period = new PeriodModel();
         this.period.start();
 
-        this.manager = cwu.getIdentity();
+        this.employee = employee.getIdentity();
         this.type = SessionType.UNKNOWN;
         this.zone = ZoneType.UNKNOWN;
     }
 
     /* Getters & Setters */
+
+    public String getId() {
+        return this.id;
+    }
+
     public HashSet<IdentityModel> getParticipants(final ParticipantType type) {
         return this.participants.get(type);
     }
 
+    public int getParticipantCount() {
+        return this.participants.values().stream()
+                .mapToInt(HashSet::size)
+                .sum();
+    }
+
     public void setType(final SessionType type) {
         this.type = type;
+
+        // set predefined zone if exist
+        final var zone = this.type.getZone();
+        if (zone == ZoneType.UNKNOWN) return;
+        this.setZone(zone);
     }
 
     public SessionType getType() {
@@ -131,7 +153,7 @@ public class SessionModel {
     }
 
     public boolean isValid() {
-        return this.manager != null && this.type != null && this.zone != null && this.hasParticipants();
+        return this.employee != null && this.type != SessionType.UNKNOWN && this.zone != ZoneType.UNKNOWN && this.hasParticipants();
     }
 
     public void computeWages() {
@@ -186,8 +208,8 @@ public class SessionModel {
     }
 
     /* Utils */
-    public String getManagerCid() {
-        return this.manager.cid;
+    public String getEmployeeCid() {
+        return this.employee.cid;
     }
 
     public boolean hasParticipants() {
@@ -203,8 +225,8 @@ public class SessionModel {
         return isValid;
     }
 
-    public CwuModel resolveCwu() {
-        return CwuDatabase.get().getFromCid(this.manager.cid);
+    public EmployeeModel resolveEmployee() {
+        return EmployeeDatabase.get().getFromCid(this.employee.cid);
     }
 
     public boolean isWithinWeek() {

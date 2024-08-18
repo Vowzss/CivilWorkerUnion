@@ -116,7 +116,7 @@ public class ReportBuilderUtils {
         sb.append("Le rapport à été transmit avec succès.\n");
         sb.append("\n");
 
-        sb.append(String.format("Nombre de **rapport soumis** cette semaine: %d Rapports.\n", report.resolveCwu().getWeeklyReportCount()));
+        sb.append(String.format("Nombre de **rapport soumis** cette semaine: %d Rapports.\n", report.resolveEmployee().getWeeklyReportCount()));
         embed.setDescription(sb.toString());
         return embed.build();
     }
@@ -168,7 +168,7 @@ public class ReportBuilderUtils {
 
     /* Menus */
     private static StringSelectMenu typeMenu(final ReportModel report) {
-        final var menu = StringSelectMenu.create(ReportMenuType.SELECT_TYPE.build(report.getManagerCid()));
+        final var menu = StringSelectMenu.create(ReportMenuType.SELECT_TYPE.build(report.getEmployeeCid()));
         final var options = ReportType.getAvailableReportTypes(report.getBranch())
                 .stream().map(v -> SelectOption.of(v.getLabel(), v.name()))
                 .toList();
@@ -180,7 +180,7 @@ public class ReportBuilderUtils {
     }
 
     private static StringSelectMenu stockMenu(final ReportModel report) {
-        final var menu = StringSelectMenu.create(ReportMenuType.SELECT_STOCK.build(report.getManagerCid()));
+        final var menu = StringSelectMenu.create(ReportMenuType.SELECT_STOCK.build(report.getEmployeeCid()));
         final var options = Arrays.stream(StockType.values())
                 .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
         options.forEach(menu::addOptions);
@@ -257,7 +257,7 @@ public class ReportBuilderUtils {
     }
 
     public static ActionRow pageRow(final ReportModel report) {
-        final String cid = report.getManagerCid();
+        final String cid = report.getEmployeeCid();
 
         if (report.getCurrentPage() == ReportPageType.PREVIEW) {
             return ReportBuilderUtils.submitOrEditRow(cid);
@@ -267,7 +267,7 @@ public class ReportBuilderUtils {
     }
 
     public static List<ActionRow> stockRow(final ReportModel report) {
-        final String cid = report.getManagerCid();
+        final String cid = report.getEmployeeCid();
 
         return List.of(
                 ActionRow.of(stockMenu(report)),
@@ -276,7 +276,7 @@ public class ReportBuilderUtils {
     }
 
     public static List<ActionRow> initRow(final ReportModel report) {
-        final String cid = report.getManagerCid();
+        final String cid = report.getEmployeeCid();
 
         return List.of(
                 ActionRow.of(typeMenu(report)),
@@ -285,7 +285,7 @@ public class ReportBuilderUtils {
     }
 
     public static List<ActionRow> beginRow(final ReportModel report) {
-        final String cid = report.getManagerCid();
+        final String cid = report.getEmployeeCid();
 
         return List.of(
                 ActionRow.of(typeMenu(report)),

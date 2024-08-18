@@ -1,8 +1,8 @@
 package com.oneliferp.cwu.commands.profile;
 
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.database.CwuDatabase;
-import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.database.EmployeeDatabase;
+import com.oneliferp.cwu.models.EmployeeModel;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.commands.CommandContext;
 import com.oneliferp.cwu.commands.profile.exceptions.*;
@@ -15,11 +15,11 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import java.util.List;
 
 public class ProfileCommand extends CwuCommand {
-    private final CwuDatabase cwuDatabase;
+    private final EmployeeDatabase cwuDatabase;
 
     public ProfileCommand() {
-        super("profile", "profil", "Vous permet d'accéder à votre profil CWU.");
-        this.cwuDatabase = CwuDatabase.get();
+        super("profile", "profil", "Vous permet d'accéder à votre profil d'employé.");
+        this.cwuDatabase = EmployeeDatabase.get();
     }
 /*
     @Override
@@ -48,7 +48,7 @@ public class ProfileCommand extends CwuCommand {
     public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
         // Obtain cid from command option or user id
         final OptionMapping cidOption = event.getOption("cid");
-        final CwuModel cwu = cidOption == null ?
+        final EmployeeModel cwu = cidOption == null ?
                 this.cwuDatabase.getFromId(event.getUser().getIdLong()) :
                 this.cwuDatabase.getFromCid(cidOption.getAsString());
         if (cwu == null) throw new ProfileNotFoundException();
@@ -92,11 +92,11 @@ public class ProfileCommand extends CwuCommand {
     }
 
     @Override
-    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext eventType) throws CwuException {
-        final CwuModel cwu = this.cwuDatabase.getFromCid(eventType.getCid());
+    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final EmployeeModel cwu = this.cwuDatabase.getFromCid(ctx.getCid());
         if (cwu == null) throw new ProfileNotFoundException();
 
-        switch ((ProfileButtonType) eventType.enumType) {
+        switch ((ProfileButtonType) ctx.getEnumType()) {
             default: {
                 throw new IllegalArgumentException();
             }

@@ -2,12 +2,12 @@ package com.oneliferp.cwu.commands.report;
 
 import com.oneliferp.cwu.cache.ReportCache;
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.database.CwuDatabase;
+import com.oneliferp.cwu.database.EmployeeDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.commands.CommandContext;
 import com.oneliferp.cwu.commands.report.misc.StockType;
-import com.oneliferp.cwu.models.CwuModel;
+import com.oneliferp.cwu.models.EmployeeModel;
 import com.oneliferp.cwu.commands.report.misc.ids.*;
 import com.oneliferp.cwu.commands.report.models.ReportModel;
 import com.oneliferp.cwu.commands.profile.exceptions.ProfileNotFoundException;
@@ -32,14 +32,14 @@ public class ReportCommand extends CwuCommand {
     private final ReportDatabase reportDatabase;
     private final ReportCache reportCache;
 
-    private final CwuDatabase cwuDatabase;
+    private final EmployeeDatabase cwuDatabase;
 
     public ReportCommand() {
         super("report", "rapport", "Vous permet de rédiger des rapports.");
         this.reportDatabase = ReportDatabase.get();
         this.reportCache = ReportCache.get();
 
-        this.cwuDatabase = CwuDatabase.get();
+        this.cwuDatabase = EmployeeDatabase.get();
     }
 
     /*
@@ -47,7 +47,7 @@ public class ReportCommand extends CwuCommand {
     */
     @Override
     public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
-        final CwuModel cwu = this.cwuDatabase.getFromId(event.getUser().getIdLong());
+        final EmployeeModel cwu = this.cwuDatabase.getFromId(event.getUser().getIdLong());
         if (cwu == null) throw new ProfileNotFoundException();
 
         final ReportModel ongoingReport = this.reportCache.get(cwu.getCid());
@@ -60,7 +60,7 @@ public class ReportCommand extends CwuCommand {
 
         // Create rapport and set default values
         final ReportModel report = new ReportModel(cwu);
-        this.reportCache.add(report.getManagerCid(), report);
+        this.reportCache.add(report.getEmployeeCid(), report);
 
         event.replyEmbeds(ReportBuilderUtils.beginMessage(cwu.getBranch(), report.getType()))
                 .setComponents(ReportBuilderUtils.initRow(report))
@@ -68,14 +68,14 @@ public class ReportCommand extends CwuCommand {
     }
 
     @Override
-    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext eventType) throws CwuException {
-        final ReportModel report = this.reportCache.get(eventType.getCid());
+    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final ReportModel report = this.reportCache.get(ctx.getCid());
         if (report == null) {
             event.getMessage().delete().queue();
             throw new ReportNotFoundException();
         }
 
-        switch ((ReportButtonType) eventType.enumType) {
+        switch ((ReportButtonType) ctx.getEnumType()) {
             default -> throw new IllegalArgumentException();
             case BEGIN -> this.handleBeginButton(event, report);
             case FILL -> this.handleFillButton(event, report);
@@ -92,11 +92,11 @@ public class ReportCommand extends CwuCommand {
     }
 
     @Override
-    public void handleSelectionInteraction(final StringSelectInteractionEvent event, final CommandContext eventType) throws CwuException {
-        final ReportModel report = this.reportCache.get(eventType.getCid());
+    public void handleSelectionInteraction(final StringSelectInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final ReportModel report = this.reportCache.get(ctx.getCid());
         if (report == null) throw new SessionNotFoundException();
 
-        switch ((ReportMenuType) eventType.enumType) {
+        switch ((ReportMenuType) ctx.getEnumType()) {
             case SELECT_TYPE -> {
                 final ReportType type = ReportType.valueOf(event.getValues().get(0));
                 report.setType(type);
@@ -118,13 +118,13 @@ public class ReportCommand extends CwuCommand {
     }
 
     @Override
-    public void handleModalInteraction(final ModalInteractionEvent event, final CommandContext eventType) throws CwuException {
-        final ReportModel report = this.reportCache.get(eventType.getCid());
+    public void handleModalInteraction(final ModalInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final ReportModel report = this.reportCache.get(ctx.getCid());
         if (report == null) throw new ReportNotFoundException();
 
         final String content = event.getValue("cwu_report.fill/data").getAsString();
 
-        switch ((ReportModalType) eventType.enumType) {
+        switch ((ReportModalType) ctx.getEnumType()) {
             default -> throw new IllegalArgumentException();
             case FILL_INFO -> {
                 report.setInfo(content);
@@ -164,7 +164,7 @@ public class ReportCommand extends CwuCommand {
     }
 
     private void handleCancelButton(final ButtonInteractionEvent event, final ReportModel report) {
-        this.reportCache.remove(report.getManagerCid());
+        this.reportCache.remove(report.getEmployeeCid());
         event.getMessage().delete().queue();
 
         event.reply("❌ Vous avez annuler votre rapport.")
@@ -175,7 +175,7 @@ public class ReportCommand extends CwuCommand {
         if (!report.isValid()) throw new ReportValidationException();
 
         report.end();
-        this.reportCache.remove(report.getManagerCid());
+        this.reportCache.remove(report.getEmployeeCid());
 
         // Save session within database
         this.reportDatabase.addOne(report);
@@ -258,7 +258,7 @@ public class ReportCommand extends CwuCommand {
             }
         }
 
-        final Modal modal = Modal.create(modalType.build(report.getManagerCid()), "Ajout des informations")
+        final Modal modal = Modal.create(modalType.build(report.getEmployeeCid()), "Ajout des informations")
                 .addComponents(ActionRow.of(inputBuilder.build()))
                 .build();
 

@@ -25,15 +25,15 @@ public abstract class CwuCommand {
         event.reply("\uD83D\uDCA5 " + "Command not yet implemented.").queue();
     }
 
-    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext eventType) throws CwuException {
+    public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext ctx) throws CwuException {
         event.reply("\uD83D\uDCA5 " + "Button not yet implemented.").queue();
     }
 
-    public void handleModalInteraction(final ModalInteractionEvent event, final CommandContext eventType) throws CwuException {
+    public void handleModalInteraction(final ModalInteractionEvent event, final CommandContext ctx) throws CwuException {
         event.reply("\uD83D\uDCA5 " + "Interface not yet implemented.").queue();
     }
 
-    public void handleSelectionInteraction(final StringSelectInteractionEvent event, final CommandContext eventType) throws CwuException {
+    public void handleSelectionInteraction(final StringSelectInteractionEvent event, final CommandContext ctx) throws CwuException {
         event.reply("\uD83D\uDCA5 " + "Selection not yet implemented.").queue();
     }
 

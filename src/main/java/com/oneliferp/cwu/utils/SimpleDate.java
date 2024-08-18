@@ -53,6 +53,7 @@ public class SimpleDate implements Comparable<SimpleDate> {
         this.time = String.format("%02d:%02d", hour, minute);
     }
 
+    /* Getters */
     public String getDate() {
         return this.date;
     }
@@ -61,9 +62,7 @@ public class SimpleDate implements Comparable<SimpleDate> {
         return this.time;
     }
 
-    /*
-            Utils
-            */
+    /* Utils */
     public static SimpleDate now() {
         final LocalDateTime currentDateTime = LocalDateTime.now();
         return new SimpleDate(currentDateTime.getDayOfMonth(), currentDateTime.getMonthValue(), currentDateTime.getYear(), currentDateTime.getHour(), currentDateTime.getMinute());
@@ -106,9 +105,7 @@ public class SimpleDate implements Comparable<SimpleDate> {
         return this.compareTo(other) == 0;
     }
 
-    /*
-    Helpers
-    */
+    /* Helpers */
     public static LocalDate getFirstMonthDay() {
         return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
     }
@@ -140,5 +137,10 @@ public class SimpleDate implements Comparable<SimpleDate> {
             return Integer.compare(this.hour, other.hour);
         }
         return Integer.compare(this.minute, other.minute);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", this.date, this.time);
     }
 }
