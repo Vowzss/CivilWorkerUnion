@@ -1,16 +1,17 @@
 package com.oneliferp.cwu.commands;
 
-import com.oneliferp.cwu.commands.manage.misc.ids.ProfileChoiceType;
-import com.oneliferp.cwu.commands.manage.misc.ids.ReportChoiceType;
-import com.oneliferp.cwu.commands.manage.misc.ids.SessionChoiceType;
+import com.oneliferp.cwu.commands.manage.misc.actions.GestionModalType;
+import com.oneliferp.cwu.commands.manage.misc.actions.ProfileChoiceType;
+import com.oneliferp.cwu.commands.manage.misc.actions.ReportChoiceType;
+import com.oneliferp.cwu.commands.manage.misc.actions.SessionChoiceType;
 import com.oneliferp.cwu.misc.IActionType;
-import com.oneliferp.cwu.commands.profile.misc.ids.ProfileButtonType;
-import com.oneliferp.cwu.commands.report.misc.ids.ReportButtonType;
-import com.oneliferp.cwu.commands.report.misc.ids.ReportMenuType;
-import com.oneliferp.cwu.commands.report.misc.ids.ReportModalType;
-import com.oneliferp.cwu.commands.session.misc.ids.SessionButtonType;
-import com.oneliferp.cwu.commands.session.misc.ids.SessionMenuType;
-import com.oneliferp.cwu.commands.session.misc.ids.SessionModalType;
+import com.oneliferp.cwu.commands.profile.misc.actions.ProfileButtonType;
+import com.oneliferp.cwu.commands.report.misc.actions.ReportButtonType;
+import com.oneliferp.cwu.commands.report.misc.actions.ReportMenuType;
+import com.oneliferp.cwu.commands.report.misc.actions.ReportModalType;
+import com.oneliferp.cwu.commands.session.misc.actions.SessionButtonType;
+import com.oneliferp.cwu.commands.session.misc.actions.SessionMenuType;
+import com.oneliferp.cwu.commands.session.misc.actions.SessionModalType;
 import com.oneliferp.cwu.commands.session.misc.SessionType;
 
 import java.util.Arrays;
@@ -110,6 +111,8 @@ public class CommandContext {
                 case "session" -> SessionChoiceType.class;
                 default -> throw new IllegalStateException("Unexpected value: " + this.specifiers.get(0));
             };
+
+            case "mdl#cwu_manage" -> GestionModalType.class;
         };
 
         return Arrays.stream((T[]) enumClass.getEnumConstants())

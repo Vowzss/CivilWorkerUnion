@@ -2,14 +2,14 @@ package com.oneliferp.cwu.commands.session;
 
 import com.oneliferp.cwu.cache.SessionCache;
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.database.EmployeeDatabase;
+import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.commands.CommandContext;
 import com.oneliferp.cwu.commands.session.misc.ParticipantType;
 import com.oneliferp.cwu.commands.session.misc.ZoneType;
-import com.oneliferp.cwu.models.EmployeeModel;
-import com.oneliferp.cwu.commands.session.misc.ids.*;
+import com.oneliferp.cwu.commands.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.session.misc.actions.*;
 import com.oneliferp.cwu.commands.session.models.SessionModel;
 import com.oneliferp.cwu.commands.profile.exceptions.ProfileNotFoundException;
 import com.oneliferp.cwu.commands.session.exceptions.SessionNotFoundException;
@@ -35,14 +35,14 @@ public class SessionCommand extends CwuCommand {
     private final SessionDatabase sessionDatabase;
     private final SessionCache sessionCache;
 
-    private final EmployeeDatabase cwuDatabase;
+    private final ProfileDatabase profileDatabase;
 
     public SessionCommand() {
         super("session", "session", "Vous permet de créer des sessions de travail.");
         this.sessionDatabase = SessionDatabase.get();
         this.sessionCache = SessionCache.get();
 
-        this.cwuDatabase = EmployeeDatabase.get();
+        this.profileDatabase = ProfileDatabase.get();
     }
 
     /*
@@ -50,7 +50,7 @@ public class SessionCommand extends CwuCommand {
     */
     @Override
     public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
-        final EmployeeModel cwu = this.cwuDatabase.getFromId(event.getUser().getIdLong());
+        final ProfileModel cwu = this.profileDatabase.getFromId(event.getUser().getIdLong());
         if (cwu == null) throw new ProfileNotFoundException();
 
         final SessionModel ongoingSession = this.sessionCache.get(cwu.getCid());
@@ -156,6 +156,7 @@ public class SessionCommand extends CwuCommand {
 
         event.reply("❌ Vous avez annuler votre session de travail.")
                 .queue();
+        event.getMessage().delete().queue();
     }
 
     private void handleEditButton(final ButtonInteractionEvent event, final SessionModel session) {

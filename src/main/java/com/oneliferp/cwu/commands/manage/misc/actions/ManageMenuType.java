@@ -1,16 +1,15 @@
-package com.oneliferp.cwu.commands.report.misc.ids;
+package com.oneliferp.cwu.commands.manage.misc.actions;
 
 import com.oneliferp.cwu.misc.IActionType;
 
-public enum ReportModalType implements IActionType {
-    FILL_INFO("mdl#cwu_report", "fill/info"),
-    FILL_IDENTITY("mdl#cwu_report", "fill/identity"),
-    FILL_TOKENS("mdl#cwu_report", "fill/tokens");
+public enum ManageMenuType implements IActionType {
+    SELECT_BRANCH("mnu#cwu_manage", "select/branch"),
+    SELECT_RANK("mnu#cwu_manage", "select/rank");
 
     public final String root;
     public final String action;
 
-    ReportModalType(final String root, final String action) {
+    ManageMenuType(final String root, final String action) {
         this.root = root;
         this.action = action;
     }

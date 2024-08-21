@@ -6,7 +6,8 @@ public enum CwuRank {
     INTERMEDIATE("Intermédiaire", 4),
     CONFIRMED("Confirmé", 3),
     MANAGER("Sous-chef", 2),
-    EXECUTIVE("Chef", 1);
+    EXECUTIVE("Chef", 1),
+    SUPERVISOR("Superviseur", 0);
 
     private final String label;
     private final int order;

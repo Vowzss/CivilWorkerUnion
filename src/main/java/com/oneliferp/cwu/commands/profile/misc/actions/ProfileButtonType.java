@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.commands.profile.misc.ids;
+package com.oneliferp.cwu.commands.profile.misc.actions;
 
 import com.oneliferp.cwu.misc.IActionType;
 

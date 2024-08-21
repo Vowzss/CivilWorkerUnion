@@ -1,9 +1,9 @@
 package com.oneliferp.cwu.commands.profile.utils;
 
-import com.oneliferp.cwu.models.EmployeeModel;
+import com.oneliferp.cwu.commands.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.report.models.ReportModel;
 import com.oneliferp.cwu.commands.session.models.SessionModel;
-import com.oneliferp.cwu.commands.profile.misc.ids.ProfileButtonType;
+import com.oneliferp.cwu.commands.profile.misc.actions.ProfileButtonType;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ProfileBuilderUtils {
     /* Messages */
-    public static MessageEmbed profileMessage(final EmployeeModel cwu) {
+    public static MessageEmbed profileMessage(final ProfileModel cwu) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDD0E  Informations du profil");
 
@@ -28,7 +28,7 @@ public class ProfileBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed statsMessage(final EmployeeModel cwu) {
+    public static MessageEmbed statsMessage(final ProfileModel cwu) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDCCA  Statistiques du profil");
 
@@ -58,7 +58,7 @@ public class ProfileBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed suppressMessage(final EmployeeModel cwu) {
+    public static MessageEmbed suppressMessage(final ProfileModel cwu) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDDD1  Suppression du profil");
         embed.setDescription("Afin de terminer la procédure, veuillez confirmer votre choix.");
@@ -92,7 +92,7 @@ public class ProfileBuilderUtils {
         return List.of(deleteButton(cid), statsButton(cid));
     }
 
-    public static List<Button> confirmAndCancelRow(final List<ProfileButtonType> types, final String cid) {
-        return List.of(cancelButton(types.get(1), cid), confirmButton(types.get(0), cid));
+    public static List<Button> confirmAndCancelRow(final ProfileButtonType confirm, final ProfileButtonType cancel, final String cid) {
+        return List.of(cancelButton(cancel, cid), confirmButton(confirm, cid));
     }
 }

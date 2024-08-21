@@ -1,4 +1,4 @@
-package com.oneliferp.cwu.commands.session.misc.ids;
+package com.oneliferp.cwu.commands.session.misc.actions;
 
 public enum SessionPageType {
     ZONE("zone", "Emplacement de la session :"),

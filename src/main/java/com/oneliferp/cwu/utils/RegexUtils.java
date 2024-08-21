@@ -12,14 +12,6 @@ public class RegexUtils {
     public static final Pattern APPLY_PATTERN = Pattern.compile("([a-zA-Z]+(?: [a-zA-Z]+)?), #(\\d(?:\\d{4})?)", Pattern.MULTILINE);
     public static final Pattern EARNINGS_PATTERN = Pattern.compile("(\\d+)");
 
-    public static IdentityModel parseIdentity(final String identity) throws IdentityMalformedException {
-        final Matcher matcher = APPLY_PATTERN.matcher(identity);
-        if (!matcher.find()) throw new IdentityMalformedException();
-
-        final String[] names = matcher.group(1).split(" ");
-        return new IdentityModel(names[0], names[1], matcher.group(2));
-    }
-
     public static List<IdentityModel> parseIdentities(final String identities) throws IdentityMalformedException {
         final List<IdentityModel> list = new ArrayList<>();
         final Matcher matcher = APPLY_PATTERN.matcher(identities);

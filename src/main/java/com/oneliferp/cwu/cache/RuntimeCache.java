@@ -21,7 +21,7 @@ public abstract class RuntimeCache<A, B> {
         this.objects.remove(key);
     }
 
-    public boolean contains(final A key) {
+    public boolean exist(final A key) {
         return this.objects.containsKey(key);
     }
 }

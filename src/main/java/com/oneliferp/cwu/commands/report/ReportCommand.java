@@ -2,13 +2,13 @@ package com.oneliferp.cwu.commands.report;
 
 import com.oneliferp.cwu.cache.ReportCache;
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.database.EmployeeDatabase;
+import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.commands.CommandContext;
 import com.oneliferp.cwu.commands.report.misc.StockType;
-import com.oneliferp.cwu.models.EmployeeModel;
-import com.oneliferp.cwu.commands.report.misc.ids.*;
+import com.oneliferp.cwu.commands.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.report.misc.actions.*;
 import com.oneliferp.cwu.commands.report.models.ReportModel;
 import com.oneliferp.cwu.commands.profile.exceptions.ProfileNotFoundException;
 import com.oneliferp.cwu.commands.report.exceptions.ReportNotFoundException;
@@ -16,6 +16,7 @@ import com.oneliferp.cwu.commands.report.exceptions.ReportValidationException;
 import com.oneliferp.cwu.commands.report.misc.*;
 import com.oneliferp.cwu.commands.report.utils.ReportBuilderUtils;
 import com.oneliferp.cwu.commands.session.exceptions.SessionNotFoundException;
+import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.RegexUtils;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -32,14 +33,14 @@ public class ReportCommand extends CwuCommand {
     private final ReportDatabase reportDatabase;
     private final ReportCache reportCache;
 
-    private final EmployeeDatabase cwuDatabase;
+    private final ProfileDatabase profileDatabase;
 
     public ReportCommand() {
         super("report", "rapport", "Vous permet de rédiger des rapports.");
         this.reportDatabase = ReportDatabase.get();
         this.reportCache = ReportCache.get();
 
-        this.cwuDatabase = EmployeeDatabase.get();
+        this.profileDatabase = ProfileDatabase.get();
     }
 
     /*
@@ -47,12 +48,12 @@ public class ReportCommand extends CwuCommand {
     */
     @Override
     public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
-        final EmployeeModel cwu = this.cwuDatabase.getFromId(event.getUser().getIdLong());
+        final ProfileModel cwu = this.profileDatabase.getFromId(event.getUser().getIdLong());
         if (cwu == null) throw new ProfileNotFoundException();
 
         final ReportModel ongoingReport = this.reportCache.get(cwu.getCid());
         if (ongoingReport != null && ongoingReport.getType() != ReportType.UNKNOWN) {
-            event.replyEmbeds(ReportBuilderUtils.ongoingMessage(ongoingReport))
+            event.replyEmbeds(ReportBuilderUtils.alreadyExistMessage(ongoingReport.getType()))
                     .setComponents(ReportBuilderUtils.resumeOrOverwriteRow(cwu.getCid()))
                     .queue();
             return;
@@ -133,7 +134,7 @@ public class ReportCommand extends CwuCommand {
                         .queue();
             }
             case FILL_IDENTITY -> {
-                report.setIdentity(RegexUtils.parseIdentity(content));
+                report.setIdentity(IdentityModel.parseIdentity(content));
                 event.editMessageEmbeds(ReportBuilderUtils.identityMessage(report))
                         .setComponents(ReportBuilderUtils.pageRow(report))
                         .queue();
@@ -169,6 +170,7 @@ public class ReportCommand extends CwuCommand {
 
         event.reply("❌ Vous avez annuler votre rapport.")
                 .queue();
+        event.getMessage().delete().queue();
     }
 
     private void handleSubmitButton(final ButtonInteractionEvent event, final ReportModel report) throws ReportValidationException {
@@ -230,7 +232,7 @@ public class ReportCommand extends CwuCommand {
 
         // Fill input if data exist at page
         ReportModalType modalType;
-        switch (currentPage) {
+        switch (report.getCurrentPage()) {
             default -> throw new IllegalArgumentException();
             case INFO -> {
                 modalType = ReportModalType.FILL_INFO;
@@ -272,9 +274,7 @@ public class ReportCommand extends CwuCommand {
         this.goToPage(event, report);
     }
 
-    /*
-    Utils
-    */
+    /* Utils */
     protected void goToPage(final ButtonInteractionEvent event, final ReportModel report) {
         final ReportPageType page = report.getCurrentPage();
 

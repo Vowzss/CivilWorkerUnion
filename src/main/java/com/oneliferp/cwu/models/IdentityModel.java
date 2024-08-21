@@ -1,8 +1,11 @@
 package com.oneliferp.cwu.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oneliferp.cwu.exceptions.IdentityMalformedException;
+import com.oneliferp.cwu.utils.RegexUtils;
 
 import java.util.Objects;
+import java.util.regex.Matcher;
 
 public class IdentityModel {
     @JsonProperty("firstname")
@@ -20,6 +23,14 @@ public class IdentityModel {
         this.firstName = firstName;
         this.lastName = lastName;
         this.cid = cid;
+    }
+
+    public static IdentityModel parseIdentity(final String str) throws IdentityMalformedException {
+        final Matcher matcher = RegexUtils.APPLY_PATTERN.matcher(str);
+        if (!matcher.find()) throw new IdentityMalformedException();
+
+        final String[] names = matcher.group(1).split(" ");
+        return new IdentityModel(names[0], names[1], matcher.group(2));
     }
 
     @Override

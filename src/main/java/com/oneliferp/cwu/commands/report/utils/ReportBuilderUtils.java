@@ -3,9 +3,9 @@ package com.oneliferp.cwu.commands.report.utils;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.commands.report.misc.StockType;
 import com.oneliferp.cwu.commands.report.models.ReportModel;
-import com.oneliferp.cwu.commands.report.misc.ids.ReportButtonType;
-import com.oneliferp.cwu.commands.report.misc.ids.ReportMenuType;
-import com.oneliferp.cwu.commands.report.misc.ids.ReportPageType;
+import com.oneliferp.cwu.commands.report.misc.actions.ReportButtonType;
+import com.oneliferp.cwu.commands.report.misc.actions.ReportMenuType;
+import com.oneliferp.cwu.commands.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.report.misc.ReportType;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
@@ -32,7 +32,7 @@ public class ReportBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed ongoingMessage(final ReportModel report) {
+    public static MessageEmbed alreadyExistMessage(final ReportType type) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Vous avez un rapport en cours!");
 
@@ -40,7 +40,7 @@ public class ReportBuilderUtils {
         sb.append("Vous ne pouvez faire qu'un rapport en simultané.\n");
         sb.append("Souhaitez-vous reprendre ou écraser le rapport en cours ?\n");
         sb.append("\n");
-        sb.append(String.format("**Rapport:** %s\n", report.getType().getLabel()));
+        sb.append(String.format("**Rapport :** %s\n", type.getLabel()));
         embed.setDescription(sb.toString());
         return embed.build();
     }

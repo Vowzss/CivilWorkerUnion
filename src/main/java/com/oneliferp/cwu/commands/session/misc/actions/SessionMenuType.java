@@ -1,16 +1,15 @@
-package com.oneliferp.cwu.commands.manage.misc.ids;
+package com.oneliferp.cwu.commands.session.misc.actions;
 
 import com.oneliferp.cwu.misc.IActionType;
 
-public enum SessionChoiceType implements IActionType {
-    VIEW("", "session/view"),
-    DELETE("", "session/delete"),
-    EDIT("", "session/edit");
+public enum SessionMenuType implements IActionType {
+    SELECT_TYPE("mnu#cwu_session", "select/type"),
+    SELECT_ZONE("mnu#cwu_session", "select/zone");
 
     public final String root;
     public final String action;
 
-    SessionChoiceType(final String root, final String action) {
+    SessionMenuType(final String root, final String action) {
         this.root = root;
         this.action = action;
     }

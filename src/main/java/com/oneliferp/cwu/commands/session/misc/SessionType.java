@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.commands.session.misc;
 
-import com.oneliferp.cwu.commands.session.misc.ids.SessionPageType;
+import com.oneliferp.cwu.commands.session.misc.actions.SessionPageType;
 import net.fellbaum.jemoji.EmojiManager;
 
 import java.util.List;

@@ -1,20 +1,18 @@
-package com.oneliferp.cwu.models;
+package com.oneliferp.cwu.commands.profile.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
-import com.oneliferp.cwu.exceptions.IdentityMalformedException;
 import com.oneliferp.cwu.commands.report.models.ReportModel;
 import com.oneliferp.cwu.commands.session.models.SessionModel;
-import com.oneliferp.cwu.utils.RegexUtils;
+import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
-import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 
 import java.util.Comparator;
 
-public class EmployeeModel {
+public class ProfileModel {
     @JsonProperty("id")
     private long id;
 
@@ -30,32 +28,19 @@ public class EmployeeModel {
     @JsonProperty("joinedAt")
     private SimpleDate joinedAt;
 
-    private EmployeeModel() {}
+    private ProfileModel() {}
 
-    public EmployeeModel(final long id, final IdentityModel identity, final CwuBranch branch, final CwuRank rank) {
+    public ProfileModel(final long id, final IdentityModel identity, final CwuBranch branch, final CwuRank rank, final SimpleDate joinedAt) {
         this.id = id;
         this.identity = identity;
         this.branch = branch;
         this.rank = rank;
-        this.joinedAt = SimpleDate.now();
-    }
-
-    public static EmployeeModel fromInput(final SlashCommandInteractionEvent event) throws IdentityMalformedException {
-        final IdentityModel identity = RegexUtils.parseIdentity(event.getOption("identity").getAsString());
-
-        final String branch = event.getOption("branch").getAsString();
-        final String rank = event.getOption("rank").getAsString();
-
-        return new EmployeeModel(event.getUser().getIdLong(), identity, CwuBranch.valueOf(branch), CwuRank.valueOf(rank));
+        this.joinedAt = joinedAt;
     }
 
     /* Getters */
     public Long getId() {
         return this.id;
-    }
-
-    public String getCid() {
-        return this.identity.cid;
     }
 
     public IdentityModel getIdentity() {
@@ -72,6 +57,11 @@ public class EmployeeModel {
 
     public CwuRank getRank() {
         return this.rank;
+    }
+
+    /* Methods */
+    public String getCid() {
+        return this.identity.cid;
     }
 
     /* Utils */
@@ -106,6 +96,11 @@ public class EmployeeModel {
         return ReportDatabase.get().getReportsByCwu(this.getCid())
                 .stream().filter(ReportModel::isWithinWeek)
                 .toList().size();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("[%s] %s", this.rank.getLabel(), this.identity);
     }
 }
 

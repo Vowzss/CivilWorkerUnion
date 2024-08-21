@@ -2,15 +2,15 @@ package com.oneliferp.cwu.commands.session.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.database.EmployeeDatabase;
+import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.misc.IdFactory;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
-import com.oneliferp.cwu.models.EmployeeModel;
+import com.oneliferp.cwu.commands.profile.models.ProfileModel;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.models.IncomeModel;
 import com.oneliferp.cwu.models.PeriodModel;
-import com.oneliferp.cwu.commands.session.misc.ids.SessionPageType;
+import com.oneliferp.cwu.commands.session.misc.actions.SessionPageType;
 import com.oneliferp.cwu.commands.session.misc.ParticipantType;
 import com.oneliferp.cwu.commands.session.misc.SessionType;
 import com.oneliferp.cwu.commands.session.misc.ZoneType;
@@ -52,7 +52,7 @@ public class SessionModel {
     public SessionModel() {
     }
 
-    public SessionModel(final EmployeeModel employee) {
+    public SessionModel(final ProfileModel employee) {
         this.id = IdFactory.get().generateID();
 
         this.period = new PeriodModel();
@@ -225,8 +225,8 @@ public class SessionModel {
         return isValid;
     }
 
-    public EmployeeModel resolveEmployee() {
-        return EmployeeDatabase.get().getFromCid(this.employee.cid);
+    public ProfileModel resolveEmployee() {
+        return ProfileDatabase.get().getFromCid(this.employee.cid);
     }
 
     public boolean isWithinWeek() {

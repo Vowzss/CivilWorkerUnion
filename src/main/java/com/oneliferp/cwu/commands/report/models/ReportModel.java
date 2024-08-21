@@ -2,14 +2,14 @@ package com.oneliferp.cwu.commands.report.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.database.EmployeeDatabase;
+import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.commands.report.misc.StockType;
 import com.oneliferp.cwu.misc.IdFactory;
-import com.oneliferp.cwu.models.EmployeeModel;
+import com.oneliferp.cwu.commands.profile.models.ProfileModel;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.commands.report.misc.ReportType;
-import com.oneliferp.cwu.commands.report.misc.ids.ReportPageType;
+import com.oneliferp.cwu.commands.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import com.oneliferp.cwu.utils.SimpleDate;
@@ -48,12 +48,12 @@ public class ReportModel {
 
     private ReportModel() {}
 
-    public ReportModel(final EmployeeModel cwu) {
+    public ReportModel(final ProfileModel employee) {
         this.id = IdFactory.get().generateID();
 
-        this.employee = cwu.getIdentity();
+        this.employee = employee.getIdentity();
         this.createdAt = SimpleDate.now();
-        this.branch = cwu.getBranch();
+        this.branch = employee.getBranch();
         this.type = ReportType.UNKNOWN;
     }
 
@@ -173,8 +173,8 @@ public class ReportModel {
         return this.tokens % this.stock.getPrice();
     }
 
-    public EmployeeModel resolveEmployee() {
-        return EmployeeDatabase.get().getFromCid(this.employee.cid);
+    public ProfileModel resolveEmployee() {
+        return ProfileDatabase.get().getFromCid(this.employee.cid);
     }
 
     public boolean isWithinWeek() {

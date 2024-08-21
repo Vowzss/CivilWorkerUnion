@@ -57,6 +57,10 @@ public class CivilWorkerUnion {
         }
     }
 
+    public JDA getJda() {
+        return this.jda;
+    }
+
     public static void main(String[] args) {
         CivilWorkerUnion.get();
     }

@@ -1,16 +1,15 @@
-package com.oneliferp.cwu.commands.manage.misc.ids;
+package com.oneliferp.cwu.commands.manage.misc.actions;
 
 import com.oneliferp.cwu.misc.IActionType;
 
-public enum ReportChoiceType implements IActionType {
-    VIEW("", "report/view"),
-    DELETE("", "report/delete"),
-    EDIT("", "report/edit");
+public enum SessionChoiceType implements IActionType {
+    VIEW("", "session/view"),
+    DELETE("", "session/delete");
 
     public final String root;
     public final String action;
 
-    ReportChoiceType(final String root, final String action) {
+    SessionChoiceType(final String root, final String action) {
         this.root = root;
         this.action = action;
     }

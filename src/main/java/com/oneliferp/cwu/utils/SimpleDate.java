@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
 
 
@@ -37,8 +39,8 @@ public class SimpleDate implements Comparable<SimpleDate> {
         this.hour = hour;
         this.minute = minute;
 
-        this.date = String.format("%02d/%02d/%04d", day, month, year);
-        this.time = String.format("%02d:%02d", hour, minute);
+        this.date = this.formatToDate();
+        this.time = this.formatToTime();
     }
 
     public SimpleDate(final LocalDate date, final LocalTime time) {
@@ -46,11 +48,35 @@ public class SimpleDate implements Comparable<SimpleDate> {
         this.month = date.getMonthValue();
         this.year = date.getYear();
 
-        this.hour = time.getHour();
-        this.minute = time.getMinute();
+        if (time != null) {
+            this.hour = time.getHour();
+            this.minute = time.getMinute();
+        } else {
+            this.hour = 0;
+            this.minute = 0;
+        }
 
-        this.date = String.format("%02d/%02d/%04d", day, month, year);
-        this.time = String.format("%02d:%02d", hour, minute);
+        this.date = this.formatToDate();
+        this.time = this.formatToTime();
+    }
+
+    public SimpleDate(final LocalDateTime dateTime) {
+        this(dateTime.toLocalDate(), dateTime.toLocalTime());
+    }
+
+    public SimpleDate(final LocalDate date) {
+        this(date, null);
+    }
+
+    public static SimpleDate parseDate(final String str) {
+        final var dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH'h'mm");
+        final var dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        try {
+            return new SimpleDate(LocalDateTime.parse(str, dateTimeFormatter));
+        } catch (final DateTimeParseException e) {
+            return new SimpleDate(LocalDate.parse(str, dateFormatter));
+        }
     }
 
     /* Getters */
@@ -142,5 +168,14 @@ public class SimpleDate implements Comparable<SimpleDate> {
     @Override
     public String toString() {
         return String.format("%s %s", this.date, this.time);
+    }
+
+    /* Utils */
+    private String formatToDate() {
+        return String.format("%02d/%02d/%04d", this.day, this.month, this.year);
+    }
+
+    private String formatToTime() {
+        return String.format("%02d:%02d", this.hour, this.minute);
     }
 }
