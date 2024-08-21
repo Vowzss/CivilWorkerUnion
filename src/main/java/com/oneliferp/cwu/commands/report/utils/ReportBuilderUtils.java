@@ -23,10 +23,12 @@ import java.util.List;
 
 public class ReportBuilderUtils {
     /* Embeds */
-    public static MessageEmbed beginMessage(final CwuBranch branch, final ReportType type) {
+    public static MessageEmbed initMessage(final CwuBranch branch, final ReportType type) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(type == ReportType.UNKNOWN ? buildTitleWithBranch(branch) : buildTitleWithBranchAndType(branch, type));
         embed.setDescription("""
+                Cette interface vous permet de créer un rapport.
+                
                 Vous allez procéder au remplissage des informations.
                 S'ensuivra un résumé de votre rapport.""");
         return embed.build();

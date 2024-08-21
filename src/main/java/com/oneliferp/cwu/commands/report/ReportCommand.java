@@ -63,7 +63,7 @@ public class ReportCommand extends CwuCommand {
         final ReportModel report = new ReportModel(cwu);
         this.reportCache.add(report.getEmployeeCid(), report);
 
-        event.replyEmbeds(ReportBuilderUtils.beginMessage(cwu.getBranch(), report.getType()))
+        event.replyEmbeds(ReportBuilderUtils.initMessage(cwu.getBranch(), ReportType.UNKNOWN))
                 .setComponents(ReportBuilderUtils.initRow(report))
                 .queue();
     }
@@ -104,7 +104,7 @@ public class ReportCommand extends CwuCommand {
                 report.setStock(null);
                 report.setTokens(null);
 
-                event.editMessageEmbeds(ReportBuilderUtils.beginMessage(report.getBranch(), report.getType()))
+                event.editMessageEmbeds(ReportBuilderUtils.initMessage(report.getBranch(), report.getType()))
                         .setComponents(ReportBuilderUtils.beginRow(report)).queue();
             }
             case SELECT_STOCK -> {
@@ -166,7 +166,6 @@ public class ReportCommand extends CwuCommand {
 
     private void handleCancelButton(final ButtonInteractionEvent event, final ReportModel report) {
         this.reportCache.remove(report.getEmployeeCid());
-        event.getMessage().delete().queue();
 
         event.reply("❌ Vous avez annuler votre rapport.")
                 .queue();
@@ -196,7 +195,7 @@ public class ReportCommand extends CwuCommand {
         report.setIdentity(null);
         report.setTokens(null);
 
-        event.replyEmbeds(ReportBuilderUtils.beginMessage(report.getBranch(), report.getType()))
+        event.replyEmbeds(ReportBuilderUtils.initMessage(report.getBranch(), report.getType()))
                 .setComponents(ReportBuilderUtils.beginRow(report))
                 .queue();
     }

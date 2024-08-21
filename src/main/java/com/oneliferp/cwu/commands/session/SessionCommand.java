@@ -65,8 +65,8 @@ public class SessionCommand extends CwuCommand {
         final SessionModel session = new SessionModel(cwu);
         this.sessionCache.add(cwu.getCid(), session);
 
-        event.replyEmbeds(SessionBuilderUtils.beginMessage(session.getType()))
-                .setComponents(SessionBuilderUtils.beginRow(session))
+        event.replyEmbeds(SessionBuilderUtils.initMessage(SessionType.UNKNOWN))
+                .setComponents(SessionBuilderUtils.initRow(session.getEmployeeCid(), SessionType.UNKNOWN))
                 .queue();
     }
 
@@ -133,8 +133,8 @@ public class SessionCommand extends CwuCommand {
                 final SessionType type = SessionType.valueOf(event.getValues().get(0));
                 if (session.getType() != type) session.setType(type);
 
-                event.editMessageEmbeds(SessionBuilderUtils.beginMessage(session.getType()))
-                        .setComponents(SessionBuilderUtils.beginRow(session))
+                event.editMessageEmbeds(SessionBuilderUtils.initMessage(type))
+                        .setComponents(SessionBuilderUtils.beginRow(session.getEmployeeCid(), type))
                         .queue();
             }
             case SELECT_ZONE -> {

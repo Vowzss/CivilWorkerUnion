@@ -6,8 +6,6 @@ import com.oneliferp.cwu.commands.manage.misc.actions.ManageMenuType;
 import com.oneliferp.cwu.commands.manage.misc.actions.ManageModalType;
 import com.oneliferp.cwu.commands.manage.models.EmployeeModel;
 import com.oneliferp.cwu.commands.profile.models.ProfileModel;
-import com.oneliferp.cwu.commands.report.misc.actions.ReportButtonType;
-import com.oneliferp.cwu.commands.report.models.ReportModel;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
@@ -35,7 +33,46 @@ import java.util.List;
 
 public class ManageBuilderUtils {
     /* Messages */
-    public static MessageEmbed profileView() {
+    public static MessageEmbed sessionsView() {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("Historique des sessions");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface vous permet d'accéder aux sessions de travail.
+                Pour toutes actions, munisser vous de l'ID uniquement.
+                """);
+        sb.append("\n");
+
+        SessionDatabase.get().getLatests(8).forEach(session -> {
+            sb.append(String.format("%s  %s **(ID: %s)**", session.getType().getEmoji(), session.getType().getLabel(), session.getId())).append("\n");
+        });
+
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    public static MessageEmbed reportsView() {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("Historique des rapports");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface vous permet d'accéder aux rapports.
+                Pour toutes actions, munisser vous de l'ID uniquement.
+                """);
+        sb.append("\n");
+
+        ReportDatabase.get().getLatests(8).forEach(report -> {
+            sb.append(String.format("%s  %s **(ID: %s)**", report.getBranch().getEmoji(), report.getType().getLabel(), report.getId())).append("\n");
+        });
+
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    /* Employee messages */
+    public static MessageEmbed employeesView() {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Liste des employés");
 
@@ -62,45 +99,7 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed sessionView() {
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle("Historique des sessions");
-
-        final StringBuilder sb = new StringBuilder();
-        sb.append("""
-                Cette interface vous permet d'accéder aux sessions de travail.
-                Pour toutes actions, munisser vous de l'ID uniquement.
-                """);
-        sb.append("\n");
-
-        SessionDatabase.get().getLatests(8).forEach(session -> {
-            sb.append(String.format("%s  %s **(ID: %s)**", session.getType().getEmoji(), session.getType().getLabel(), session.getId())).append("\n");
-        });
-
-        embed.setDescription(sb.toString());
-        return embed.build();
-    }
-
-    public static MessageEmbed reportView() {
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle("Historique des rapports");
-
-        final StringBuilder sb = new StringBuilder();
-        sb.append("""
-                Cette interface vous permet d'accéder aux rapports.
-                Pour toutes actions, munisser vous de l'ID uniquement.
-                """);
-        sb.append("\n");
-
-        ReportDatabase.get().getLatests(8).forEach(report -> {
-            sb.append(String.format("%s  %s **(ID: %s)**", report.getBranch().getEmoji(), report.getType().getLabel(), report.getId())).append("\n");
-        });
-
-        embed.setDescription(sb.toString());
-        return embed.build();
-    }
-
-    public static MessageEmbed profileAlreadyExistMessage(final IdentityModel identity) {
+    public static MessageEmbed employeeAlreadyExistMessage(final IdentityModel identity) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Vous avez un profil en cours de création!");
 
@@ -113,13 +112,14 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed createProfileMessage() {
+    public static MessageEmbed createEmployeeMessage() {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | Initialisation");
 
         final StringBuilder sb = new StringBuilder();
         sb.append("""
                 Cette interface vous permet de créer le profil d'un nouvel employé.
+                
                 Vous allez procéder au remplissage des informations.
                 S'ensuivra un résumé de votre session.
                 """);
@@ -129,21 +129,21 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    private static MessageEmbed.Field profileIdentityField(final IdentityModel identity) {
+    private static MessageEmbed.Field employeeIdentityField(final IdentityModel identity) {
         final boolean hasValue = identity != null;
 
         final String name = String.format("%s  %s", hasValue ? EmojiUtils.getGreenCircle() : EmojiUtils.getRedCircle(), EmployeePageType.IDENTITY.getDescription());
         final String value = String.format("%s", hasValue ? identity.toString() : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
-    public static MessageEmbed profileIdentityMessage(final IdentityModel identity) {
+    public static MessageEmbed employeeIdentityMessage(final IdentityModel identity) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 1/5");
-        embed.addField(profileIdentityField(identity));
+        embed.addField(employeeIdentityField(identity));
         return embed.build();
     }
 
-    private static MessageEmbed.Field profileIdField(final Long id) {
+    private static MessageEmbed.Field employeeIdField(final Long id) {
         final boolean hasValue = id != null;
 
         final String name = String.format("%s  %s", hasValue ? EmojiUtils.getGreenCircle() : EmojiUtils.getRedCircle(), EmployeePageType.ID.getDescription());
@@ -153,25 +153,25 @@ public class ManageBuilderUtils {
     public static MessageEmbed profileIdMessage(final Long id) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 2/5");
-        embed.addField(profileIdField(id));
+        embed.addField(employeeIdField(id));
         return embed.build();
     }
 
-    private static MessageEmbed.Field profileBranchField(final CwuBranch branch) {
+    private static MessageEmbed.Field employeeBranchField(final CwuBranch branch) {
         final boolean hasValue = branch != null;
 
         final String name = String.format("%s  %s", hasValue ? EmojiUtils.getGreenCircle() : EmojiUtils.getRedCircle(), EmployeePageType.BRANCH.getDescription());
         final String value = String.format("%s", hasValue ? String.format("%s - %s", branch.name(), branch.getMeaning()) : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
-    public static MessageEmbed profileBranchMessage(final CwuBranch branch) {
+    public static MessageEmbed employeeBranchMessage(final CwuBranch branch) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 3/5");
-        embed.addField(profileBranchField(branch));
+        embed.addField(employeeBranchField(branch));
         return embed.build();
     }
 
-    private static MessageEmbed.Field profileRankField(final CwuRank rank) {
+    private static MessageEmbed.Field employeeRankField(final CwuRank rank) {
         final boolean hasValue = rank != null;
 
         final String name = String.format("%s  %s", hasValue ? EmojiUtils.getGreenCircle() : EmojiUtils.getRedCircle(), EmployeePageType.RANK.getDescription());
@@ -181,33 +181,33 @@ public class ManageBuilderUtils {
     public static MessageEmbed profileRankMessage(final CwuRank rank) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 4/5");
-        embed.addField(profileRankField(rank));
+        embed.addField(employeeRankField(rank));
         return embed.build();
     }
 
-    private static MessageEmbed.Field profileJoinedAtField(final SimpleDate joinedAt) {
+    private static MessageEmbed.Field employeeJoinedAtField(final SimpleDate joinedAt) {
         final boolean hasValue = joinedAt != null;
 
         final String name = String.format("%s  %s", hasValue ? EmojiUtils.getGreenCircle() : EmojiUtils.getRedCircle(), EmployeePageType.JOINED_AT.getDescription());
         final String value = String.format("%s", hasValue ? joinedAt.getDate() : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
-    public static MessageEmbed profileJoinedAtMessage(final SimpleDate joinedAt) {
+    public static MessageEmbed employeeJoinedAtMessage(final SimpleDate joinedAt) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 5/5");
-        embed.addField(profileJoinedAtField(joinedAt));
+        embed.addField(employeeJoinedAtField(joinedAt));
         return embed.build();
     }
 
-    public static MessageEmbed profilePreviewMessage(final EmployeeModel employee) {
+    public static MessageEmbed employeePreviewMessage(final EmployeeModel employee) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | Apperçu");
 
-        embed.addField(profileIdentityField(employee.getIdentity()));
-        embed.addField(profileIdField(employee.getId()));
-        embed.addField(profileBranchField(employee.getBranch()));
-        embed.addField(profileRankField(employee.getRank()));
-        embed.addField(profileJoinedAtField(employee.getJoinedAt()));
+        embed.addField(employeeIdentityField(employee.getIdentity()));
+        embed.addField(employeeIdField(employee.getId()));
+        embed.addField(employeeBranchField(employee.getBranch()));
+        embed.addField(employeeRankField(employee.getRank()));
+        embed.addField(employeeJoinedAtField(employee.getJoinedAt()));
 
         return embed.build();
     }
@@ -234,32 +234,32 @@ public class ManageBuilderUtils {
     }
 
     /* Modals */
-    public static Modal profileSearchModal() {
-        final TextInput.Builder inputBuilder = TextInput.create("cwu_manage.fill/data", "Identifiant :", TextInputStyle.SHORT)
+    public static Modal employeeSearchModal() {
+        final TextInput.Builder seachInput = TextInput.create("cwu_manage.fill/data", "Identifiant :", TextInputStyle.SHORT)
                 .setPlaceholder("ex: #12345")
                 .setRequired(true);
 
         return Modal.create(ManageModalType.PROFILE_CID.build(), "Recherche d'un employé")
-                .addComponents(ActionRow.of(inputBuilder.build()))
+                .addComponents(ActionRow.of(seachInput.build()))
                 .build();
     }
 
     public static Modal reportSearchModal(final String cid) {
-        final TextInput.Builder inputBuilder = TextInput.create("cwu_manage.fill/data", "Identifiant :", TextInputStyle.SHORT)
+        final TextInput.Builder seachInput = TextInput.create("cwu_manage.fill/data", "Identifiant :", TextInputStyle.SHORT)
                 .setPlaceholder("ex: 15wegf869")
                 .setRequired(true);
 
         return Modal.create(ManageModalType.REPORT_ID.build(cid), "Recherche d'un rapport")
-                .addComponents(ActionRow.of(inputBuilder.build()))
+                .addComponents(ActionRow.of(seachInput.build()))
                 .build();
     }
 
     public static Modal sessionSearchModal(final String cid) {
-        final TextInput.Builder inputBuilder = TextInput.create("cwu_manage.fill/data", "Identifiant :", TextInputStyle.SHORT)
+        final TextInput.Builder seachInput = TextInput.create("cwu_manage.fill/data", "Identifiant :", TextInputStyle.SHORT)
                 .setPlaceholder("ex: 15wegf869")
                 .setRequired(true);
         return Modal.create(ManageModalType.SESSION_ID.build(cid), "Recherche d'une session")
-                .addComponents(ActionRow.of(inputBuilder.build()))
+                .addComponents(ActionRow.of(seachInput.build()))
                 .build();
     }
 
@@ -325,15 +325,15 @@ public class ManageBuilderUtils {
     }
 
     /* Rows */
-    public static ActionRow profileActionRow(final String cid) {
+    public static ActionRow employeesComponent(final String cid) {
         return ActionRow.of(createButton(ManageButtonType.PROFILE_CREATE, cid), deleteButton(ManageButtonType.PROFILE_DELETE, cid), updateButton(ManageButtonType.PROFILE_UPDATE, cid), viewButton(ManageButtonType.PROFILE_VIEW, cid));
     }
 
-    public static ActionRow sessionActionRow(final String cid) {
+    public static ActionRow sessionsComponent(final String cid) {
         return ActionRow.of(deleteButton(ManageButtonType.SESSION_DELETE, cid), viewButton(ManageButtonType.SESSION_VIEW, cid));
     }
 
-    public static ActionRow reportActionRow(final String cid) {
+    public static ActionRow reportsComponent(final String cid) {
         return ActionRow.of(deleteButton(ManageButtonType.REPORT_DELETE, cid), viewButton(ManageButtonType.REPORT_VIEW, cid));
     }
 
@@ -353,7 +353,7 @@ public class ManageBuilderUtils {
         return ActionRow.of(clearButton(ManageButtonType.PROFILE_CLEAR,cid), fillButton(ManageButtonType.PROFILE_FILL,cid), prevButton(ManageButtonType.PROFILE_PREV, cid), nextButton(ManageButtonType.PROFILE_NEXT, cid));
     }
 
-    public static ActionRow createProfileComponent(final String cid) {
+    public static ActionRow createEmployeeComponent(final String cid) {
         return ActionRow.of(startButton(cid), cancelButton(cid));
     }
 
@@ -373,7 +373,7 @@ public class ManageBuilderUtils {
         return submitOrEditRow(ManageButtonType.PROFILE_SUBMIT, ManageButtonType.PROFILE_EDIT, cid);
     }
 
-    public static LayoutComponent profileResumeOrOverwriteComponent(final String cid) {
+    public static LayoutComponent employeeResumeOrOverwriteComponent(final String cid) {
         return ActionRow.of(overwriteButton(cid), resumeButton(cid));
     }
 

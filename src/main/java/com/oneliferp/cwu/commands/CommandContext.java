@@ -1,7 +1,7 @@
 package com.oneliferp.cwu.commands;
 
 import com.oneliferp.cwu.commands.manage.misc.actions.GestionModalType;
-import com.oneliferp.cwu.commands.manage.misc.actions.ProfileChoiceType;
+import com.oneliferp.cwu.commands.manage.misc.actions.EmployeeChoiceType;
 import com.oneliferp.cwu.commands.manage.misc.actions.ReportChoiceType;
 import com.oneliferp.cwu.commands.manage.misc.actions.SessionChoiceType;
 import com.oneliferp.cwu.misc.IActionType;
@@ -107,7 +107,7 @@ public class CommandContext {
 
             case "btn#cwu_manage" -> switch (this.specifiers.get(0)) {
                 case "report" -> ReportChoiceType.class;
-                case "profile" -> ProfileChoiceType.class;
+                case "profile" -> EmployeeChoiceType.class;
                 case "session" -> SessionChoiceType.class;
                 default -> throw new IllegalStateException("Unexpected value: " + this.specifiers.get(0));
             };

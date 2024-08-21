@@ -7,14 +7,13 @@ import com.oneliferp.cwu.commands.manage.exceptions.EmployeeNotFoundException;
 import com.oneliferp.cwu.commands.manage.exceptions.EmployeeValidationException;
 import com.oneliferp.cwu.commands.manage.misc.EmployeePageType;
 import com.oneliferp.cwu.commands.manage.misc.actions.GestionModalType;
-import com.oneliferp.cwu.commands.manage.misc.actions.ProfileChoiceType;
+import com.oneliferp.cwu.commands.manage.misc.actions.EmployeeChoiceType;
 import com.oneliferp.cwu.commands.manage.misc.actions.ReportChoiceType;
 import com.oneliferp.cwu.commands.manage.misc.actions.SessionChoiceType;
 import com.oneliferp.cwu.commands.manage.models.EmployeeModel;
 import com.oneliferp.cwu.commands.manage.utils.ManageBuilderUtils;
 import com.oneliferp.cwu.commands.profile.exceptions.ProfileNotFoundException;
 import com.oneliferp.cwu.commands.profile.models.ProfileModel;
-import com.oneliferp.cwu.commands.report.utils.ReportBuilderUtils;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.misc.CwuBranch;
@@ -48,10 +47,10 @@ public class ManageCommand extends CwuCommand {
 
     @Override
     public SlashCommandData configure(SlashCommandData slashCommand) {
-        final SubcommandData createProfileCommand = new SubcommandData("profil", "Vous permet de gérer les employés de la CWU.");
+        final SubcommandData employeeSucCommand = new SubcommandData("effectif", "Vous permet de gérer l'effectif de la CWU.");
         final SubcommandData sessionSubCommand = new SubcommandData("session", "Vous permet de gérer les sessions de travail.");
         final SubcommandData reportSubCommand = new SubcommandData("rapport", "Vous permet de gérer les rapports.");
-        slashCommand.addSubcommands(createProfileCommand, sessionSubCommand, reportSubCommand);
+        slashCommand.addSubcommands(employeeSucCommand, sessionSubCommand, reportSubCommand);
         return super.configure(slashCommand);
     }
 
@@ -63,21 +62,21 @@ public class ManageCommand extends CwuCommand {
         switch (Objects.requireNonNull(event.getSubcommandName())) {
             default:
                 throw new IllegalArgumentException();
-            case "profil": {
-                event.replyEmbeds(ManageBuilderUtils.profileView())
-                        .setComponents(ManageBuilderUtils.profileActionRow(cwu.getCid()))
+            case "effectif": {
+                event.replyEmbeds(ManageBuilderUtils.employeesView())
+                        .setComponents(ManageBuilderUtils.employeesComponent(cwu.getCid()))
                         .queue();
                 break;
             }
             case "session": {
-                event.replyEmbeds(ManageBuilderUtils.sessionView())
-                        .setComponents(ManageBuilderUtils.sessionActionRow(cwu.getCid()))
+                event.replyEmbeds(ManageBuilderUtils.sessionsView())
+                        .setComponents(ManageBuilderUtils.sessionsComponent(cwu.getCid()))
                         .queue();
                 break;
             }
             case "rapport": {
-                event.replyEmbeds(ManageBuilderUtils.reportView())
-                        .setComponents(ManageBuilderUtils.reportActionRow(cwu.getCid()))
+                event.replyEmbeds(ManageBuilderUtils.reportsView())
+                        .setComponents(ManageBuilderUtils.reportsComponent(cwu.getCid()))
                         .queue();
                 break;
             }
@@ -94,8 +93,8 @@ public class ManageCommand extends CwuCommand {
             this.handleSessionChoice(event, choice, ctx.getCid());
         } else if (type instanceof ReportChoiceType choice) {
             this.handleReportChoice(event, choice, ctx.getCid());
-        } else if (type instanceof ProfileChoiceType choice) {
-            this.handleProfileChoice(event, choice, ctx);
+        } else if (type instanceof EmployeeChoiceType choice) {
+            this.handleEmployeeChoice(event, choice, ctx);
         } else throw new IllegalArgumentException();
     }
 
@@ -117,7 +116,7 @@ public class ManageCommand extends CwuCommand {
             case FILL_JOINED_AT -> employee.setJoinedAt(SimpleDate.parseDate(content));
         }
 
-        this.goToPage(event, employee);
+        this.employeeGoToPage(event, employee);
     }
 
     @Override
@@ -135,7 +134,7 @@ public class ManageCommand extends CwuCommand {
             case "rank" -> employee.setRank(CwuRank.valueOf(content.toUpperCase()));
         }
 
-        this.goToPage(event, employee);
+        this.employeeGoToPage(event, employee);
     }
 
     /* Handlers */
@@ -157,15 +156,15 @@ public class ManageCommand extends CwuCommand {
         }
     }
 
-    private void handleProfileChoice(final ButtonInteractionEvent event, final ProfileChoiceType choice, final CommandContext ctx) throws CwuException {
+    private void handleEmployeeChoice(final ButtonInteractionEvent event, final EmployeeChoiceType choice, final CommandContext ctx) throws CwuException {
         switch (choice) {
             default -> throw new IllegalArgumentException();
             case VIEW, DELETE, UPDATE -> {
-                event.replyModal(ManageBuilderUtils.profileSearchModal()).queue();
+                event.replyModal(ManageBuilderUtils.employeeSearchModal()).queue();
             }
             case CREATE -> {
-                event.editMessageEmbeds(ManageBuilderUtils.createProfileMessage())
-                        .setComponents(ManageBuilderUtils.createProfileComponent(ctx.getCid()))
+                event.editMessageEmbeds(ManageBuilderUtils.createEmployeeMessage())
+                        .setComponents(ManageBuilderUtils.createEmployeeComponent(ctx.getCid()))
                         .queue();
             }
             case ABORT -> {
@@ -188,12 +187,12 @@ public class ManageCommand extends CwuCommand {
                         .setEphemeral(true).queue();
                 event.getMessage().delete().queue();
             }
-            case RESUME -> {
+            case RESUME, EDIT -> {
                 final EmployeeModel employee = this.employeeCache.get(ctx.getCid());
                 if (employee == null) throw new EmployeeNotFoundException();
 
                 employee.goFirstPage();
-                this.goToPage(event, employee);
+                this.employeeGoToPage(event, employee);
             }
             case OVERWRITE -> {
                 final String cid = ctx.getCid();
@@ -202,14 +201,14 @@ public class ManageCommand extends CwuCommand {
                 employee.begin();
 
                 employee.goFirstPage();
-                this.goToPage(event, employee);
+                this.employeeGoToPage(event, employee);
             }
             case START -> {
                 final String cid = ctx.getCid();
                 if (this.employeeCache.exist(cid)) {
                     final IdentityModel identity = this.employeeCache.get(cid).getIdentity();
-                    event.editMessageEmbeds(ManageBuilderUtils.profileAlreadyExistMessage(identity))
-                            .setComponents(ManageBuilderUtils.profileResumeOrOverwriteComponent(cid))
+                    event.editMessageEmbeds(ManageBuilderUtils.employeeAlreadyExistMessage(identity))
+                            .setComponents(ManageBuilderUtils.employeeResumeOrOverwriteComponent(cid))
                             .queue();
                     return;
                 }
@@ -219,75 +218,68 @@ public class ManageCommand extends CwuCommand {
                 employee.begin();
 
                 employee.goFirstPage();
-                this.goToPage(event, employee);
-            }
-            case EDIT -> {
-                final EmployeeModel employee = this.employeeCache.get(ctx.getCid());
-                if (employee == null) throw new EmployeeNotFoundException();
-
-                employee.goFirstPage();
-                this.goToPage(event, employee);
+                this.employeeGoToPage(event, employee);
             }
             case CLEAR -> {
                 final EmployeeModel employee = this.employeeCache.get(ctx.getCid());
                 if (employee == null) throw new EmployeeNotFoundException();
 
-                this.handleClearButton(event, employee);
+                this.employeeHandleClearButton(event, employee);
             }
             case FILL -> {
                 final EmployeeModel employee = this.employeeCache.get(ctx.getCid());
                 if (employee == null) throw new EmployeeNotFoundException();
 
-                this.handleFillButton(event, employee);
+                this.employeeHandleFillButton(event, employee);
             }
             case PREVIEW -> {
                 final EmployeeModel employee = this.employeeCache.get(ctx.getCid());
                 if (employee == null) throw new EmployeeNotFoundException();
 
                 employee.goPreviewPage();
-                this.goToPage(event, employee);
+                this.employeeGoToPage(event, employee);
             }
             case PAGE_NEXT -> {
                 final EmployeeModel employee = this.employeeCache.get(ctx.getCid());
                 if (employee == null) throw new EmployeeNotFoundException();
 
                 employee.goNextPage();
-                this.goToPage(event, employee);
+                this.employeeGoToPage(event, employee);
             }
             case PAGE_PREV -> {
                 final EmployeeModel employee = this.employeeCache.get(ctx.getCid());
                 if (employee == null) throw new EmployeeNotFoundException();
 
                 employee.goPrevPage();
-                this.goToPage(event, employee);
+                this.employeeGoToPage(event, employee);
             }
         }
     }
 
     /* Utils */
-    protected void goToPage(final IMessageEditCallback event, final EmployeeModel employee) {
+    protected void employeeGoToPage(final IMessageEditCallback event, final EmployeeModel employee) {
         final EmployeePageType page = employee.getCurrentPage();
 
         final var callback = (switch (page) {
             default -> throw new IllegalArgumentException();
-            case IDENTITY -> event.editMessageEmbeds(ManageBuilderUtils.profileIdentityMessage(employee.getIdentity()))
+            case IDENTITY -> event.editMessageEmbeds(ManageBuilderUtils.employeeIdentityMessage(employee.getIdentity()))
                     .setComponents(ManageBuilderUtils.profileIdentityComponent(employee.getManagerCid()));
             case ID -> event.editMessageEmbeds(ManageBuilderUtils.profileIdMessage(employee.getId()))
                     .setComponents(ManageBuilderUtils.profileIdComponent(employee.getManagerCid()));
-            case BRANCH -> event.editMessageEmbeds(ManageBuilderUtils.profileBranchMessage(employee.getBranch()))
+            case BRANCH -> event.editMessageEmbeds(ManageBuilderUtils.employeeBranchMessage(employee.getBranch()))
                     .setComponents(ManageBuilderUtils.profileBranchComponents(employee.getManagerCid(), employee.getBranch()));
             case RANK -> event.editMessageEmbeds(ManageBuilderUtils.profileRankMessage(employee.getRank()))
                     .setComponents(ManageBuilderUtils.profileRankComponents(employee.getManagerCid(), employee.getRank()));
-            case JOINED_AT -> event.editMessageEmbeds(ManageBuilderUtils.profileJoinedAtMessage(employee.getJoinedAt()))
+            case JOINED_AT -> event.editMessageEmbeds(ManageBuilderUtils.employeeJoinedAtMessage(employee.getJoinedAt()))
                     .setComponents(ManageBuilderUtils.profileJoinedAtComponent(employee.getManagerCid()));
-            case PREVIEW -> event.editMessageEmbeds(ManageBuilderUtils.profilePreviewMessage(employee))
+            case PREVIEW -> event.editMessageEmbeds(ManageBuilderUtils.employeePreviewMessage(employee))
                     .setComponents(ManageBuilderUtils.profilePreviewComponents(employee.getManagerCid()));
         });
 
         callback.queue();
     }
 
-    private void handleClearButton(final ButtonInteractionEvent event, final EmployeeModel employee) {
+    private void employeeHandleClearButton(final ButtonInteractionEvent event, final EmployeeModel employee) {
         switch (employee.getCurrentPage()) {
             default -> throw new IllegalArgumentException();
             case IDENTITY -> employee.setIdentity(null);
@@ -297,10 +289,10 @@ public class ManageCommand extends CwuCommand {
             case JOINED_AT -> employee.setJoinedAt(null);
         }
 
-        this.goToPage(event, employee);
+        this.employeeGoToPage(event, employee);
     }
 
-    private void handleFillButton(final ButtonInteractionEvent event, final EmployeeModel employee) {
+    private void employeeHandleFillButton(final ButtonInteractionEvent event, final EmployeeModel employee) {
         final var currentPage = employee.getCurrentPage();
         final TextInput.Builder inputBuilder = TextInput.create("cwu_manage.fill/data", currentPage.getDescription(), TextInputStyle.SHORT)
                 .setRequired(true);

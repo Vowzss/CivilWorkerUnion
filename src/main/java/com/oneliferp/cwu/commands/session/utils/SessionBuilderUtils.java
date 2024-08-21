@@ -23,16 +23,16 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SessionBuilderUtils {
-    /*
-    Embeds
-    */
-    public static MessageEmbed beginMessage(final SessionType type) {
+    /* Embeds */
+    public static MessageEmbed initMessage(final SessionType type) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         final String title = type == SessionType.UNKNOWN ? "\uD83D\uDCBC  Session de travail" :
                 String.format("%s  Session - %s", type.getEmoji(), type.getLabel());
 
         embed.setTitle(title);
         embed.setDescription("""
+                Cette interface vous permet d'enregistrer une Session de travail.
+                
                 Vous allez procéder au remplissage des informations.
                 S'ensuivra un résumé de votre session.""");
         return embed.build();
@@ -208,13 +208,12 @@ public class SessionBuilderUtils {
         return menu.build();
     }
 
-    private static StringSelectMenu typeMenu(final String cid, final SessionModel session) {
+    private static StringSelectMenu typeMenu(final String cid, final SessionType type) {
         final var menu = StringSelectMenu.create(SessionMenuType.SELECT_TYPE.build(cid));
         final var options = Arrays.stream(SessionType.values()).skip(1)
                 .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
         options.forEach(menu::addOptions);
 
-        final SessionType type = session.getType();
         if (type != SessionType.UNKNOWN) Toolbox.setDefaulMenuOption(menu, options, type.name());
         return menu.build();
     }
@@ -240,7 +239,7 @@ public class SessionBuilderUtils {
         return Button.primary(SessionButtonType.BEGIN.build(cid), "Commencer");
     }
 
-    private static Button cancelButton(final String cid) {
+    private static Button abortButton(final String cid) {
         return Button.danger(SessionButtonType.ABORT.build(cid), "Abandonner");
     }
 
@@ -294,12 +293,17 @@ public class SessionBuilderUtils {
         );
     }
 
-    public static List<ActionRow> beginRow(final SessionModel session) {
-        final String cid = session.getEmployeeCid();
-
+    public static List<ActionRow> initRow(final String cid, final SessionType type) {
         return List.of(
-                ActionRow.of(typeMenu(cid, session)),
-                ActionRow.of(startButton(cid), cancelButton(cid))
+                ActionRow.of(typeMenu(cid, type)),
+                ActionRow.of(abortButton(cid))
+        );
+    }
+
+    public static List<ActionRow> beginRow(final String cid, final SessionType type) {
+        return List.of(
+                ActionRow.of(typeMenu(cid, type)),
+                ActionRow.of(abortButton(cid), startButton(cid))
         );
     }
 
