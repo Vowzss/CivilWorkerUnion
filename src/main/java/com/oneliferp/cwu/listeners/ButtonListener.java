@@ -1,7 +1,8 @@
 package com.oneliferp.cwu.listeners;
 
 import com.oneliferp.cwu.CivilWorkerUnion;
-import com.oneliferp.cwu.commands.CommandContext;
+import com.oneliferp.cwu.commands.exceptions.CommandNotFoundException;
+import com.oneliferp.cwu.commands.utils.CommandContext;
 import com.oneliferp.cwu.exceptions.CwuException;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -17,10 +18,9 @@ public class ButtonListener extends ListenerAdapter {
             final var command = CivilWorkerUnion.get().getCommandFromId(eventType.getCommand());
             command.handleButtonInteraction(event, eventType);
         } catch (CwuException ex) {
-            event.reply(ex.getMessage())
-                    .queue();
-
-            ex.printStackTrace();
+            ex.reply();
+        } catch (CommandNotFoundException ex) {
+            event.reply(ex.getMessage()).setEphemeral(true).queue();
         }
     }
 }

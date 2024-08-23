@@ -51,14 +51,14 @@ public abstract class JsonDatabase<A, B> {
 
         this.file = new File(directoryPath.toFile(), fileName);
         this.map = new HashMap<>();
+
+        this.load();
     }
 
-    /*
-    Update methods
-    */
+    /* Methods */
     public abstract void addOne(final B value);
 
-    public void addMany(final List<B> values) {
+    public void addMany(final Collection<B> values) {
         values.forEach(this::addOne);
     }
 
@@ -74,16 +74,26 @@ public abstract class JsonDatabase<A, B> {
         return this.map.values();
     }
 
-    /*
-    Persistence methods
-    */
-    public Collection<B> readFromCache() {
+    /* Persistence methods */
+    protected void load() {
+        this.addMany(this.readFromCache());
+        System.out.printf("Loaded: '%d' values from file: '%s'.\n\n", this.map.values().size(), this.file);
+    }
+
+    public void save() {
+        this.writeToCache(this.getAll());
+    }
+
+    public void clear() {
+        this.clearCache();
+    }
+
+    /* Disk methods */
+    private Collection<B> readFromCache() {
         if (!file.exists()) return new ArrayList<>();
 
         try (final FileReader fr = new FileReader(this.file)) {
-            final var values = MAPPER.readValue(fr, typeRef);
-            System.out.println("Found " + values.size() + " values in " + this.file);
-            return values;
+            return MAPPER.readValue(fr, typeRef);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,11 +101,7 @@ public abstract class JsonDatabase<A, B> {
         return new ArrayList<>();
     }
 
-    public void save() {
-        this.writeToCache(this.getAll());
-    }
-
-    public void erase() {
+    private void clearCache() {
         try (final FileWriter fw = new FileWriter(this.file)) {
             fw.flush();
         } catch (IOException e) {
@@ -103,10 +109,9 @@ public abstract class JsonDatabase<A, B> {
         }
     }
 
-    public final void writeToCache(final Collection<B> objects) {
+    private void writeToCache(final Collection<B> objects) {
         try (final FileWriter fw = new FileWriter(this.file)) {
             MAPPER.writeValue(fw, objects);
-            System.out.printf("Saved %d objects%n", objects.size());
         } catch (Exception e) {
             e.printStackTrace();
         }

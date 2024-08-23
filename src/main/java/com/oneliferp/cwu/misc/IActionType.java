@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.misc;
 
-import com.oneliferp.cwu.commands.CommandContext;
+import com.oneliferp.cwu.commands.utils.CommandContext;
 
 import java.util.Map;
 

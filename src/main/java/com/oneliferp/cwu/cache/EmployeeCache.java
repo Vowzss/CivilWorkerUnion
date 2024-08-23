@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.cache;
 
-import com.oneliferp.cwu.commands.manage.models.EmployeeModel;
+import com.oneliferp.cwu.commands.modules.manage.models.EmployeeModel;
 
 public class EmployeeCache extends RuntimeCache<String, EmployeeModel> {
     private static EmployeeCache instance;

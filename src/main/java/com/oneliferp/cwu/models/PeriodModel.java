@@ -16,9 +16,7 @@ public class PeriodModel {
 
     public PeriodModel() {}
 
-    /*
-    Getters
-    */
+    /* Getters */
     public SimpleDate getStartedAt() {
         return this.startedAt;
     }
@@ -31,9 +29,7 @@ public class PeriodModel {
         return this.duration;
     }
 
-    /*
-    Methods
-    */
+    /* Methods */
     public void start() {
         this.startedAt = SimpleDate.now();
     }

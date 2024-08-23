@@ -167,7 +167,7 @@ public class SimpleDate implements Comparable<SimpleDate> {
 
     @Override
     public String toString() {
-        return String.format("%s %s", this.date, this.time);
+        return String.format("Le %s à %s", this.date, this.time);
     }
 
     /* Utils */

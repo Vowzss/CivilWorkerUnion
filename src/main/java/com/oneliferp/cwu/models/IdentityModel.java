@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
 import com.oneliferp.cwu.utils.RegexUtils;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 
@@ -31,6 +33,22 @@ public class IdentityModel {
 
         final String[] names = matcher.group(1).split(" ");
         return new IdentityModel(names[0], names[1], matcher.group(2));
+    }
+
+    public static List<IdentityModel> parseIdentities(final String str) throws IdentityMalformedException {
+        final List<IdentityModel> list = new ArrayList<>();
+        final Matcher matcher = RegexUtils.APPLY_PATTERN.matcher(str);
+
+        matcher.results().forEach(rs -> {
+            final String[] names = matcher.group(1).split(" ");
+
+            // This parameter can be optional depending on the case
+            final String lastName = names.length > 1 ? (names[1] != null ? names[1] : "") : "";
+            list.add(new IdentityModel(names[0], lastName, matcher.group(2)));
+        });
+
+        if (list.isEmpty()) throw new IdentityMalformedException();
+        return list;
     }
 
     @Override

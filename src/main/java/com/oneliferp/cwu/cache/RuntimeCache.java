@@ -10,6 +10,7 @@ public abstract class RuntimeCache<A, B> {
     }
 
     public void add(final A key, final B object) {
+        System.out.println("Added object: '" + object + "' with key: '" + key + "'");
         this.objects.put(key, object);
     }
 

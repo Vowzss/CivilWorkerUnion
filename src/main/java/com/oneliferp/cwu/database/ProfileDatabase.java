@@ -1,7 +1,7 @@
 package com.oneliferp.cwu.database;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.oneliferp.cwu.commands.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 
@@ -20,11 +20,11 @@ public class ProfileDatabase extends JsonDatabase<String, ProfileModel> {
     private ProfileDatabase() {
         super(new TypeReference<>() {
         }, "profile_db.json");
-        this.readFromCache().forEach(e -> map.put(e.getCid(), e));
     }
 
     @Override
     public void addOne(final ProfileModel cwu) {
+        System.out.printf("CID: '%s', IDENTITY: '%s'%n", cwu.getCid(), cwu.getIdentity());
         this.map.put(cwu.getCid(), cwu);
     }
 
@@ -45,19 +45,23 @@ public class ProfileDatabase extends JsonDatabase<String, ProfileModel> {
                 .orElse(null);
     }
 
-    public Map<CwuBranch, List<ProfileModel>> getAsGroupAndOrder() {
-        final var profiles = this.getAll();
-        final var supervisor = this.getSupervisor();
-        if (supervisor != null) profiles.remove(supervisor);
+    public ProfileModel getAssistant() {
+        return this.map.values().stream()
+                .filter(e -> e.getRank() == CwuRank.ASSISTANT)
+                .findFirst()
+                .orElse(null);
+    }
 
-        return profiles.stream()
+    public Map<CwuBranch, List<ProfileModel>> getAsGroupAndOrder() {
+        return this.getAll().stream()
+                .filter(profile -> profile.getBranch() != CwuBranch.CWU)
                 .collect(Collectors.groupingBy(
                         ProfileModel::getBranch,
                         TreeMap::new,
                         Collectors.collectingAndThen(
                                 Collectors.toList(),
                                 list -> list.stream()
-                                        .sorted(Comparator.comparingInt(employee -> employee.getRank().getOrder()))
+                                        .sorted(Comparator.comparingInt(employee -> employee.getRank().ordinal()))
                                         .toList()
                         )
                 ));

@@ -1,10 +1,11 @@
 package com.oneliferp.cwu.misc.pagination;
 
-import com.oneliferp.cwu.commands.manage.misc.EmployeePageType;
-import com.oneliferp.cwu.commands.report.misc.actions.ReportPageType;
-import com.oneliferp.cwu.commands.report.misc.ReportType;
-import com.oneliferp.cwu.commands.session.misc.actions.SessionPageType;
-import com.oneliferp.cwu.commands.session.misc.SessionType;
+import com.oneliferp.cwu.commands.modules.manage.misc.EmployeePageType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
+import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
+import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
+import com.oneliferp.cwu.utils.Toolbox;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -33,11 +34,20 @@ public class PaginationRegistry {
         final Map<ReportType, List<ReportPageType>> map = new EnumMap<>(ReportType.class);
 
         map.put(ReportType.STOCK, List.of(ReportPageType.STOCK, ReportPageType.TOKENS, ReportPageType.INFO));
-        map.put(ReportType.HOUSING_ATTRIBUTION, List.of(ReportPageType.IDENTITY, ReportPageType.TOKENS, ReportPageType.INFO));
-        map.put(ReportType.HOUSING_PAYMENT, List.of(ReportPageType.IDENTITY, ReportPageType.TOKENS, ReportPageType.INFO));
-        map.put(ReportType.HOUSING_EVICTION, List.of(ReportPageType.IDENTITY, ReportPageType.INFO));
-        map.put(ReportType.MEDICAL_CHECK, null);
-        map.put(ReportType.HOUSING_VERIFICATION, List.of(ReportPageType.INFO));
+
+        map.put(ReportType.HOUSING_ATTRIBUTION, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
+        map.put(ReportType.HOUSING_PAYMENT, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
+        map.put(ReportType.HOUSING_EVICTION, List.of(ReportPageType.TENANT, ReportPageType.INFO));
+        map.put(ReportType.HOUSING_CLEANING, List.of(ReportPageType.HEALTHINESS, ReportPageType.INFO));
+
+        map.put(ReportType.BUSINESS_ATTRIBUTION, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
+        map.put(ReportType.BUSINESS_PAYMENT, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
+        map.put(ReportType.BUSINESS_ORDER, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.TAX, ReportPageType.INFO));
+        map.put(ReportType.BUSINESS_CLEANING, List.of(ReportPageType.HEALTHINESS, ReportPageType.INFO));
+
+        map.put(ReportType.MEDICAL_INTERVENTION, List.of(ReportPageType.PATIENT, ReportPageType.MEDICAL, ReportPageType.INFO));
+        map.put(ReportType.MEDICAL_ORDER, List.of(ReportPageType.TOKENS, ReportPageType.TAX, ReportPageType.INFO));
+
         map.put(ReportType.OTHER, List.of(ReportPageType.INFO));
 
         map.replaceAll((k, v) -> v == null ? null : Collections.unmodifiableList(v));
@@ -50,13 +60,13 @@ public class PaginationRegistry {
         final Map<SessionType, List<SessionPageType>> map = new EnumMap<>(SessionType.class);
 
         final var defaults = SessionType.getDefaultPages();
-        final var earningsPages = Stream.concat(defaults.stream(), Stream.of(SessionPageType.TOKENS)).toList();
-        final var zonePages = Stream.concat(Stream.of(SessionPageType.ZONE), defaults.stream()).toList();
+        final var earningsPages = Toolbox.insert(defaults, defaults.size()- 1, SessionPageType.TOKENS);
+        final var zonePages = Toolbox.insert(defaults, 0, SessionPageType.ZONE);
 
         map.put(SessionType.RATION, earningsPages);
-        map.put(SessionType.DISTILLERY, earningsPages);
+        map.put(SessionType.CAN, earningsPages);
         map.put(SessionType.LAUNDRY, earningsPages);
-        map.put(SessionType.RECYCLING, earningsPages);
+        map.put(SessionType.CARDBOARD, earningsPages);
         map.put(SessionType.PRINTING, SessionType.getDefaultPages());
         map.put(SessionType.CLEANING, zonePages);
         map.put(SessionType.RENOVATION, zonePages);

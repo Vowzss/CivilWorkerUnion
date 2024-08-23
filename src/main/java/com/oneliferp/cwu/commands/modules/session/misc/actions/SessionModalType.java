@@ -1,0 +1,27 @@
+package com.oneliferp.cwu.commands.modules.session.misc.actions;
+
+import com.oneliferp.cwu.misc.IActionType;
+
+public enum SessionModalType implements IActionType {
+    FILL_PARTICIPANTS("mdl#cwu_session", "fill/participants"),
+    FILL_INFO("mdl#cwu_session", "fill/info"),
+    FILL_EARNINGS("mdl#cwu_session", "fill/earnings");
+
+    public final String root;
+    public final String action;
+
+    SessionModalType(final String root, final String action) {
+        this.root = root;
+        this.action = action;
+    }
+
+    @Override
+    public String getRoot() {
+        return this.root;
+    }
+
+    @Override
+    public String getAction() {
+        return this.action;
+    }
+}

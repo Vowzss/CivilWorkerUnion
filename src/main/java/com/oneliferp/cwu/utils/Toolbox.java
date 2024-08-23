@@ -20,6 +20,12 @@ public class Toolbox {
         return collection;
     }
 
+    public static <T> List<T> insert(final List<T> list, final int index, final T object) {
+        final List<T> newList = new ArrayList<>(list);
+        newList.add(index, object);
+        return newList;
+    }
+
     public static void setDefaulMenuOption(final StringSelectMenu.Builder menu, final List<SelectOption> options, final String value) {
         options.stream().filter(o -> o.getValue().equals(value))
                 .findFirst()

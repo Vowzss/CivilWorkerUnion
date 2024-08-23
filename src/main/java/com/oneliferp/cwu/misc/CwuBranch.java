@@ -1,9 +1,12 @@
 package com.oneliferp.cwu.misc;
 
+import com.oneliferp.cwu.utils.EmojiUtils;
+
 public enum CwuBranch {
-    DTL("Département Travail et Logement", "\uD83C\uDFD7"),
-    DMS("Département Médical et Scientifique", "\uD83D\uDE91"),
-    DRT("Département Restauration et Transport", "\uD83C\uDF7D");
+    CWU("Département Administratif", EmojiUtils.getScales()),
+    DTL("Département Travail et Logement", EmojiUtils.getKey()),
+    DMS("Département Médical et Scientifique", EmojiUtils.getHospital()),
+    DRT("Département Restauration et Transport", EmojiUtils.getHamburger());
 
     private final String meaning;
     private final String emoji;

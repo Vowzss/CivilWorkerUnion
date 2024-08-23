@@ -1,27 +1,35 @@
 package com.oneliferp.cwu.misc;
 
 public enum CwuRank {
-    RECRUIT("Recrue", 6),
-    APPRENTICE("Apprenti", 5),
-    INTERMEDIATE("Intermédiaire", 4),
-    CONFIRMED("Confirmé", 3),
-    MANAGER("Sous-chef", 2),
-    EXECUTIVE("Chef", 1),
-    SUPERVISOR("Superviseur", 0);
+    SUPERVISOR("Superviseur", 65, 35),
+    ASSISTANT("Adjoint", 60, 30),
+    EXECUTIVE("Chef", 55, 25),
+    MANAGER("Sous-chef", 50, 20),
+    CONFIRMED("Confirmé", 45, 15),
+    INTERMEDIATE("Intermédiaire", 40, 10),
+    APPRENTICE("Apprenti", 35, 5),
+    RECRUIT("Recrue", 30, 0);
+
 
     private final String label;
-    private final int order;
+    private final int sessionRoyalty;
+    private final int branchRoyalty;
 
-    CwuRank(final String label, final int order) {
+    CwuRank(final String label, final int sessionRoyalty, final int branchRoyalty) {
         this.label = label;
-        this.order = order;
+        this.sessionRoyalty = sessionRoyalty;
+        this.branchRoyalty = branchRoyalty;
     }
 
     public String getLabel() {
         return this.label;
     }
 
-    public int getOrder() {
-        return this.order;
+    public int getSessionRoyalty() {
+        return this.sessionRoyalty;
+    }
+
+    public int getBranchRoyalty() {
+        return this.branchRoyalty;
     }
 }

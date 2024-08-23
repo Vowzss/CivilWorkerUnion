@@ -1,7 +1,7 @@
 package com.oneliferp.cwu.commands;
 
+import com.oneliferp.cwu.commands.utils.CommandContext;
 import com.oneliferp.cwu.exceptions.CwuException;
-import com.oneliferp.cwu.misc.ICommandType;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -46,7 +46,6 @@ public abstract class CwuCommand {
 
     /* Utils */
     public final SlashCommandData toSlashCommand() {
-        System.out.printf(this.name + " " + this.description + "\n");
         return Commands.slash(this.name, this.description);
     }
 

@@ -1,9 +1,9 @@
 package com.oneliferp.cwu.database;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.oneliferp.cwu.commands.report.models.ReportModel;
-import com.oneliferp.cwu.commands.report.misc.ReportType;
-import com.oneliferp.cwu.commands.session.models.SessionModel;
+import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
+import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
+import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,12 +19,11 @@ public class ReportDatabase extends JsonDatabase<String, ReportModel> {
     protected ReportDatabase() {
         super(new TypeReference<>() {
         }, "report_db.json");
-
-        this.readFromCache().forEach(report -> map.put(report.getId(), report));
     }
 
     @Override
     public void addOne(final ReportModel report) {
+        System.out.printf("TYPE: '%s', IDENTITY: '%s'%n", report.getType().name(), report.getEmployee());
         this.map.put(report.getId(), report);
     }
 
