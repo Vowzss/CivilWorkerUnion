@@ -107,7 +107,7 @@ public class CommandContext {
 
             case "btn#cwu_manage" -> switch (this.specifiers.get(0)) {
                 case "report" -> ReportChoiceType.class;
-                case "profile" -> EmployeeChoiceType.class;
+                case "employee" -> EmployeeChoiceType.class;
                 case "session" -> SessionChoiceType.class;
                 default -> throw new IllegalStateException("Unexpected value: " + this.specifiers.get(0));
             };

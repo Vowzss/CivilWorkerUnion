@@ -257,9 +257,9 @@ public class SessionModel {
     /* Helpers */
     public static String getAsDescription(final SessionModel session) {
         final StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s Session: %s **(ID: %s)**", session.getType().getEmoji(), session.getType().getLabel(), session.getId())).append("\n");
-        sb.append(String.format("Emplacement: %s", session.getZone().getLabel())).append("\n");
-        sb.append(String.format("En charge: %s ", session.getEmployee())).append("\n");
+        sb.append(String.format("%s Session : %s **(ID: %s)**", session.getType().getEmoji(), session.getType().getLabel(), session.getId())).append("\n");
+        sb.append(String.format("Emplacement : %s", session.getZone().getLabel())).append("\n");
+        sb.append(String.format("Employé : %s ", session.getEmployee())).append("\n");
         sb.append(session.getPeriod().getEndedAt()).append("\n");
         return sb.toString();
     }

@@ -1,21 +1,21 @@
 package com.oneliferp.cwu.misc;
 
 public enum CwuRank {
-    SUPERVISOR("Superviseur", 65, 35),
-    ASSISTANT("Adjoint", 60, 30),
-    EXECUTIVE("Chef", 55, 25),
-    MANAGER("Sous-chef", 50, 20),
-    CONFIRMED("Confirmé", 45, 15),
-    INTERMEDIATE("Intermédiaire", 40, 10),
-    APPRENTICE("Apprenti", 35, 5),
-    RECRUIT("Recrue", 30, 0);
+    SUPERVISOR("Superviseur", 0.65f, 0.35f),
+    ASSISTANT("Adjoint", 0.60f, 0.30f),
+    EXECUTIVE("Chef", 0.55f, 0.25f),
+    MANAGER("Sous-chef", 0.50f, 0.20f),
+    CONFIRMED("Confirmé", 0.45f, 0.15f),
+    INTERMEDIATE("Intermédiaire", 0.40f, 0.10f),
+    APPRENTICE("Apprenti", 0.35f, 0.5f),
+    RECRUIT("Recrue", 30, 0.0f);
 
 
     private final String label;
-    private final int sessionRoyalty;
-    private final int branchRoyalty;
+    private final float sessionRoyalty;
+    private final float branchRoyalty;
 
-    CwuRank(final String label, final int sessionRoyalty, final int branchRoyalty) {
+    CwuRank(final String label, final float sessionRoyalty, final float branchRoyalty) {
         this.label = label;
         this.sessionRoyalty = sessionRoyalty;
         this.branchRoyalty = branchRoyalty;
@@ -25,11 +25,11 @@ public enum CwuRank {
         return this.label;
     }
 
-    public int getSessionRoyalty() {
+    public float getSessionRoyalty() {
         return this.sessionRoyalty;
     }
 
-    public int getBranchRoyalty() {
+    public float getBranchRoyalty() {
         return this.branchRoyalty;
     }
 }

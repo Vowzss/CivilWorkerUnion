@@ -54,7 +54,6 @@ public class ProfileDatabase extends JsonDatabase<String, ProfileModel> {
 
     public Map<CwuBranch, List<ProfileModel>> getAsGroupAndOrder() {
         return this.getAll().stream()
-                .filter(profile -> profile.getBranch() != CwuBranch.CWU)
                 .collect(Collectors.groupingBy(
                         ProfileModel::getBranch,
                         TreeMap::new,

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.commands.modules.report.misc.StockType;
@@ -227,5 +228,14 @@ public abstract class ReportModel {
 
     public String getEndingTitle() {
         return String.format("%s  Rapport %s - %s | Finalisation", this.type.getBranchEmoji(), this.branch, this.type.getLabel());
+    }
+
+    /* Helpers */
+    public static String getAsDescription(final ReportModel report) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s  %s - %s **(ID: %s)**", report.getBranch().getEmoji(), report.getBranch().name(), report.getType().getLabel(), report.getId())).append("\n");
+        sb.append(String.format("Employé : %s ", report.getEmployee())).append("\n");
+        sb.append(report.getCreatedAt()).append("\n");
+        return sb.toString();
     }
 }

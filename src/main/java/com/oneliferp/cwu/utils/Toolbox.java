@@ -31,4 +31,8 @@ public class Toolbox {
                 .findFirst()
                 .ifPresent(menu::setDefaultOptions);
     }
+
+    public static double getPercent(final Integer num1, final Integer num2) {
+        return (double) num1 / num2 * 100;
+    }
 }

@@ -2,6 +2,7 @@ package com.oneliferp.cwu.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
+import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.utils.RegexUtils;
 
 import java.util.ArrayList;
@@ -19,7 +20,10 @@ public class IdentityModel {
     @JsonProperty("cid")
     public String cid;
 
-    public IdentityModel() {}
+    @JsonProperty("rank")
+    public CwuRank rank;
+
+    private IdentityModel() {}
 
     public IdentityModel(final String firstName, final String lastName, final String cid) {
         this.firstName = firstName;
@@ -27,6 +31,28 @@ public class IdentityModel {
         this.cid = cid;
     }
 
+    /* Utils */
+    @Override
+    public String toString() {
+        if (this.lastName == null) return String.format("%s, %s", firstName, cid);
+        return String.format("%s %s, #%s", this.firstName, this.lastName, this.cid);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final IdentityModel that = (IdentityModel) o;
+        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(cid, that.cid);
+    }
+
+    @Override
+    public int hashCode() {
+        if (this.lastName == null) return Objects.hash(firstName, cid);
+        return Objects.hash(firstName, lastName, cid);
+    }
+
+    /* Helpers */
     public static IdentityModel parseIdentity(final String str) throws IdentityMalformedException {
         final Matcher matcher = RegexUtils.APPLY_PATTERN.matcher(str);
         if (!matcher.find()) throw new IdentityMalformedException();
@@ -49,25 +75,5 @@ public class IdentityModel {
 
         if (list.isEmpty()) throw new IdentityMalformedException();
         return list;
-    }
-
-    @Override
-    public String toString() {
-        if (this.lastName == null) return String.format("%s, %s", firstName, cid);
-        return String.format("%s %s, #%s", this.firstName, this.lastName, this.cid);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final IdentityModel that = (IdentityModel) o;
-        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(cid, that.cid);
-    }
-
-    @Override
-    public int hashCode() {
-        if (this.lastName == null) return Objects.hash(firstName, cid);
-        return Objects.hash(firstName, lastName, cid);
     }
 }

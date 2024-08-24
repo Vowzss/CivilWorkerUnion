@@ -1,14 +1,14 @@
 package com.oneliferp.cwu.commands.modules.profile.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.database.ReportDatabase;
-import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
-import com.oneliferp.cwu.models.IdentityModel;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.database.ReportDatabase;
+import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
+import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.utils.SimpleDate;
 
 import java.util.Comparator;
 import java.util.List;
@@ -23,20 +23,16 @@ public class ProfileModel {
     @JsonProperty("branch")
     private CwuBranch branch;
 
-    @JsonProperty("rank")
-    private CwuRank rank;
-
     @JsonProperty("joinedAt")
     private SimpleDate joinedAt;
 
     private ProfileModel() {
     }
 
-    public ProfileModel(final long id, final IdentityModel identity, final CwuBranch branch, final CwuRank rank, final SimpleDate joinedAt) {
+    public ProfileModel(final long id, final IdentityModel identity, final CwuBranch branch, final SimpleDate joinedAt) {
         this.id = id;
         this.identity = identity;
         this.branch = branch;
-        this.rank = rank;
         this.joinedAt = joinedAt;
     }
 
@@ -57,13 +53,17 @@ public class ProfileModel {
         return this.branch;
     }
 
-    public CwuRank getRank() {
-        return this.rank;
-    }
-
     /* Methods */
     public String getCid() {
         return this.identity.cid;
+    }
+
+    public void setRank(final CwuRank rank) {
+        this.identity.rank = rank;
+    }
+
+    public CwuRank getRank() {
+        return this.identity.rank;
     }
 
     /* Utils */
@@ -80,44 +80,55 @@ public class ProfileModel {
                 .toList();
     }
 
+    public List<SessionModel> resolveSessions() {
+        return SessionDatabase.get().resolveByEmployee(this.getCid());
+    }
+
     public ReportModel resolveLatestReport() {
-        return ReportDatabase.get().getReportsByCwu(this.getCid()).stream()
+        return ReportDatabase.get().resolveByEmployee(this.getCid()).stream()
                 .max(Comparator.comparing(ReportModel::getCreatedAt))
                 .orElse(null);
     }
 
     public List<ReportModel> resolveWeekReports() {
-        return ReportDatabase.get().getReportsByCwu(this.getCid())
+        return ReportDatabase.get().resolveByEmployee(this.getCid())
                 .stream().filter(ReportModel::isWithinWeek)
                 .toList();
     }
 
-    /*public Pair<Integer, Integer> computeSalary() {
-        final var sessions = this.getWeeklySessions();
-        final int sessionEarnings = SessionCollection.resolveTotalEarnings(this.getWeeklySessions());
+    public List<ReportModel> resolveReports() {
+        return ReportDatabase.get().resolveByEmployee(this.getCid());
+    }
 
-        final var reports = this.getWeeklyReports();
-        final int reportsEarnings =
-
-        this.rank.getSessionRoyalty();
-        this.rank.getBranchRoyalty();
-
-    }*/
 
     @Override
     public String toString() {
-        return String.format("[%s] %s", this.rank.getLabel(), this.identity);
+        return String.format("[%s] %s", this.identity.rank.getLabel(), this.identity);
     }
 
     public String getWeekStats() {
-        return String.format("Sessions: %d | Rapports: %s | Paies : %d tokens & %d points", this.resolveWeekSessions().size(), this.resolveWeekReports().size());
+        final var sessions = this.resolveWeekSessions();
+        final var reports = this.resolveWeekReports();
+
+        return String.format("""
+                        %s
+                        Sessions: %d | Rapports: %s
+                        Salaire : %d token(s) & %d point(s)""",
+                this, sessions.size(), reports.size(),
+                SessionDatabase.resolveEarnings(sessions) + ReportDatabase.resolveEarnings(reports), SessionDatabase.resolvePoints(sessions) + ReportDatabase.resolvePoints(reports)
+        );
     }
 
     public String getOverallStats() {
+        final var sessions = this.resolveSessions();
+        final var reports = this.resolveReports();
+
         return String.format("""
+                        %s
                         Sessions: %d | Rapports: %s
-                        Paies : %d tokens & %d points""",
-                this.resolveWeekSessions().size(), this.resolveWeekReports().size()
+                        Salaire : %d token(s) & %d point(s)""",
+                this, sessions.size(), reports.size(),
+                SessionDatabase.resolveEarnings(sessions) + ReportDatabase.resolveEarnings(reports), SessionDatabase.resolvePoints(sessions) + ReportDatabase.resolvePoints(reports)
         );
     }
 }

@@ -22,8 +22,6 @@ public class EmployeeModel {
 
     private CwuBranch branch;
 
-    private CwuRank rank;
-
     private SimpleDate joinedAt;
 
     private PaginationContext<EmployeePageType> pagination;
@@ -57,14 +55,6 @@ public class EmployeeModel {
         return this.branch;
     }
 
-    public void setRank(final CwuRank rank) {
-        this.rank = rank;
-    }
-
-    public CwuRank getRank() {
-        return this.rank;
-    }
-
     public void setJoinedAt(final SimpleDate joinedAt) {
         this.joinedAt = joinedAt;
     }
@@ -78,6 +68,14 @@ public class EmployeeModel {
         return this.manager;
     }
 
+    public void setRank(final CwuRank rank) {
+        this.identity.rank = rank;
+    }
+
+    public CwuRank getRank() {
+        return this.identity.rank;
+    }
+
     public void begin() {
         this.pagination = new PaginationContext<>(PaginationRegistry.getEmployeePages(), EmployeePageType.PREVIEW);
     }
@@ -88,7 +86,7 @@ public class EmployeeModel {
 
     /* Utils */
     public ProfileModel toProfile() {
-        return new ProfileModel(this.id, this.identity, this.branch, this.rank, this.joinedAt);
+        return new ProfileModel(this.id, this.identity, this.branch, this.joinedAt);
     }
 
     /* Page Metadata */

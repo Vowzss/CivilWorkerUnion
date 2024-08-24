@@ -32,9 +32,15 @@ public class SessionDatabase extends JsonDatabase<String, SessionModel> {
 
     /* Utils */
     public static int resolveEarnings(final Collection<SessionModel> collection) {
+        if (collection.isEmpty()) return 0;
         return collection.stream()
-                .mapToInt(s -> s.getIncome().getEarnings())
+                .mapToInt(s -> (int) Math.floor(s.getIncome().getEarnings() * s.getEmployee().rank.getSessionRoyalty()))
                 .sum();
+    }
+
+    public static int resolvePoints(final Collection<SessionModel> collection) {
+        if (collection == null) return 0;
+        return collection.size() / 2;
     }
 
     public static int resolveWages(final Collection<SessionModel> collection) {

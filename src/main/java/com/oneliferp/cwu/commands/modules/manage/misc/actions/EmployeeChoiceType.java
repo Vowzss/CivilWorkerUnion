@@ -3,16 +3,17 @@ package com.oneliferp.cwu.commands.modules.manage.misc.actions;
 import com.oneliferp.cwu.misc.IActionType;
 
 public enum EmployeeChoiceType implements IActionType {
-    VIEW("", "profile/view"),
-    DELETE("", "profile/delete"),
-    SUMMARY("", "profile/summary"),
+    SUMMARY("", "employee/summary"),
+    STATS("", "employee/stats"),
+    MANAGE("", "employee/manage"),
+
     CREATE("", "profile/create"),
     START("", "profile/start"),
     ABORT("", "profile/abort"),
     PAGE_NEXT("", "profile/next"),
     PAGE_PREV("", "profile/prev"),
     FILL("", "profile/fill"),
-    UPDATE("", "profile/update"),
+
     EDIT("", "profile/edit"),
     CLEAR("", "profile/clear"),
     PREVIEW("", "profile/preview"),

@@ -3,9 +3,10 @@ package com.oneliferp.cwu.commands.modules.manage.misc.actions;
 import com.oneliferp.cwu.misc.IActionType;
 
 public enum ManageButtonType implements IActionType {
-    EMPLOYEE_MANAGE("btn#cwu_manage", "profile/view"),
-    PROFILE_DELETE("btn#cwu_manage", "profile/delete"),
-    EMPLOYEE_SUMMARY("btn#cwu_manage", "profile/summary"),
+    EMPLOYEE_SUMMARY("btn#cwu_manage", "employee/summary"),
+    EMPLOYEE_STATS("btn#cwu_manage", "employee/stats"),
+    EMPLOYEE_MANAGE("btn#cwu_manage", "employee/manage"),
+
     PROFILE_START("btn#cwu_manage", "profile/start"),
     PROFILE_ABORT("btn#cwu_manage", "profile/abort"),
     PROFILE_NEXT("btn#cwu_manage", "profile/next"),

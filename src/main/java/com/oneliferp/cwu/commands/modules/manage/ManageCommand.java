@@ -65,8 +65,8 @@ public class ManageCommand extends CwuCommand {
         switch (Objects.requireNonNull(event.getSubcommandName())) {
             default: throw new IllegalArgumentException();
             case "effectif": {
-                event.replyEmbeds(ManageBuilderUtils.employeeListView())
-                        .setComponents(ManageBuilderUtils.employeeListComponent(cwu.getCid()))
+                event.replyEmbeds(ManageBuilderUtils.employeeSummaryMessage())
+                        .setComponents(ManageBuilderUtils.employeeSummaryComponent(cwu.getCid()))
                         .setEphemeral(true).queue();
                 break;
             }
@@ -192,15 +192,21 @@ public class ManageCommand extends CwuCommand {
 
     private void handleEmployeeChoice(final ButtonInteractionEvent event, final EmployeeChoiceType choice, final CommandContext ctx) throws CwuException {
         switch (choice) {
-            case VIEW, DELETE, UPDATE -> {
+            case SUMMARY -> {
+                event.replyEmbeds(ManageBuilderUtils.employeeSummaryMessage())
+                        .setComponents(ManageBuilderUtils.employeeSummaryComponent(ctx.getCid()))
+                        .setEphemeral(true).queue();
+            }
+            case STATS -> {
+                event.editMessageEmbeds(ManageBuilderUtils.employeeStatsView())
+                        .setComponents(ManageBuilderUtils.employeeStatsComponent(ctx.getCid()))
+                        .queue();
+            }
+            case MANAGE -> {
                 event.replyModal(ManageBuilderUtils.employeeSearchModal(ctx.getCid()))
                         .queue();
             }
-            case SUMMARY -> {
-                event.replyEmbeds(ManageBuilderUtils.createEmployeeMessage())
-                        .setComponents(ManageBuilderUtils.createEmployeeComponent(ctx.getCid()))
-                        .setEphemeral(true).queue();
-            }
+
             case CREATE -> {
                 final String cid = ctx.getCid();
 

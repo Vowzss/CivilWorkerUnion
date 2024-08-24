@@ -6,6 +6,7 @@ import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageMenuType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
 import com.oneliferp.cwu.commands.modules.manage.models.EmployeeModel;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
@@ -31,6 +32,7 @@ import net.dv8tion.jda.api.interactions.modals.Modal;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ManageBuilderUtils {
     /* Messages */
@@ -45,8 +47,8 @@ public class ManageBuilderUtils {
                 """).append("\n");
 
         sb.append("**Sessions récemment effectué :**").append("\n");
-        SessionDatabase.get().resolveLatestLimit(5).forEach(session -> {
-            sb.append(SessionModel.getAsDescription(session)).append("\n");
+        SessionDatabase.get().resolveLatestLimit(5).forEach(s -> {
+            sb.append(SessionModel.getAsDescription(s)).append("\n");
         });
 
         embed.setDescription(sb.toString());
@@ -57,41 +59,41 @@ public class ManageBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Statistiques de la semaine");
 
+        final List<SessionModel> sessions = SessionDatabase.get().resolveWithinWeek();
+        final int totalSessionCount = sessions.size();
+        final int totalEarnings = SessionDatabase.resolveEarnings(sessions);
+
         final StringBuilder sb = new StringBuilder();
+        sb.append("**Productivité commune :**").append("\n");
+        sb.append(String.format("Total de sessions: %d", sessions.size())).append("\n");
+        sb.append(String.format("Revenus générés: %d tokens", totalEarnings)).append("\n");
+        sb.append(String.format("Paies distribuées: %d tokens", SessionDatabase.resolveWages(sessions))).append("\n\n");
 
-        {
-            final ProfileModel supervisor = ProfileDatabase.get().getSupervisor();
-            if (supervisor != null) {
-                sb.append(String.format("%s  **Superviseur** | Sessions: %d", EmojiUtils.getPenBall(), supervisor.resolveWeekSessions().size())).append("\n");
-                sb.append("\n");
-            }
-
-            final ProfileModel assistant = ProfileDatabase.get().getAssistant();
-            if (assistant != null) {
-                sb.append(String.format("%s  **Adjoint** | Sessions: %d", EmojiUtils.getPenFountain(), assistant.resolveWeekSessions().size())).append("\n");
-                sb.append("\n");
-            }
-        }
-
+        sb.append("**Productivité respective :**").append("\n");
         ProfileDatabase.get().getAsGroupAndOrder().forEach((branch, profiles) -> {
-            sb.append(String.format("%s  **Branche %s** | Sessions: %d", branch.getEmoji(), branch.name(), profiles.stream().mapToInt(p -> p.resolveWeekSessions().size()).sum())).append("\n");
+            sb.append(String.format("%s  **Branche %s (%s)** ", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
+
+            final var identities = profiles.stream()
+                    .map(ProfileModel::getIdentity)
+                    .collect(Collectors.toSet());
+            final var branchSessions = sessions.stream()
+                    .filter(s -> identities.contains(s.getEmployee()))
+                    .toList();
+
+            final int branchEarnings = SessionDatabase.resolveEarnings(branchSessions);
+            final int branchSessionCount = branchSessions.size();
+            sb.append(String.format("Sessions : %d (%.2f%%)", branchSessions.size(), Toolbox.getPercent(branchSessionCount, totalSessionCount))).append("\n");
+            sb.append(String.format("Revenus générés: %d tokens (%.2f%%)", branchEarnings, Toolbox.getPercent(branchEarnings, totalEarnings))).append("\n\n");
         });
-        sb.append("\n");
 
         {
-            final List<SessionModel> sessions = SessionDatabase.get().resolveWithinWeek();
             final SessionModel latest = SessionDatabase.get().resolveLatest();
-
             sb.append("**Dernière session :**").append("\n");
             if (latest == null || !latest.getPeriod().getEndedAt().isWithinWeek()) {
-                sb.append("Aucune").append("\n").append("\n");
+                sb.append("Aucune").append("\n\n");
             } else {
                 sb.append(SessionModel.getAsDescription(latest)).append("\n");
             }
-
-            sb.append(String.format("Total de sessions: %d", sessions.size())).append("\n");
-            sb.append(String.format("Revenus générés: %d tokens", SessionDatabase.resolveEarnings(sessions))).append("\n");
-            sb.append(String.format("Paies distribuées: %d tokens", SessionDatabase.resolveWages(sessions))).append("\n");
         }
         embed.setDescription(sb.toString());
         return embed.build();
@@ -108,8 +110,8 @@ public class ManageBuilderUtils {
                 """);
         sb.append("\n");
 
-        ReportDatabase.get().getLatests(8).forEach(report -> {
-            sb.append(String.format("%s  %s - %s **(ID: %s)**", report.getBranch().getEmoji(), report.getBranch().name(), report.getType().getLabel(), report.getId())).append("\n");
+        ReportDatabase.get().resolveLatestLimit(5).forEach(r -> {
+            sb.append(ReportModel.getAsDescription(r)).append("\n");
         });
 
         embed.setDescription(sb.toString());
@@ -117,7 +119,7 @@ public class ManageBuilderUtils {
     }
 
     /* Employee messages */
-    public static MessageEmbed employeeListView() {
+    public static MessageEmbed employeeSummaryMessage() {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Liste des employés");
 
@@ -136,6 +138,7 @@ public class ManageBuilderUtils {
         sb.append("\n");
 
         ProfileDatabase.get().getAsGroupAndOrder().forEach((branch, profiles) -> {
+            if (branch == CwuBranch.CWU) return;
             sb.append(String.format("%s **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
             profiles.forEach(profile -> sb.append(profile).append("\n"));
             sb.append("\n");
@@ -150,30 +153,11 @@ public class ManageBuilderUtils {
         embed.setTitle("Statistiques des employés");
 
         final StringBuilder sb = new StringBuilder();
-
-        {
-            final ProfileModel supervisor = ProfileDatabase.get().getSupervisor();
-            sb.append(String.format("%s  **Superviseur**", EmojiUtils.getPenBall())).append("\n");
-            sb.append(String.format("%s", supervisor == null ? "Aucun" : supervisor)).append("\n");
-            if (supervisor != null) sb.append(supervisor.getOverallStats()).append("\n");
-            sb.append("\n");
-        }
-
-        {
-            final ProfileModel assistant = ProfileDatabase.get().getAssistant();
-            sb.append(String.format("%s  **Adjoint**", EmojiUtils.getPenFountain())).append("\n");
-            sb.append(String.format("%s", assistant == null ? "Aucun" : assistant)).append("\n");
-            if (assistant != null) sb.append(assistant.getOverallStats()).append("\n");
-            sb.append("\n");
-        }
-
         ProfileDatabase.get().getAsGroupAndOrder().forEach((branch, profiles) -> {
-            sb.append(String.format("%s  **Employés %s**", branch.getEmoji(), branch.name())).append("\n");
-            profiles.forEach(profile -> {
-                sb.append(profile).append("\n");
-                sb.append(profile.getOverallStats()).append("\n");
-            });
-            sb.append("\n");
+            sb.append(String.format("%s  **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
+
+            if (profiles.isEmpty()) return;
+            profiles.forEach(profile -> sb.append(profile.getWeekStats()).append("\n\n"));
         });
 
         embed.setDescription(sb.toString());
@@ -411,8 +395,8 @@ public class ManageBuilderUtils {
     }
 
     /* Rows */
-    public static ActionRow employeeListComponent(final String cid) {
-        return ActionRow.of(statsButton(ManageButtonType.EMPLOYEE_SUMMARY, cid), manageButton(ManageButtonType.EMPLOYEE_MANAGE, cid));
+    public static ActionRow employeeSummaryComponent(final String cid) {
+        return ActionRow.of(statsButton(ManageButtonType.EMPLOYEE_STATS, cid), manageButton(ManageButtonType.EMPLOYEE_MANAGE, cid));
     }
 
     public static ActionRow sessionsSummaryMessage(final String cid) {
@@ -479,5 +463,9 @@ public class ManageBuilderUtils {
 
     public static LayoutComponent sessionStatsComponent(final String cid) {
         return ActionRow.of(returnButton(ManageButtonType.SESSION_SUMMARY, cid));
+    }
+
+    public static LayoutComponent employeeStatsComponent(final String cid) {
+        return ActionRow.of(returnButton(ManageButtonType.EMPLOYEE_SUMMARY, cid));
     }
 }
