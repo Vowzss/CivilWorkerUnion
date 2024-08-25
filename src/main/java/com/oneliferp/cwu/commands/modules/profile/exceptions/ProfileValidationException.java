@@ -1,10 +1,10 @@
-package com.oneliferp.cwu.commands.modules.manage.exceptions;
+package com.oneliferp.cwu.commands.modules.profile.exceptions;
 
 import com.oneliferp.cwu.exceptions.CwuException;
 import net.dv8tion.jda.api.interactions.callbacks.IReplyCallback;
 
-public class EmployeeNotFoundException extends CwuException {
-    public EmployeeNotFoundException(final IReplyCallback callback) {
+public class ProfileValidationException extends CwuException {
+    public ProfileValidationException(final IReplyCallback callback) {
         super(callback);
     }
 

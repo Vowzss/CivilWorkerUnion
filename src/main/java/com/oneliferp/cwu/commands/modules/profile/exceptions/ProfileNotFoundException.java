@@ -10,6 +10,6 @@ public class ProfileNotFoundException extends CwuException {
 
     @Override
     public String getMessage() {
-        return "Ce profil n'existe pas dans notre registre.";
+        return "Cet employé n'existe pas dans notre registre.";
     }
 }

@@ -7,7 +7,7 @@ public enum ManageModalType implements IActionType {
     FILL_ID("mdl#cwu_manage", "fill/id"),
     FILL_JOINED_AT("mdl#cwu_manage", "fill/joined_at"),
 
-    EMPLOYEE_SEARCH("mdl#cwu_manage", "employee/search"),
+    PROFILE_SEARCH("mdl#cwu_manage", "profile/search"),
     SESSION_SEARCH("mdl#cwu_manage", "session/search"),
     REPORT_SEARCH("mdl#cwu_manage", "report/search");
 

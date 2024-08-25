@@ -6,21 +6,20 @@ import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.IdentityModel;
 
 public class CwuReportModel extends ReportModel {
-    private CwuReportModel() {
-        super();
-
-        this.branch = CwuBranch.CWU;
-    }
-
-    public CwuReportModel(final ProfileModel employee) {
-        super(employee);
-    }
-
     @JsonProperty("identity")
     private IdentityModel identity;
 
+
+    private CwuReportModel() {
+        super(CwuBranch.CWU);
+    }
+
+    public CwuReportModel(final ProfileModel profile) {
+        super(profile);
+    }
+
     @Override
-    public void setIdentity(IdentityModel identity) {
+    public void setIdentity(final IdentityModel identity) {
         this.identity = identity;
     }
 
@@ -28,4 +27,6 @@ public class CwuReportModel extends ReportModel {
     public IdentityModel getIdentity() {
         return this.identity;
     }
+
+    /* Pageable implementation */
 }

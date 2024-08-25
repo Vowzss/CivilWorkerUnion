@@ -1,19 +1,19 @@
 package com.oneliferp.cwu.commands.modules.session.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.database.ProfileDatabase;
-import com.oneliferp.cwu.misc.IdFactory;
-import com.oneliferp.cwu.misc.pagination.PaginationContext;
-import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
-import com.oneliferp.cwu.models.IdentityModel;
-import com.oneliferp.cwu.models.IncomeModel;
-import com.oneliferp.cwu.models.PeriodModel;
-import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
 import com.oneliferp.cwu.commands.modules.session.misc.ParticipantType;
 import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
 import com.oneliferp.cwu.commands.modules.session.misc.ZoneType;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
+import com.oneliferp.cwu.database.ProfileDatabase;
+import com.oneliferp.cwu.misc.IdFactory;
+import com.oneliferp.cwu.misc.pagination.Pageable;
+import com.oneliferp.cwu.misc.pagination.PaginationContext;
+import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
+import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.IncomeModel;
+import com.oneliferp.cwu.models.PeriodModel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -21,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class SessionModel {
+public class SessionModel extends Pageable<SessionPageType> {
     @JsonProperty("id")
     private String id;
 
@@ -46,11 +46,7 @@ public class SessionModel {
     @JsonProperty("income")
     private IncomeModel income;
 
-    @JsonIgnore
-    private PaginationContext<SessionPageType> pagination;
-
-    public SessionModel() {
-    }
+    private SessionModel() {}
 
     public SessionModel(final IdentityModel identity) {
         this.id = IdFactory.get().generateID();
@@ -72,20 +68,9 @@ public class SessionModel {
         return this.employee;
     }
 
-    public HashSet<IdentityModel> getParticipants(final ParticipantType type) {
-        return this.participants.get(type);
-    }
-
-    public int getParticipantCount() {
-        return this.participants.values().stream()
-                .mapToInt(HashSet::size)
-                .sum();
-    }
-
     public void setType(final SessionType type) {
         this.type = type;
 
-        // set predefined zone if exist
         final var zone = this.type.getZone();
         if (zone == ZoneType.UNKNOWN) return;
         this.setZone(zone);
@@ -98,6 +83,7 @@ public class SessionModel {
     public void setZone(final ZoneType zone) {
         this.zone = zone;
     }
+
     public ZoneType getZone() {
         return this.zone;
     }
@@ -105,6 +91,7 @@ public class SessionModel {
     public void setInfo(@Nullable final String info) {
         this.info = (info == null || info.isBlank()) ? null : info;
     }
+
     public String getInfo() {
         return this.info;
     }
@@ -118,6 +105,24 @@ public class SessionModel {
     }
 
     /* Methods */
+    public String getEmployeeCid() {
+        return this.employee.cid;
+    }
+
+    public HashSet<IdentityModel> getParticipants(final ParticipantType type) {
+        return this.participants.get(type);
+    }
+
+    public boolean hasParticipants() {
+        boolean isValid = false;
+        for (final ParticipantType type : ParticipantType.values()) {
+            if (this.participants.get(type).isEmpty()) continue;
+            isValid = true;
+            break;
+        }
+        return isValid;
+    }
+
     public void addParticipants(final ParticipantType type, final List<IdentityModel> identities) {
         final var entries = this.participants.computeIfAbsent(type, k -> new HashSet<>());
         entries.addAll(identities);
@@ -131,7 +136,46 @@ public class SessionModel {
         this.income.setEarnings(earnings);
     }
 
-    public void begin() {
+    /* Utils */
+    public ProfileModel resolveEmployee() {
+        return ProfileDatabase.get().getFromCid(this.employee.cid);
+    }
+
+    public boolean isWithinWeek() {
+        return this.period.getStartedAt().isWithinWeek();
+    }
+
+    public void computeWages() {
+        final AtomicInteger wages = new AtomicInteger(
+                participants.entrySet().stream()
+                        .mapToInt(entry -> entry.getKey().getWage() * entry.getValue().size())
+                        .sum()
+        );
+        this.income.setWages(wages.get());
+    }
+
+    public void computeDeposit() {
+        final Integer earnings = income.getEarnings();
+        this.income.setDeposit(earnings == null ? 0 : earnings - this.income.getWages());
+    }
+
+    /* Helpers */
+    public String getDescriptionFormat(final boolean withIdentity) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s Session : %s **(ID: %s)**", this.type.getEmoji(), this.type.getLabel(), this.id)).append("\n");
+        sb.append(String.format("Emplacement : %s", this.zone.getLabel())).append("\n");
+        if (withIdentity) sb.append(String.format("Employé : %s ", this.employee)).append("\n");
+        sb.append(this.period.getEndedAt());
+        return sb.toString();
+    }
+
+    public String getDescriptionFormat() {
+        return this.getDescriptionFormat(true);
+    }
+
+    /* Pageable implementation */
+    @Override
+    public void start() {
         this.period.start();
         this.income = new IncomeModel();
         this.participants = new HashMap<>();
@@ -155,112 +199,21 @@ public class SessionModel {
         this.computeDeposit();
     }
 
-    public void clear() {
+    @Override
+    public void reset() {
         for (final ParticipantType type : ParticipantType.values()) {
             this.clearParticipants(type);
         }
+
         this.type = SessionType.UNKNOWN;
-        this.zone =ZoneType.UNKNOWN;
+        this.zone = ZoneType.UNKNOWN;
         this.info = null;
         this.period = new PeriodModel();
         this.period.start();
     }
 
-    public boolean isValid() {
+    @Override
+    public boolean verify() {
         return this.employee != null && this.type != SessionType.UNKNOWN && this.zone != ZoneType.UNKNOWN && this.hasParticipants();
-    }
-
-    public void computeWages() {
-        final AtomicInteger wages = new AtomicInteger(
-                participants.entrySet().stream()
-                        .mapToInt(entry -> entry.getKey().getWage() * entry.getValue().size())
-                        .sum()
-        );
-
-        this.income.setWages(wages.get());
-    }
-
-    public void computeDeposit() {
-        final Integer earnings = income.getEarnings();
-        this.income.setDeposit(earnings == null ? 0 : earnings - this.income.getWages());
-    }
-
-    /* Page Metadata */
-    public SessionPageType getCurrentPage() {
-        return this.pagination.getCurrent();
-    }
-
-    public void goNextPage() {
-        this.pagination.setNext();
-    }
-    public void goPrevPage() {
-        this.pagination.setPrev();
-    }
-    public void goPreviewPage() {
-        this.pagination.setPreview();
-    }
-    public void goFirstPage() {
-        this.pagination.setFirst();
-    }
-
-    public boolean isFirstPage() {
-        return this.pagination.isFirst();
-    }
-    public boolean isLastPage() {
-        return this.pagination.isLast();
-    }
-
-    public int getCurrentStep() {
-        return this.pagination.getCurrentStep();
-    }
-    public int getMaxSteps() {
-        return this.pagination.getMaxSteps();
-    }
-
-    public boolean hasPage(final SessionPageType type) {
-        return this.pagination.contains(type);
-    }
-
-    /* Utils */
-    public String getEmployeeCid() {
-        return this.employee.cid;
-    }
-
-    public boolean hasParticipants() {
-        boolean isValid = false;
-
-        for (final ParticipantType type : ParticipantType.values()) {
-            if (this.participants.get(type).isEmpty()) continue;
-
-            isValid = true;
-            break;
-        }
-
-        return isValid;
-    }
-
-    public ProfileModel resolveEmployee() {
-        return ProfileDatabase.get().getFromCid(this.employee.cid);
-    }
-
-    public boolean isFromSupervisor() {
-        final var supervisor = ProfileDatabase.get().getSupervisor();
-        if (supervisor == null) return false;
-
-        return this.employee.cid.equals(supervisor.getCid());
-    }
-
-    public boolean isWithinWeek() {
-        return this.period.getStartedAt().isWithinWeek();
-    }
-
-    /* Helpers */
-    public static String getAsDescription(final SessionModel session) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s Session : %s **(ID: %s)**", session.getType().getEmoji(), session.getType().getLabel(), session.getId())).append("\n");
-        sb.append(String.format("Emplacement : %s", session.getZone().getLabel())).append("\n");
-        sb.append(String.format("Employé : %s ", session.getEmployee())).append("\n");
-        sb.append(session.getPeriod().getEndedAt()).append("\n");
-        return sb.toString();
     }
 }

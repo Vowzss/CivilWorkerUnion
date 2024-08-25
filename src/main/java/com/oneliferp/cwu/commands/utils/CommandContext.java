@@ -1,11 +1,12 @@
 package com.oneliferp.cwu.commands.utils;
 
-import com.oneliferp.cwu.commands.modules.manage.misc.actions.EmployeeChoiceType;
+import com.oneliferp.cwu.commands.modules.manage.misc.actions.WorkforceButtonType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.ReportChoiceType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.SessionChoiceType;
-import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileButtonType;
+import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileMenuType;
+import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportMenuType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportModalType;
@@ -100,6 +101,7 @@ public class CommandContext {
             case "mnu#cwu_session" -> SessionMenuType.class;
 
             case "btn#cwu_profile" -> ProfileButtonType.class;
+            case "mnu#cwu_profile" -> ProfileMenuType.class;
 
             case "btn#cwu_report" -> ReportButtonType.class;
             case "mdl#cwu_report" -> ReportModalType.class;
@@ -107,7 +109,7 @@ public class CommandContext {
 
             case "btn#cwu_manage" -> switch (this.specifiers.get(0)) {
                 case "report" -> ReportChoiceType.class;
-                case "employee" -> EmployeeChoiceType.class;
+                case "workforce" -> WorkforceButtonType.class;
                 case "session" -> SessionChoiceType.class;
                 default -> throw new IllegalStateException("Unexpected value: " + this.specifiers.get(0));
             };

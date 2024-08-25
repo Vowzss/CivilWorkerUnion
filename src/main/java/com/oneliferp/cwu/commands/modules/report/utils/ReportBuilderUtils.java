@@ -1,6 +1,5 @@
 package com.oneliferp.cwu.commands.modules.report.utils;
 
-import com.oneliferp.cwu.commands.modules.manage.misc.EmployeePageType;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.commands.modules.report.misc.StockType;
 import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
@@ -8,7 +7,6 @@ import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportMenuType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
-import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;

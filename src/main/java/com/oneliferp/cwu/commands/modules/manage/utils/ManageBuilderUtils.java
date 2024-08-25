@@ -1,12 +1,9 @@
 package com.oneliferp.cwu.commands.modules.manage.utils;
 
-import com.oneliferp.cwu.commands.modules.manage.misc.EmployeePageType;
-import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageButtonType;
-import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageMenuType;
-import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
-import com.oneliferp.cwu.commands.modules.manage.models.EmployeeModel;
+import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
+import com.oneliferp.cwu.commands.modules.manage.misc.actions.*;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
-import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
+import com.oneliferp.cwu.commands.modules.profile.utils.ProfileBuilderUtils;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
@@ -24,19 +21,16 @@ import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ManageBuilderUtils {
     /* Messages */
-    public static MessageEmbed sessionsSummaryMessage() {
+    public static MessageEmbed sessionOverviewComponent() {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Historique des sessions");
 
@@ -48,7 +42,7 @@ public class ManageBuilderUtils {
 
         sb.append("**Sessions récemment effectué :**").append("\n");
         SessionDatabase.get().resolveLatestLimit(5).forEach(s -> {
-            sb.append(SessionModel.getAsDescription(s)).append("\n");
+            sb.append(s.getDescriptionFormat()).append("\n");
         });
 
         embed.setDescription(sb.toString());
@@ -92,7 +86,7 @@ public class ManageBuilderUtils {
             if (latest == null || !latest.getPeriod().getEndedAt().isWithinWeek()) {
                 sb.append("Aucune").append("\n\n");
             } else {
-                sb.append(SessionModel.getAsDescription(latest)).append("\n");
+                sb.append(latest.getDescriptionFormat()).append("\n");
             }
         }
         embed.setDescription(sb.toString());
@@ -111,7 +105,7 @@ public class ManageBuilderUtils {
         sb.append("\n");
 
         ReportDatabase.get().resolveLatestLimit(5).forEach(r -> {
-            sb.append(ReportModel.getAsDescription(r)).append("\n");
+            sb.append(r.getDescriptionFormat()).append("\n");
         });
 
         embed.setDescription(sb.toString());
@@ -119,7 +113,7 @@ public class ManageBuilderUtils {
     }
 
     /* Employee messages */
-    public static MessageEmbed employeeSummaryMessage() {
+    public static MessageEmbed workforceOverviewMessage() {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Liste des employés");
 
@@ -197,7 +191,7 @@ public class ManageBuilderUtils {
     private static MessageEmbed.Field employeeIdentityField(final IdentityModel identity) {
         final boolean hasValue = identity != null;
 
-        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), EmployeePageType.IDENTITY.getDescription());
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), ProfilePageType.IDENTITY.getDescription());
         final String value = String.format("%s", hasValue ? identity.toString() : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
@@ -212,7 +206,7 @@ public class ManageBuilderUtils {
     private static MessageEmbed.Field employeeIdField(final Long id) {
         final boolean hasValue = id != null;
 
-        final String name = String.format("%s  %s", EmojiUtils.getGreenOrYellowCircle(hasValue), EmployeePageType.ID.getDescription());
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrYellowCircle(hasValue), ProfilePageType.ID.getDescription());
         final String value = String.format("%s", hasValue ? String.format("<@%d>", id) : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
@@ -224,40 +218,24 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    private static MessageEmbed.Field employeeBranchField(final CwuBranch branch) {
-        final boolean hasValue = branch != null;
-
-        final String name = String.format("%s %s", EmojiUtils.getGreenOrRedCircle(hasValue), EmployeePageType.BRANCH.getDescription());
-        final String value = String.format("%s", hasValue ? String.format("%s - %s", branch.name(), branch.getMeaning()) : "`Information manquante`");
-        return new MessageEmbed.Field(name, value, false);
-    }
-
     public static MessageEmbed employeeBranchMessage(final CwuBranch branch) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 3/5");
-        embed.addField(employeeBranchField(branch));
+        embed.addField(ProfileBuilderUtils.branchField(branch));
         return embed.build();
-    }
-
-    private static MessageEmbed.Field employeeRankField(final CwuRank rank) {
-        final boolean hasValue = rank != null;
-
-        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), EmployeePageType.RANK.getDescription());
-        final String value = String.format("%s", hasValue ? rank.getLabel() : "`Information manquante`");
-        return new MessageEmbed.Field(name, value, false);
     }
 
     public static MessageEmbed profileRankMessage(final CwuRank rank) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 4/5");
-        embed.addField(employeeRankField(rank));
+        embed.addField(ProfileBuilderUtils.rankField(rank));
         return embed.build();
     }
 
     private static MessageEmbed.Field employeeJoinedAtField(final SimpleDate joinedAt) {
         final boolean hasValue = joinedAt != null;
 
-        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), EmployeePageType.JOINED_AT.getDescription());
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), ProfilePageType.JOINED_AT.getDescription());
         final String value = String.format("%s", hasValue ? joinedAt.getDate() : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
@@ -269,47 +247,26 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed employeePreviewMessage(final EmployeeModel employee) {
+    public static MessageEmbed employeePreviewMessage(final ProfileModel employee) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | Apperçu");
 
         embed.addField(employeeIdentityField(employee.getIdentity()));
         embed.addField(employeeIdField(employee.getId()));
-        embed.addField(employeeBranchField(employee.getBranch()));
-        embed.addField(employeeRankField(employee.getRank()));
+        embed.addField(ProfileBuilderUtils.branchField(employee.getBranch()));
+        embed.addField(ProfileBuilderUtils.rankField(employee.getRank()));
         embed.addField(employeeJoinedAtField(employee.getJoinedAt()));
 
         return embed.build();
     }
 
-    /* Menus */
-    private static StringSelectMenu branchMenu(final CwuBranch branch, final String cid) {
-        final var menu = StringSelectMenu.create(ManageMenuType.SELECT_BRANCH.build(cid));
-        final var options = Arrays.stream(CwuBranch.values())
-                .map(v -> SelectOption.of(String.format("%s - %s", v.name(), v.getMeaning()), v.name())).toList();
-        options.forEach(menu::addOptions);
-
-        if (branch != null) Toolbox.setDefaulMenuOption(menu, options, branch.name());
-        return menu.build();
-    }
-
-    private static StringSelectMenu rankMenu(final CwuRank rank, final String cid) {
-        final var menu = StringSelectMenu.create(ManageMenuType.SELECT_RANK.build(cid));
-        final var options = Arrays.stream(CwuRank.values())
-                .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
-        options.forEach(menu::addOptions);
-
-        if (rank != null) Toolbox.setDefaulMenuOption(menu, options, rank.name());
-        return menu.build();
-    }
-
     /* Modals */
     public static Modal employeeSearchModal(final String cid) {
         final TextInput.Builder searchInput = TextInput.create("cwu_manage.fill/data", "Cid :", TextInputStyle.SHORT)
-                .setPlaceholder("ex: #12345")
+                .setPlaceholder("ex: (#)12345")
                 .setRequired(true);
 
-        return Modal.create(ManageModalType.EMPLOYEE_SEARCH.build(cid), "Recherche d'un employé")
+        return Modal.create(ManageModalType.PROFILE_SEARCH.build(cid), "Recherche d'un employé")
                 .addComponents(ActionRow.of(searchInput.build()))
                 .build();
     }
@@ -335,11 +292,15 @@ public class ManageBuilderUtils {
 
     /* Buttons */
     private static Button startButton(final String cid) {
-        return Button.primary(ManageButtonType.PROFILE_START.build(cid), "Commencer");
+        return Button.primary(WorkforceButtonType.START.build(cid), "Commencer");
     }
 
-    public static Button cancelButton(final String cid) {
-        return Button.danger(ManageButtonType.PROFILE_ABORT.build(cid), "Abandonner");
+    public static Button cancelButton(final IActionType type, final String cid) {
+        return Button.danger(type.build(cid), "Abandonner");
+    }
+
+    public static Button confirmButton(final IActionType type, final String cid) {
+        return Button.danger(type.build(cid), "Confirmer");
     }
 
     public static Button returnButton(final IActionType type, final String cid) {
@@ -351,11 +312,11 @@ public class ManageBuilderUtils {
     }
 
     public static Button updateButton(final IActionType type, final String cid) {
-        return Button.secondary(type.build(cid), "Mettre à jour");
+        return Button.primary(type.build(cid), "Mettre à jour");
     }
 
     public static Button editButton(final IActionType type, final String cid) {
-        return Button.secondary(type.build(cid), "Modifier");
+        return Button.primary(type.build(cid), "Modifier");
     }
 
     public static Button manageButton(final IActionType type, final String cid) {
@@ -387,85 +348,86 @@ public class ManageBuilderUtils {
     }
 
     private static Button resumeButton(final String cid) {
-        return Button.primary(ManageButtonType.PROFILE_RESUME.build(cid), "Reprendre");
+        return Button.primary(WorkforceButtonType.RESUME.build(cid), "Reprendre");
+    }
+
+    private static Button deleteButton(final IActionType type, final String cid) {
+        return Button.danger(type.build(cid), "Supprimer");
     }
 
     private static Button overwriteButton(final String cid) {
-        return Button.danger(ManageButtonType.PROFILE_OVERWRITE.build(cid), "Écraser");
+        return Button.danger(WorkforceButtonType.OVERWRITE.build(cid), "Écraser");
     }
 
-    /* Rows */
-    public static ActionRow employeeSummaryComponent(final String cid) {
-        return ActionRow.of(statsButton(ManageButtonType.EMPLOYEE_STATS, cid), manageButton(ManageButtonType.EMPLOYEE_MANAGE, cid));
+    /* Single Components */
+    public static ActionRow workforceOverviewComponent(final String cid) {
+        return ActionRow.of(statsButton(WorkforceButtonType.STATS, cid), manageButton(WorkforceButtonType.MANAGE, cid));
     }
 
-    public static ActionRow sessionsSummaryMessage(final String cid) {
-        return ActionRow.of(statsButton(ManageButtonType.SESSION_STATS, cid), manageButton(ManageButtonType.SESSION_MANAGE, cid));
+    public static ActionRow sessionOverviewComponent(final String cid) {
+        return ActionRow.of(statsButton(SessionChoiceType.OVERVIEW, cid), manageButton(SessionChoiceType.MANAGE, cid));
     }
 
-    public static ActionRow reportsComponent(final String cid) {
-        return ActionRow.of(statsButton(ManageButtonType.REPORT_STATS, cid), manageButton(ManageButtonType.SESSION_MANAGE, cid));
+    public static ActionRow reportsOverviewComponent(final String cid) {
+        return ActionRow.of(statsButton(ReportChoiceType.OVERVIEW, cid), manageButton(ReportChoiceType.MANAGE, cid));
     }
 
     private static ActionRow submitOrEditRow(final IActionType submitType, final IActionType editType, final String cid) {
         return ActionRow.of(submitButton(submitType, cid), editButton(editType, cid));
     }
 
+    // TODO: FIX
     private static ActionRow profileNextRow(final String cid) {
-        return ActionRow.of(clearButton(ManageButtonType.PROFILE_CLEAR, cid), fillButton(ManageButtonType.PROFILE_FILL, cid), nextButton(ManageButtonType.PROFILE_NEXT, cid));
+        return ActionRow.of(startButton(cid));
+        //return ActionRow.of(clearButton(ManageButtonType.PROFILE_CLEAR, cid), fillButton(ManageButtonType.PROFILE_FILL, cid), nextButton(ManageButtonType.PROFILE_NEXT, cid));
     }
 
     private static ActionRow profilePrevRow(final String cid) {
-        return ActionRow.of(previewButton(ManageButtonType.PROFILE_PREVIEW, cid), clearButton(ManageButtonType.PROFILE_CLEAR, cid), fillButton(ManageButtonType.PROFILE_FILL, cid), prevButton(ManageButtonType.PROFILE_PREV, cid));
+        return ActionRow.of(startButton(cid));
+        //return ActionRow.of(previewButton(ManageButtonType.PROFILE_PREVIEW, cid), clearButton(ManageButtonType.PROFILE_CLEAR, cid), fillButton(ManageButtonType.PROFILE_FILL, cid), prevButton(ManageButtonType.PROFILE_PREV, cid));
     }
 
     private static ActionRow profilePrevAndNextRow(final String cid) {
-        return ActionRow.of(clearButton(ManageButtonType.PROFILE_CLEAR, cid), fillButton(ManageButtonType.PROFILE_FILL, cid), prevButton(ManageButtonType.PROFILE_PREV, cid), nextButton(ManageButtonType.PROFILE_NEXT, cid));
+        return ActionRow.of(startButton(cid));
+        //return ActionRow.of(clearButton(ManageButtonType.PROFILE_CLEAR, cid), fillButton(ManageButtonType.PROFILE_FILL, cid), prevButton(ManageButtonType.PROFILE_PREV, cid), nextButton(ManageButtonType.PROFILE_NEXT, cid));
     }
 
     public static ActionRow createEmployeeComponent(final String cid) {
-        return ActionRow.of(startButton(cid), cancelButton(cid));
+        return ActionRow.of(startButton(cid), cancelButton(WorkforceButtonType.ABORT, cid));
     }
 
-    public static LayoutComponent profileIdentityComponent(final String cid) {
+    public static LayoutComponent employeeIdentityComponent(final String cid) {
         return profileNextRow(cid);
     }
 
-    public static LayoutComponent profileIdComponent(final String cid) {
+    public static LayoutComponent employeeIdComponent(final String cid) {
         return profilePrevAndNextRow(cid);
     }
 
-    public static LayoutComponent profileJoinedAtComponent(final String cid) {
+    public static LayoutComponent employeeJoinedAtComponent(final String cid) {
         return profilePrevRow(cid);
     }
 
-    public static LayoutComponent profilePreviewComponents(final String cid) {
-        return submitOrEditRow(ManageButtonType.PROFILE_SUBMIT, ManageButtonType.PROFILE_EDIT, cid);
+    public static LayoutComponent employeePreviewComponents(final String cid) {
+        return submitOrEditRow(WorkforceButtonType.SUBMIT, WorkforceButtonType.EDIT, cid);
     }
 
     public static LayoutComponent employeeResumeOrOverwriteComponent(final String cid) {
         return ActionRow.of(overwriteButton(cid), resumeButton(cid));
     }
 
-    public static List<LayoutComponent> profileBranchComponents(final String cid, final CwuBranch branch) {
-        return List.of(
-                ActionRow.of(branchMenu(branch, cid)),
-                profilePrevAndNextRow(cid)
-        );
-    }
 
-    public static List<LayoutComponent> profileRankComponents(final String cid, final CwuRank rank) {
-        return List.of(
-                ActionRow.of(rankMenu(rank, cid)),
-                profilePrevAndNextRow(cid)
-        );
-    }
-
-    public static LayoutComponent sessionStatsComponent(final String cid) {
-        return ActionRow.of(returnButton(ManageButtonType.SESSION_SUMMARY, cid));
-    }
 
     public static LayoutComponent employeeStatsComponent(final String cid) {
-        return ActionRow.of(returnButton(ManageButtonType.EMPLOYEE_SUMMARY, cid));
+        return ActionRow.of(returnButton(WorkforceButtonType.OVERVIEW, cid));
+    }
+
+    /* Combined components */
+    public static List<LayoutComponent> employeeBranchComponents(final String cid, final CwuBranch branch) {
+        return List.of(/*branchMenu(branch, cid)*/profilePrevAndNextRow(cid));
+    }
+
+    public static List<LayoutComponent> employeeRankComponents(final String cid, final CwuRank rank) {
+        return List.of(/*rankMenu(rank, cid),*/ profilePrevAndNextRow(cid));
     }
 }

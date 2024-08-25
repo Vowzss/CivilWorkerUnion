@@ -3,8 +3,9 @@ package com.oneliferp.cwu.commands.modules.manage.misc.actions;
 import com.oneliferp.cwu.misc.IActionType;
 
 public enum ReportChoiceType implements IActionType {
-    SUMMARY("", "report/summary"),
-    MANAGE("", "report/manage");
+    OVERVIEW("btn#cwu_manage", "report/overview"),
+    STATS("btn#manage", "report/stats"),
+    MANAGE("btn#cwu_manage", "report/manage");
 
     public final String root;
     public final String action;

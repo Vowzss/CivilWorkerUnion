@@ -29,7 +29,7 @@ public class ReportDatabase extends JsonDatabase<String, ReportModel> {
     }
 
     /* Utils */
-    public static int resolveEarnings(final List<ReportModel> collection) {
+    public static int resolveEarnings(final Collection<ReportModel> collection) {
         if (collection.isEmpty()) return 0;
         return collection.stream()
                 .filter(c -> c.getType() == ReportType.BUSINESS_ORDER || c.getType() == ReportType.MEDICAL_ORDER)

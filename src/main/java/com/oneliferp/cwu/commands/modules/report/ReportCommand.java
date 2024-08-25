@@ -191,7 +191,7 @@ public class ReportCommand extends CwuCommand {
             return;
         }
 
-        report.begin();
+        report.start();
         this.goToPage(event, report);
     }
 
@@ -209,7 +209,7 @@ public class ReportCommand extends CwuCommand {
     }
 
     private void handleSubmitButton(final ButtonInteractionEvent event, final ReportModel report) throws ReportValidationException {
-        if (!report.isValid()) throw new ReportValidationException(event);
+        if (!report.verify()) throw new ReportValidationException(event);
 
         report.end();
         this.reportCache.remove(report.getEmployeeCid());

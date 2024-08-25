@@ -30,7 +30,7 @@ public class ProfileDatabase extends JsonDatabase<String, ProfileModel> {
 
     /* Utils */
     public ProfileModel getFromCid(final String cid) {
-        return this.map.get(cid);
+        return !cid.contains("#") ? this.map.get(cid) : this.map.get(cid.substring(1));
     }
 
     public ProfileModel getFromId(final long id) {

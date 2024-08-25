@@ -1,6 +1,6 @@
-package com.oneliferp.cwu.commands.modules.manage.misc;
+package com.oneliferp.cwu.commands.modules.profile.misc;
 
-public enum EmployeePageType {
+public enum ProfilePageType {
     IDENTITY("identity", "Identité de l'employé :"),
     ID("id", "Identifiant discord :"),
     BRANCH("branch", "Branche de l'employé :"),
@@ -11,7 +11,7 @@ public enum EmployeePageType {
     private final String id;
     private final String description;
 
-    EmployeePageType(final String id, final String description) {
+    ProfilePageType(final String id, final String description) {
         this.id = id;
         this.description = description;
     }

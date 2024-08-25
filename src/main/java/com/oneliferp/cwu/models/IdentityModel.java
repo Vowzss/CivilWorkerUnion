@@ -31,7 +31,7 @@ public class IdentityModel {
         this.cid = cid;
     }
 
-    /* Utils */
+    /* Object */
     @Override
     public String toString() {
         if (this.lastName == null) return String.format("%s, %s", firstName, cid);

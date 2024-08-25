@@ -16,6 +16,18 @@ public class EmojiUtils {
         return EmojiManager.getByAlias(":red_circle:").get().getUnicode();
     }
 
+    public static String getIdCard() {
+        return EmojiManager.getByAlias(":identification_card:").get().getUnicode();
+    }
+
+    public static String getPencilMemo() {
+        return EmojiManager.getByAlias(":pencil:").get().getUnicode();
+    }
+
+    public static String getPencil() {
+        return EmojiManager.getByAlias(":pencil2:").get().getUnicode();
+    }
+
     public static String getPenBall() {
         return EmojiManager.getByAlias(":pen_ballpoint:").get().getUnicode();
     }

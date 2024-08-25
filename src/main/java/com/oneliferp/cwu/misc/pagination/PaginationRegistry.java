@@ -1,6 +1,6 @@
 package com.oneliferp.cwu.misc.pagination;
 
-import com.oneliferp.cwu.commands.modules.manage.misc.EmployeePageType;
+import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
@@ -11,7 +11,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class PaginationRegistry {
     private static final Map<ReportType, List<ReportPageType>> reportPages = fillReportPages();
@@ -24,8 +23,8 @@ public class PaginationRegistry {
         return sessionPages.getOrDefault(type, Collections.emptyList());
     }
 
-    private static final List<EmployeePageType> employeePages = List.of(EmployeePageType.IDENTITY, EmployeePageType.ID, EmployeePageType.BRANCH, EmployeePageType.RANK, EmployeePageType.JOINED_AT);
-    public static List<EmployeePageType> getEmployeePages() {
+    private static final List<ProfilePageType> employeePages = List.of(ProfilePageType.IDENTITY, ProfilePageType.ID, ProfilePageType.BRANCH, ProfilePageType.RANK, ProfilePageType.JOINED_AT);
+    public static List<ProfilePageType> getProfilePages() {
         return employeePages;
     }
 

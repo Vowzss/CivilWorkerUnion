@@ -1,21 +1,26 @@
 package com.oneliferp.cwu.commands.modules.profile.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
 import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
+import com.oneliferp.cwu.misc.pagination.Pageable;
+import com.oneliferp.cwu.misc.pagination.PaginationContext;
+import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-public class ProfileModel {
+public class ProfileModel extends Pageable<ProfilePageType> {
     @JsonProperty("id")
-    private long id;
+    private Long id;
 
     @JsonProperty("identity")
     private IdentityModel identity;
@@ -26,31 +31,36 @@ public class ProfileModel {
     @JsonProperty("joinedAt")
     private SimpleDate joinedAt;
 
-    private ProfileModel() {
+    public ProfileModel() {
     }
 
-    public ProfileModel(final long id, final IdentityModel identity, final CwuBranch branch, final SimpleDate joinedAt) {
+    /* Getters & Setters */
+    public void setId(final Long id) {
         this.id = id;
-        this.identity = identity;
-        this.branch = branch;
-        this.joinedAt = joinedAt;
     }
-
-    /* Getters */
     public Long getId() {
         return this.id;
     }
 
+    public void setIdentity(final IdentityModel identity) {
+        this.identity = identity;
+    }
     public IdentityModel getIdentity() {
         return this.identity;
     }
 
-    public SimpleDate getJoinedAt() {
-        return this.joinedAt;
+    public void setBranch(final CwuBranch branch) {
+        this.branch = branch;
     }
-
     public CwuBranch getBranch() {
         return this.branch;
+    }
+
+    public void setJoinedAt(final SimpleDate joinedAt) {
+        this.joinedAt = joinedAt;
+    }
+    public SimpleDate getJoinedAt() {
+        return this.joinedAt;
     }
 
     /* Methods */
@@ -100,6 +110,16 @@ public class ProfileModel {
         return ReportDatabase.get().resolveByEmployee(this.getCid());
     }
 
+    public Integer resolveSalaryTokens(final Collection<SessionModel> sessions, final Collection<ReportModel> reports) {
+        final CwuRank rank = this.identity.rank;
+
+        return (int) Math.floor(SessionDatabase.resolveEarnings(sessions) * rank.getSessionRoyalty()) +
+               (int) Math.floor(ReportDatabase.resolveEarnings(reports) * rank.getBranchRoyalty());
+    }
+
+    public Integer resolveSalaryPoints(final Collection<SessionModel> sessions, final Collection<ReportModel> reports) {
+        return SessionDatabase.resolvePoints(sessions) + ReportDatabase.resolvePoints(reports);
+    }
 
     @Override
     public String toString() {
@@ -115,7 +135,7 @@ public class ProfileModel {
                         Sessions: %d | Rapports: %s
                         Salaire : %d token(s) & %d point(s)""",
                 this, sessions.size(), reports.size(),
-                SessionDatabase.resolveEarnings(sessions) + ReportDatabase.resolveEarnings(reports), SessionDatabase.resolvePoints(sessions) + ReportDatabase.resolvePoints(reports)
+                this.resolveSalaryTokens(sessions, reports), this.resolveSalaryPoints(sessions, reports)
         );
     }
 
@@ -128,8 +148,69 @@ public class ProfileModel {
                         Sessions: %d | Rapports: %s
                         Salaire : %d token(s) & %d point(s)""",
                 this, sessions.size(), reports.size(),
-                SessionDatabase.resolveEarnings(sessions) + ReportDatabase.resolveEarnings(reports), SessionDatabase.resolvePoints(sessions) + ReportDatabase.resolvePoints(reports)
+                this.resolveSalaryTokens(sessions, reports), this.resolveSalaryPoints(sessions, reports)
         );
+    }
+
+    /* Helpers */
+    public String getDescriptionFormat() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append("**Informations général :**").append("\n");
+        sb.append(String.format("Identité : %s", this.identity)).append("\n");
+        sb.append(String.format("Identifiant discord : <@%d>", this.id)).append("\n");
+        sb.append(String.format("Recruté le: %s", this.joinedAt.getDate())).append("\n\n");
+
+        sb.append("**Informations CWU :**").append("\n");
+        sb.append(String.format("Division : %s (%s)\n", this.branch, this.branch.getMeaning()));
+        sb.append(String.format("Grade : %s\n", this.identity.rank.getLabel()));
+        return sb.toString();
+    }
+
+    public String getStatsFormat() {
+        final StringBuilder sb = new StringBuilder();
+        {
+            final SessionModel s = this.resolveLatestSession();
+            sb.append("**Dernière session effectuée :**").append("\n");
+            sb.append(s == null ? "`Information inexistante`" : s.getDescriptionFormat(false)).append("\n\n");
+        }
+
+        /*
+        sb.append(String.format("**Nombre de sessions:** %d\n", cwu.getSessionCount()));
+        sb.append(String.format("**Compteur hebdomadaire:** %d\n", cwu.getWeeklySessionCount()));
+        */
+
+        {
+            final ReportModel r = this.resolveLatestReport();
+            sb.append("**Dernier rapport soumis :**").append("\n");
+            sb.append(r == null ? "`Information inexistante`" : r.getDescriptionFormat(false)).append("\n\n");
+        }
+        /*
+        sb.append(String.format("**Nombre de rapports:** %d\n", cwu.getReportCount()));
+        sb.append(String.format("**Compteur hebdomadaire:** %d\n", cwu.getWeeklyReportCount()));
+        */
+
+        return sb.toString();
+    }
+
+    /* Pageable implementation */
+    @Override
+    public void start() {
+        this.pagination = new PaginationContext<>(PaginationRegistry.getProfilePages(), ProfilePageType.PREVIEW);
+    }
+
+    @Override
+    public void end() {
+
+    }
+
+    @Override
+    public void reset() {
+
+    }
+
+    @Override
+    public boolean verify() {
+        return false;
     }
 }
 

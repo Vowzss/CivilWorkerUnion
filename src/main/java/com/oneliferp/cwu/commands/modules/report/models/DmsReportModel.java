@@ -16,18 +16,16 @@ public class DmsReportModel extends ReportModel {
     private String medical;
 
     private DmsReportModel() {
-        super();
-
-        this.branch = CwuBranch.DMS;
+        super(CwuBranch.DMS);
     }
 
-    public DmsReportModel(final ProfileModel employee) {
-        super(employee);
+    public DmsReportModel(final ProfileModel profile) {
+        super(profile);
     }
 
     /* Getter & Setter */
     @Override
-    public void setIdentity(IdentityModel identity) {
+    public void setIdentity(final IdentityModel identity) {
         this.patient = identity;
     }
 
@@ -56,7 +54,7 @@ public class DmsReportModel extends ReportModel {
         return this.medical;
     }
 
-    /* Methods */
+    /* Pageable implementation */
     @Override
     public void reset() {
         super.reset();

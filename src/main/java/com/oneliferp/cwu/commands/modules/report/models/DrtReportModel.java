@@ -16,18 +16,16 @@ public class DrtReportModel extends ReportModel {
     private String healthiness;
 
     private DrtReportModel() {
-        super();
-
-        this.branch = CwuBranch.DRT;
+        super(CwuBranch.DRT);
     }
 
-    public DrtReportModel(final ProfileModel employee) {
-        super(employee);
+    public DrtReportModel(final ProfileModel profile) {
+        super(profile);
     }
 
     /* Getter & Setter */
     @Override
-    public void setIdentity(IdentityModel identity) {
+    public void setIdentity(final IdentityModel identity) {
         this.tenant = identity;
     }
 
@@ -56,7 +54,7 @@ public class DrtReportModel extends ReportModel {
         return this.healthiness;
     }
 
-    /* Methods */
+    /* Pageable implementation */
     @Override
     public void reset() {
         super.reset();

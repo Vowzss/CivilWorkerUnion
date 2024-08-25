@@ -13,18 +13,16 @@ public class DtlReportModel extends ReportModel {
     private String healthiness;
 
     private DtlReportModel() {
-        super();
-
-        this.branch = CwuBranch.DTL;
+        super(CwuBranch.DTL);
     }
 
-    public DtlReportModel(final ProfileModel employee) {
-        super(employee);
+    public DtlReportModel(final ProfileModel profile) {
+        super(profile);
     }
 
     /* Getter & Setter */
     @Override
-    public void setIdentity(IdentityModel identity) {
+    public void setIdentity(final IdentityModel identity) {
         this.tenant = identity;
     }
 
@@ -43,7 +41,7 @@ public class DtlReportModel extends ReportModel {
         return this.healthiness;
     }
 
-    /* Methods */
+    /* Pageable implementation */
     @Override
     public void reset() {
         super.reset();

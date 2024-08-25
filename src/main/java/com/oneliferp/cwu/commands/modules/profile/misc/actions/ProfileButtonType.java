@@ -4,13 +4,17 @@ import com.oneliferp.cwu.misc.IActionType;
 
 public enum ProfileButtonType implements IActionType {
     STATS("btn#cwu_profile", "stats"),
-    RETURN("btn#cwu_profile", "return"),
+    UPDATE("btn#cwu_profile", "update"),
+    UPDATE_CONFIRM("btn#cwu_profile", "update/confirm"),
+    UPDATE_CANCEL("btn#cwu_profile", "update/cancel"),
+
     DELETE("btn#cwu_profile", "delete"),
     DELETE_CONFIRM("btn#cwu_profile", "delete/confirm"),
     DELETE_CANCEL("btn#cwu_profile", "delete/cancel");
 
-    public final String root;
-    public final String action;
+
+    private final String root;
+    private final String action;
 
     ProfileButtonType(final String root, final String action) {
         this.root = root;

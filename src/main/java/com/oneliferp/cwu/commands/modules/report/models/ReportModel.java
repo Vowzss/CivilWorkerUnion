@@ -1,22 +1,20 @@
 package com.oneliferp.cwu.commands.modules.report.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
+import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
+import com.oneliferp.cwu.commands.modules.report.misc.StockType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
-import com.oneliferp.cwu.commands.modules.report.misc.StockType;
 import com.oneliferp.cwu.misc.IdFactory;
-import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
-import com.oneliferp.cwu.models.IdentityModel;
-import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
-import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
+import com.oneliferp.cwu.misc.pagination.Pageable;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
+import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
-import kotlin.NotImplementedError;
 import org.jetbrains.annotations.Nullable;
 
 @JsonTypeInfo(
@@ -29,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
         @JsonSubTypes.Type(value = DmsReportModel.class, name = "DMS"),
         @JsonSubTypes.Type(value = DmsReportModel.class, name = "DRT"),
 })
-public abstract class ReportModel {
+public abstract class ReportModel extends Pageable<ReportPageType>  {
     @JsonProperty("id")
     private String id;
 
@@ -54,16 +52,15 @@ public abstract class ReportModel {
     @JsonProperty("information")
     private String info;
 
-    @JsonIgnore
-    private PaginationContext<ReportPageType> pagination;
+    protected ReportModel(final CwuBranch branch) {
+        this.branch = branch;
+    }
 
-    protected ReportModel() {}
-
-    protected ReportModel(final ProfileModel employee) {
+    protected ReportModel(final ProfileModel profile) {
         this.id = IdFactory.get().generateID();
 
-        this.employee = employee.getIdentity();
-        this.branch = employee.getBranch();
+        this.employee = profile.getIdentity();
+        this.branch = profile.getBranch();
         this.createdAt = SimpleDate.now();
 
         this.stock = StockType.UNKNOWN;
@@ -73,7 +70,6 @@ public abstract class ReportModel {
     }
 
     /* Getters & Setters */
-
     public String getId() {
         return this.id;
     }
@@ -131,7 +127,6 @@ public abstract class ReportModel {
     public void setHealthiness(final String healthiness) {
         throw new UnsupportedOperationException("Healthiness is not available for this type of report.");
     }
-
     public String getHealthiness() {
         throw new UnsupportedOperationException("Healthiness is not available for this type of report.");
     }
@@ -139,70 +134,8 @@ public abstract class ReportModel {
     public void setMedical(final String medical) {
         throw new UnsupportedOperationException("Medical is not available for this type of report.");
     }
-
     public String getMedical() {
         throw new UnsupportedOperationException("Medical is not available for this type of report.");
-    }
-
-    /* Methods */
-    public void begin() {
-        this.pagination = new PaginationContext<>(PaginationRegistry.getReportPages(this.type), ReportPageType.PREVIEW);
-    }
-
-    public void end() {
-
-    }
-
-    public void reset() {
-        this.type = ReportType.UNKNOWN;
-        this.info = null;
-        this.stock = StockType.UNKNOWN;
-        this.tokens = null;
-    }
-
-    public boolean isValid() {
-        // TODO: FIX TO CHECK BASED OF SPECIFIC TYPE !!! OVERRIDE
-        return this.employee != null && this.type != null;
-    }
-
-    /* Page Metadata */
-    public ReportPageType getCurrentPage() {
-        return this.pagination.getCurrent();
-    }
-
-    public boolean hasSingleStep() {
-        return this.pagination.getMaxSteps() <= 1;
-    }
-
-    public void goNextPage() {
-        this.pagination.setNext();
-    }
-    public void goPrevPage() {
-        this.pagination.setPrev();
-    }
-    public void goPreviewPage() {
-        this.pagination.setPreview();
-    }
-    public void goFirstPage() {
-        this.pagination.setFirst();
-    }
-
-    public boolean isFirstPage() {
-        return this.pagination.isFirst();
-    }
-    public boolean isLastPage() {
-        return this.pagination.isLast();
-    }
-
-    public int getCurrentStep() {
-        return this.pagination.getCurrentStep();
-    }
-    public int getMaxSteps() {
-        return this.pagination.getMaxSteps();
-    }
-
-    public boolean hasPage(final ReportPageType type) {
-        return this.pagination.contains(type);
     }
 
     /* Utils */
@@ -218,6 +151,19 @@ public abstract class ReportModel {
         return this.createdAt.isWithinWeek();
     }
 
+    /* Helpers */
+    public String getDescriptionFormat(final boolean withIdentity) {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s  %s - %s **(ID: %s)**", this.branch.getEmoji(), this.branch.name(), this.type.getLabel(), this.id)).append("\n");
+        if (withIdentity) sb.append(String.format("Employé : %s ", this.employee)).append("\n");
+        sb.append(this.createdAt);
+        return sb.toString();
+    }
+
+    public String getDescriptionFormat() {
+        return this.getDescriptionFormat(true);
+    }
+
     public String getStepTitle() {
         return String.format("%s  Rapport %s - %s | %d/%d", this.type.getBranchEmoji(), this.branch, this.type.getLabel(), this.getCurrentStep(), this.getMaxSteps());
     }
@@ -230,12 +176,26 @@ public abstract class ReportModel {
         return String.format("%s  Rapport %s - %s | Finalisation", this.type.getBranchEmoji(), this.branch, this.type.getLabel());
     }
 
-    /* Helpers */
-    public static String getAsDescription(final ReportModel report) {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s  %s - %s **(ID: %s)**", report.getBranch().getEmoji(), report.getBranch().name(), report.getType().getLabel(), report.getId())).append("\n");
-        sb.append(String.format("Employé : %s ", report.getEmployee())).append("\n");
-        sb.append(report.getCreatedAt()).append("\n");
-        return sb.toString();
+    /* Pageable implementation */
+    @Override
+    public void start() {
+        this.pagination = new PaginationContext<>(PaginationRegistry.getReportPages(this.type), ReportPageType.PREVIEW);
+    }
+
+    public void end() {
+
+    }
+
+    @Override
+    public void reset() {
+        this.type = ReportType.UNKNOWN;
+        this.info = null;
+        this.stock = StockType.UNKNOWN;
+        this.tokens = null;
+    }
+
+    @Override
+    public boolean verify() {
+        return this.employee != null && this.type != null;
     }
 }
