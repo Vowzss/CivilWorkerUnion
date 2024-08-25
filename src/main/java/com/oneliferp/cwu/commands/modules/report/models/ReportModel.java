@@ -15,6 +15,7 @@ import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.Toolbox;
 import org.jetbrains.annotations.Nullable;
 
 @JsonTypeInfo(
@@ -162,6 +163,15 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
 
     public String getDescriptionFormat() {
         return this.getDescriptionFormat(true);
+    }
+
+    public String getDisplayFormat() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(String.format("%s **Rapport :** %s", this.type.getBranchEmoji(), this.type.getLabel())).append("\n");
+        sb.append(String.format("**Employé :** %s", this.employee)).append("\n");
+        sb.append(String.format("**Date :** %s", this.getCreatedAt())).append("\n\n");
+        sb.append("**Informations supplémentaires :**").append("\n").append(this.info == null ? "Rien à signaler" : info).append("\n\n");
+        return sb.toString();
     }
 
     public String getStepTitle() {

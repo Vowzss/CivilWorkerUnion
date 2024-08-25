@@ -3,6 +3,9 @@ package com.oneliferp.cwu.commands.modules.report;
 import com.oneliferp.cwu.cache.ReportCache;
 import com.oneliferp.cwu.commands.CwuCommand;
 import com.oneliferp.cwu.commands.modules.report.models.*;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType;
+import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
+import com.oneliferp.cwu.commands.modules.session.utils.SessionBuilderUtils;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
@@ -45,9 +48,7 @@ public class ReportCommand extends CwuCommand {
         this.profileDatabase = ProfileDatabase.get();
     }
 
-    /*
-    Abstract Handlers
-    */
+    /* Handlers */
     @Override
     public void handleCommandInteraction(final SlashCommandInteractionEvent event) throws CwuException {
         final ProfileModel cwu = this.profileDatabase.getFromId(event.getUser().getIdLong());
@@ -76,10 +77,36 @@ public class ReportCommand extends CwuCommand {
 
     @Override
     public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext ctx) throws CwuException {
+        final ProfileModel profile = this.profileDatabase.getFromCid(ctx.getCid());
+        if (profile == null) throw new ProfileNotFoundException(event);
+
+        final ReportButtonType type = ctx.getEnumType();
+        if (type == ReportButtonType.DELETE) {
+            final ReportModel report = this.reportDatabase.get(ctx.getAsString("report"));
+            if (report == null) throw new ReportNotFoundException(event);
+
+            event.editMessageEmbeds(ReportBuilderUtils.deleteMessage(report))
+                    .setComponents(ReportBuilderUtils.deleteComponent(profile.getCid(), report.getId())).queue();
+            return;
+        } else if (type == ReportButtonType.DELETE_CONFIRM) {
+            this.reportDatabase.removeOne(ctx.getAsString("report"));
+            this.reportDatabase.save();
+
+            event.reply("Suppression du rapport avec succès.")
+                    .setEphemeral(true).queue();
+            event.getMessage().delete().queue();
+            return;
+        } else if (type == ReportButtonType.DELETE_CANCEL) {
+            event.reply("Vous avez annulé la suppression du rapport.")
+                    .setEphemeral(true).queue();
+            event.getMessage().delete().queue();
+            return;
+        }
+
         final ReportModel report = this.reportCache.get(ctx.getCid());
         if (report == null) throw new ReportNotFoundException(event);
 
-        switch ((ReportButtonType) ctx.getEnumType()) {
+        switch (type) {
             default -> throw new IllegalArgumentException();
             case BEGIN -> this.handleBeginButton(event, report);
             case FILL -> this.handleFillButton(event, report);

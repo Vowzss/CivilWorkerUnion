@@ -70,8 +70,16 @@ public abstract class JsonDatabase<A, B> {
         return this.map.containsKey(cid);
     }
 
-    public Collection<B> getAll() {
-        return this.map.values();
+    public List<B> getAll() {
+        return this.map.values().stream().toList();
+    }
+
+    public B get(final A key) {
+        return this.map.get(key);
+    }
+
+    public int getCount() {
+        return this.map.size();
     }
 
     /* Persistence methods */

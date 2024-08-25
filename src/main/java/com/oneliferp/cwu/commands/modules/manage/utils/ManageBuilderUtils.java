@@ -1,12 +1,15 @@
 package com.oneliferp.cwu.commands.modules.manage.utils;
 
+import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
+import com.oneliferp.cwu.commands.modules.manage.misc.actions.WorkforceButtonType;
 import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
-import com.oneliferp.cwu.commands.modules.manage.misc.actions.*;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.modules.profile.utils.ProfileBuilderUtils;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
+import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.database.ProfileDatabase;
-import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
@@ -25,25 +28,47 @@ import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ManageBuilderUtils {
     /* Messages */
-    public static MessageEmbed sessionOverviewComponent() {
+    public static MessageEmbed sessionOverviewMessage(final Collection<SessionModel> sessions) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle("Historique des sessions");
+        embed.setTitle("Statistiques des sessions");
 
         final StringBuilder sb = new StringBuilder();
         sb.append("""
                 Cette interface vous permet d'accéder aux sessions de travail.
-                Pour toutes actions, munisser vous de l'ID uniquement.
+                Pour toutes actions, munissez vous de l'ID uniquement.
                 """).append("\n");
 
-        sb.append("**Sessions récemment effectué :**").append("\n");
-        SessionDatabase.get().resolveLatestLimit(5).forEach(s -> {
-            sb.append(s.getDescriptionFormat()).append("\n");
-        });
+        for (final CwuBranch branch : CwuBranch.values()) {
+            sb.append(String.format("%s **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
+            sb.append(String.format("Nombre de session(s) : %d", 0)).append("\n\n");
+        }
+
+        sb.append("**Dernières sessions effectuées :**").append("\n");
+        sessions.forEach(s -> sb.append(s.getDescriptionFormat()).append("\n\n"));
+
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    public static MessageEmbed sessionPageMessage(final Collection<SessionModel> sessions, final int pageIndex, final int maxIndex) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(String.format("Historique des sessions | Page %d sur %d", pageIndex, maxIndex));
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface recense toutes les sessions de travail.
+                Pour toutes actions, munissez vous de l'ID uniquement.
+                """).append("\n");
+
+        sessions.forEach(r -> sb.append(r.getDescriptionFormat()).append("\n\n"));
 
         embed.setDescription(sb.toString());
         return embed.build();
@@ -53,7 +78,7 @@ public class ManageBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Statistiques de la semaine");
 
-        final List<SessionModel> sessions = SessionDatabase.get().resolveWithinWeek();
+        final List<SessionModel> sessions = SessionDatabase.get().resolveFromWeek();
         final int totalSessionCount = sessions.size();
         final int totalEarnings = SessionDatabase.resolveEarnings(sessions);
 
@@ -93,20 +118,39 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed reportsLatestMessage() {
+    public static MessageEmbed reportOverviewMessage(final Collection<ReportModel> reports) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle("Historique des rapports");
+        embed.setTitle("Statistiques des rapports");
 
         final StringBuilder sb = new StringBuilder();
         sb.append("""
                 Cette interface vous permet d'accéder aux rapports.
-                Pour toutes actions, munisser vous de l'ID uniquement.
-                """);
-        sb.append("\n");
+                Pour toutes actions, munissez vous de l'ID uniquement.
+                """).append("\n");
 
-        ReportDatabase.get().resolveLatestLimit(5).forEach(r -> {
-            sb.append(r.getDescriptionFormat()).append("\n");
-        });
+        for (final CwuBranch branch : CwuBranch.values()) {
+            sb.append(String.format("%s **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
+            sb.append(String.format("Nombre de rapport(s) : %d", reports.stream().filter(r -> r.getBranch() == branch).toList().size())).append("\n\n");
+        }
+
+        sb.append("**Derniers rapports envoyés :**").append("\n");
+        reports.forEach(r -> sb.append(r.getDescriptionFormat()).append("\n\n"));
+
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    public static MessageEmbed reportPageMessage(final Collection<ReportModel> reports, final int pageIndex, final int maxIndex) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(String.format("Historique des rapports | Page %d sur %d", pageIndex, maxIndex));
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface recense tous les rapports.
+                Pour toutes actions, munissez vous de l'ID uniquement.
+                """).append("\n");
+
+        reports.forEach(r -> sb.append(r.getDescriptionFormat()).append("\n\n"));
 
         embed.setDescription(sb.toString());
         return embed.build();
@@ -115,24 +159,13 @@ public class ManageBuilderUtils {
     /* Employee messages */
     public static MessageEmbed workforceOverviewMessage() {
         final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle("Liste des employés");
+        embed.setTitle("Effectif de la Civil Worker's Union");
 
         final StringBuilder sb = new StringBuilder();
         sb.append("Cette interface vous permet de gérer l'effectif total.").append("\n");
-        sb.append("Pour toutes actions, munisser vous du CID uniquement.").append("\n\n");
-
-        sb.append(String.format("%s **Branche CWU (%s)**", EmojiUtils.getScales(), CwuBranch.CWU.getMeaning())).append("\n");
-        {
-            final ProfileModel supervisor = ProfileDatabase.get().getSupervisor();
-            if (supervisor != null) sb.append(supervisor).append("\n");
-
-            final ProfileModel assistant = ProfileDatabase.get().getAssistant();
-            if (assistant != null) sb.append(assistant).append("\n");
-        }
-        sb.append("\n");
+        sb.append("Pour toutes actions, munissez vous du CID uniquement.").append("\n\n");
 
         ProfileDatabase.get().getAsGroupAndOrder().forEach((branch, profiles) -> {
-            if (branch == CwuBranch.CWU) return;
             sb.append(String.format("%s **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
             profiles.forEach(profile -> sb.append(profile).append("\n"));
             sb.append("\n");
@@ -151,7 +184,8 @@ public class ManageBuilderUtils {
             sb.append(String.format("%s  **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
 
             if (profiles.isEmpty()) return;
-            profiles.forEach(profile -> sb.append(profile.getWeekStats()).append("\n\n"));
+            profiles.forEach(profile -> sb.append(profile.getWeekStats()).append("\n"));
+            sb.append("\n");
         });
 
         embed.setDescription(sb.toString());
@@ -331,12 +365,16 @@ public class ManageBuilderUtils {
         return Button.danger(type.build(cid), "Effacer");
     }
 
-    private static Button prevButton(final IActionType type, final String cid) {
-        return Button.secondary(type.build(cid), EmojiUtils.asDiscordEmoji(EmojiUtils.getLeftArrow()));
+    private static Button prevButton(final IActionType type, final String cid, final Map<String, String> params) {
+        return Button.secondary(type.build(cid, params), EmojiUtils.asDiscordEmoji(EmojiUtils.getLeftArrow()));
     }
 
-    private static Button nextButton(final IActionType type, final String cid) {
-        return Button.secondary(type.build(cid), EmojiUtils.asDiscordEmoji(EmojiUtils.getRightArrow()));
+    private static Button nextButton(final IActionType type, final String cid, final Map<String, String> params) {
+        return Button.secondary(type.build(cid, params), EmojiUtils.asDiscordEmoji(EmojiUtils.getRightArrow()));
+    }
+
+    private static Button historyButton(final IActionType type, final String cid) {
+        return Button.primary(type.build(cid), "Historique");
     }
 
     private static Button previewButton(final IActionType type, final String cid) {
@@ -365,11 +403,46 @@ public class ManageBuilderUtils {
     }
 
     public static ActionRow sessionOverviewComponent(final String cid) {
-        return ActionRow.of(statsButton(SessionChoiceType.OVERVIEW, cid), manageButton(SessionChoiceType.MANAGE, cid));
+        return ActionRow.of(historyButton(SessionButtonType.HISTORY, cid), manageButton(SessionButtonType.MANAGE, cid));
     }
 
-    public static ActionRow reportsOverviewComponent(final String cid) {
-        return ActionRow.of(statsButton(ReportChoiceType.OVERVIEW, cid), manageButton(ReportChoiceType.MANAGE, cid));
+    public static ActionRow sessionPageComponent(final String cid, final int currIndex, final int maxIndex) {
+        final List<Button> buttons = new ArrayList<>();
+        if (maxIndex > 1) {
+            if (currIndex > 1)
+                buttons.add(prevButton(SessionButtonType.PAGE, cid, Map.of("index", String.valueOf(currIndex - 1), "type", "prev")));
+            if (currIndex < maxIndex)
+                buttons.add(nextButton(SessionButtonType.PAGE, cid, Map.of("index", String.valueOf(currIndex + 1), "type", "next")));
+        }
+
+        buttons.addAll(List.of(
+                manageButton(SessionButtonType.MANAGE, cid),
+                returnButton(SessionButtonType.OVERVIEW, cid)
+        ));
+
+        return ActionRow.of(buttons);
+    }
+
+
+    public static ActionRow reportOverviewComponent(final String cid) {
+        return ActionRow.of(historyButton(ReportButtonType.HISTORY, cid), manageButton(ReportButtonType.MANAGE, cid));
+    }
+
+    public static ActionRow reportPageComponent(final String cid, final int currIndex, final int maxIndex) {
+        final List<Button> buttons = new ArrayList<>();
+        if (maxIndex > 1) {
+            if (currIndex > 1)
+                buttons.add(prevButton(ReportButtonType.PAGE, cid, Map.of("index", String.valueOf(currIndex - 1), "type", "prev")));
+            if (currIndex < maxIndex)
+                buttons.add(nextButton(ReportButtonType.PAGE, cid, Map.of("index", String.valueOf(currIndex + 1), "type", "next")));
+        }
+
+        buttons.addAll(List.of(
+                manageButton(ReportButtonType.MANAGE, cid),
+                returnButton(ReportButtonType.OVERVIEW, cid)
+        ));
+
+        return ActionRow.of(buttons);
     }
 
     private static ActionRow submitOrEditRow(final IActionType submitType, final IActionType editType, final String cid) {
@@ -415,7 +488,6 @@ public class ManageBuilderUtils {
     public static LayoutComponent employeeResumeOrOverwriteComponent(final String cid) {
         return ActionRow.of(overwriteButton(cid), resumeButton(cid));
     }
-
 
 
     public static LayoutComponent employeeStatsComponent(final String cid) {

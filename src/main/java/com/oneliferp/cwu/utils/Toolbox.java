@@ -7,10 +7,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class Toolbox {
-    public static <T> String flatten(final Collection<T> collection) {
+    public static <T> String flatten(final Collection<T> collection, final boolean newLine) {
         return collection.stream()
                 .map(T::toString)
-                .collect(Collectors.joining("\n"));
+                .collect(Collectors.joining(newLine ? "\n" : " "));
+    }
+    public static <T> String flatten(final Collection<T> collection) {
+       return flatten(collection, true);
     }
 
     public static <T> List<T> merge(final Collection<T> collection1, final Collection<T> collection2) {
@@ -26,7 +29,11 @@ public class Toolbox {
         return newList;
     }
 
-    public static void setDefaulMenuOption(final StringSelectMenu.Builder menu, final List<SelectOption> options, final String value) {
+    public static <T> List<T> select(final List<T> list, final int start, final int end) {
+        return list.subList(Math.max(0, start), Math.min(list.size(), end + 1));
+    }
+
+    public static void setDefaultMenuOption(final StringSelectMenu.Builder menu, final List<SelectOption> options, final String value) {
         options.stream().filter(o -> o.getValue().equals(value))
                 .findFirst()
                 .ifPresent(menu::setDefaultOptions);

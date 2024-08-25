@@ -1,6 +1,7 @@
 package com.oneliferp.cwu.database;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
 import com.oneliferp.cwu.misc.CwuBranch;
@@ -31,6 +32,38 @@ public class SessionDatabase extends JsonDatabase<String, SessionModel> {
     }
 
     /* Utils */
+    public List<SessionModel> resolveFromWeek(final int limit) {
+        return this.map.values().stream().filter(SessionModel::isWithinWeek)
+                .limit(limit)
+                .toList();
+    }
+
+    public List<SessionModel> resolveFromWeek() {
+        return this.map.values().stream().filter(SessionModel::isWithinWeek)
+                .toList();
+    }
+
+    public List<SessionModel> resolveByType(final SessionType type) {
+        return this.map.values().stream()
+                .filter(o -> o.getType() == type)
+                .toList();
+    }
+
+    public List<SessionModel> resolveByEmployee(final String cid) {
+        return this.map.values().stream()
+                .filter(o -> Objects.equals(o.getEmployeeCid(), cid))
+                .toList();
+    }
+
+    public SessionModel resolveLatest() {
+        if (this.map.values().isEmpty()) return null;
+
+        return this.map.values().stream()
+                .sorted(Comparator.comparing(v -> v.getPeriod().getEndedAt(), Comparator.reverseOrder()))
+                .findFirst().get();
+    }
+
+    /* Helpers */
     public static int resolveEarnings(final Collection<SessionModel> collection) {
         if (collection.isEmpty()) return 0;
         return collection.stream()
@@ -49,35 +82,18 @@ public class SessionDatabase extends JsonDatabase<String, SessionModel> {
                 .sum();
     }
 
-    public List<SessionModel> resolveWithinWeek() {
-        return this.map.values().stream().filter(SessionModel::isWithinWeek)
-                .toList();
-    }
-
-    public List<SessionModel> resolveLatestLimit(final int count) {
-        return this.map.values().stream()
+    public static List<SessionModel> resolveLatestLimit(final Collection<SessionModel> sessions, final int count) {
+        return sessions.stream()
                 .sorted(Comparator.comparing(v -> v.getPeriod().getEndedAt(), Comparator.reverseOrder()))
                 .limit(count)
                 .toList();
     }
 
-    public SessionModel resolveLatest() {
-        if (this.map.values().isEmpty()) return null;
+    public static SessionModel resolveMostRecent(final Collection<SessionModel> sessions) {
+        if (sessions.isEmpty()) return null;
 
-        return this.map.values().stream()
+        return sessions.stream()
                 .sorted(Comparator.comparing(v -> v.getPeriod().getEndedAt(), Comparator.reverseOrder()))
                 .findFirst().get();
-    }
-
-    public List<SessionModel> resolveByType(final SessionType type) {
-        return this.map.values().stream()
-                .filter(o -> o.getType() == type)
-                .toList();
-    }
-
-    public List<SessionModel> resolveByEmployee(final String cid) {
-        return this.map.values().stream()
-                .filter(o -> Objects.equals(o.getEmployeeCid(), cid))
-                .toList();
     }
 }

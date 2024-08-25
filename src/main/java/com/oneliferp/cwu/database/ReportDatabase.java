@@ -3,7 +3,6 @@ package com.oneliferp.cwu.database;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
-import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -29,17 +28,15 @@ public class ReportDatabase extends JsonDatabase<String, ReportModel> {
     }
 
     /* Utils */
-    public static int resolveEarnings(final Collection<ReportModel> collection) {
-        if (collection.isEmpty()) return 0;
-        return collection.stream()
-                .filter(c -> c.getType() == ReportType.BUSINESS_ORDER || c.getType() == ReportType.MEDICAL_ORDER)
-                .mapToInt(r ->  (int) Math.floor(r.getTax() * r.getEmployee().rank.getBranchRoyalty()))
-                .sum();
+    public List<ReportModel> resolveFromWeek(final int limit) {
+        return this.map.values().stream().filter(ReportModel::isWithinWeek)
+                .limit(limit)
+                .toList();
     }
 
-    public static int resolvePoints(final Collection<ReportModel> collection) {
-        if (collection == null) return 0;
-        return collection.size() / 2;
+    public List<ReportModel> resolveFromWeek() {
+        return this.map.values().stream().filter(ReportModel::isWithinWeek)
+                .toList();
     }
 
     public List<ReportModel> resolveByType(final ReportType type) {
@@ -54,10 +51,26 @@ public class ReportDatabase extends JsonDatabase<String, ReportModel> {
                 .toList();
     }
 
-    public List<ReportModel> resolveLatestLimit(final int count) {
+    public ReportModel resolveLatest() {
+        if (this.map.values().isEmpty()) return null;
+
         return this.map.values().stream()
-                .sorted(Comparator.comparing(ReportModel::getCreatedAt, Comparator.naturalOrder()))
-                .limit(count)
-                .toList();
+                .sorted(Comparator.comparing(ReportModel::getCreatedAt, Comparator.reverseOrder()))
+                .findFirst().get();
     }
+
+    /* Helpers */
+    public static int resolveEarnings(final Collection<ReportModel> collection) {
+        if (collection.isEmpty()) return 0;
+        return collection.stream()
+                .filter(c -> c.getType() == ReportType.BUSINESS_ORDER || c.getType() == ReportType.MEDICAL_ORDER)
+                .mapToInt(r ->  (int) Math.floor(r.getTax() * r.getEmployee().rank.getBranchRoyalty()))
+                .sum();
+    }
+
+    public static int resolvePoints(final Collection<ReportModel> collection) {
+        if (collection == null) return 0;
+        return collection.size() / 2;
+    }
+
 }

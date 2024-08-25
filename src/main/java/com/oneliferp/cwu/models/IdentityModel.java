@@ -34,7 +34,7 @@ public class IdentityModel {
     /* Object */
     @Override
     public String toString() {
-        if (this.lastName == null) return String.format("%s, %s", firstName, cid);
+        if (this.lastName == null || this.lastName.isEmpty()) return String.format("%s, #%s", firstName, cid);
         return String.format("%s %s, #%s", this.firstName, this.lastName, this.cid);
     }
 

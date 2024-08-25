@@ -25,7 +25,7 @@ import java.util.List;
 
 public class ProfileBuilderUtils {
     /* Messages */
-    public static MessageEmbed infoMessage(final ProfileModel profile) {
+    public static MessageEmbed displayMessage(final ProfileModel profile) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Fiche d'information de l'employé");
 
@@ -100,7 +100,7 @@ public class ProfileBuilderUtils {
                 .map(v -> SelectOption.of(String.format("%s - %s", v.name(), v.getMeaning()), v.name())).toList();
         options.forEach(menu::addOptions);
 
-        if (branch != null) Toolbox.setDefaulMenuOption(menu, options, branch.name());
+        if (branch != null) Toolbox.setDefaultMenuOption(menu, options, branch.name());
         return ActionRow.of(menu.build());
     }
 
@@ -110,7 +110,7 @@ public class ProfileBuilderUtils {
                 .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
         options.forEach(menu::addOptions);
 
-        if (rank != null) Toolbox.setDefaulMenuOption(menu, options, rank.name());
+        if (rank != null) Toolbox.setDefaultMenuOption(menu, options, rank.name());
         return ActionRow.of(menu.build());
     }
 
@@ -119,7 +119,7 @@ public class ProfileBuilderUtils {
         return ActionRow.of(cancelButton(ProfileButtonType.DELETE_CANCEL, cid), confirmButton(ProfileButtonType.DELETE_CONFIRM, cid));
     }
 
-    public static LayoutComponent infoComponent(final String cid) {
+    public static LayoutComponent displayComponent(final String cid) {
         return ActionRow.of(deleteButton(cid), updateButton(cid), returnButton(WorkforceButtonType.OVERVIEW, cid));
     }
 

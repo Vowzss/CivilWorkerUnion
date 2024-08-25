@@ -3,6 +3,15 @@ package com.oneliferp.cwu.commands.modules.report.misc.actions;
 import com.oneliferp.cwu.misc.IActionType;
 
 public enum ReportButtonType implements IActionType {
+    OVERVIEW("btn#cwu_manage", "report/overview"),
+    HISTORY("btn#cwu_manage", "report/history"),
+    MANAGE("btn#cwu_manage", "report/manage"),
+    PAGE("btn#cwu_manage", "report/page"),
+
+    DELETE("btn#cwu_report", "delete"),
+    DELETE_CONFIRM("btn#cwu_report", "delete/confirm"),
+    DELETE_CANCEL("btn#cwu_report", "delete/cancel"),
+
     BEGIN("btn#cwu_report", "begin"),
     ABORT("btn#cwu_report", "abort"),
     RESUME("btn#cwu_report", "resume"),

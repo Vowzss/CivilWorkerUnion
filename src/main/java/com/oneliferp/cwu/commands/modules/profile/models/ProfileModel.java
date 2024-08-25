@@ -76,6 +76,10 @@ public class ProfileModel extends Pageable<ProfilePageType> {
         return this.identity.rank;
     }
 
+    public boolean isAdministration() {
+        return this.branch == CwuBranch.CWU;
+    }
+
     /* Utils */
     public SessionModel resolveLatestSession() {
         return SessionDatabase.get().resolveByEmployee(this.getCid()).stream()
@@ -132,10 +136,8 @@ public class ProfileModel extends Pageable<ProfilePageType> {
 
         return String.format("""
                         %s
-                        Sessions: %d | Rapports: %s
-                        Salaire : %d token(s) & %d point(s)""",
-                this, sessions.size(), reports.size(),
-                this.resolveSalaryTokens(sessions, reports), this.resolveSalaryPoints(sessions, reports)
+                        Sessions: %d | Rapports: %s""",
+                this, sessions.size(), reports.size()
         );
     }
 
@@ -145,10 +147,8 @@ public class ProfileModel extends Pageable<ProfilePageType> {
 
         return String.format("""
                         %s
-                        Sessions: %d | Rapports: %s
-                        Salaire : %d token(s) & %d point(s)""",
-                this, sessions.size(), reports.size(),
-                this.resolveSalaryTokens(sessions, reports), this.resolveSalaryPoints(sessions, reports)
+                        Sessions: %d | Rapports: %s""",
+                this, sessions.size(), reports.size()
         );
     }
 

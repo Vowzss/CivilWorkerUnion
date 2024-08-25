@@ -1,5 +1,7 @@
 package com.oneliferp.cwu.commands.modules.report.utils;
 
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType;
+import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.commands.modules.report.misc.StockType;
 import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
@@ -7,6 +9,7 @@ import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportMenuType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
+import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
@@ -15,15 +18,17 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class ReportBuilderUtils {
-    /* MessageS & Fields */
+    /* Messages */
     public static MessageEmbed initMessage(final CwuBranch branch, final ReportType type) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(type == ReportType.UNKNOWN ? buildTitleWithBranch(branch) : buildTitleWithBranchAndType(branch, type));
@@ -48,6 +53,29 @@ public class ReportBuilderUtils {
         return embed.build();
     }
 
+    public static MessageEmbed displayMessage(final ReportModel report) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("Informations du rapport");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append(report.getDisplayFormat()).append("\n");
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    public static MessageEmbed deleteMessage(final ReportModel report) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("\uD83D\uDDD1 Action en cours - Suppression d'un rapport'");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Afin de terminer la procédure, veuillez confirmer votre choix.").append("\n\n");
+        sb.append("**Aperçu du rapport concerné :**").append("\n");
+        sb.append(report.getDescriptionFormat()).append("\n");
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    /* Fields */
     private static MessageEmbed.Field infoField(final String info) {
         final String name = String.format("%s  %s", EmojiUtils.getGreenCircle(),  ReportPageType.INFO.getDescription());
         final String value = info != null ? info : "`Rien à signaler`";
@@ -158,7 +186,6 @@ public class ReportBuilderUtils {
         sb.append("Le rapport à été transmit avec succès.\n");
         sb.append("\n");
 
-        //sb.append(String.format("Nombre de **rapport soumis** cette semaine: %d Rapports.\n", report.resolveEmployee().getWeeklyReportCount()));
         embed.setDescription(sb.toString());
         return embed.build();
     }
@@ -206,7 +233,7 @@ public class ReportBuilderUtils {
                 .toList();
         options.forEach(menu::addOptions);
 
-        if (type != ReportType.UNKNOWN) Toolbox.setDefaulMenuOption(menu, options, type.name());
+        if (type != ReportType.UNKNOWN) Toolbox.setDefaultMenuOption(menu, options, type.name());
         return menu.build();
     }
 
@@ -217,7 +244,7 @@ public class ReportBuilderUtils {
         options.forEach(menu::addOptions);
 
         final StockType type = report.getStock();
-        if (type != StockType.UNKNOWN) Toolbox.setDefaulMenuOption(menu, options, type.name());
+        if (type != StockType.UNKNOWN) Toolbox.setDefaultMenuOption(menu, options, type.name());
         return menu.build();
     }
 
@@ -266,7 +293,27 @@ public class ReportBuilderUtils {
         return Button.success(ReportButtonType.SUBMIT.build(cid), "Envoyer");
     }
 
-    /* Rows */
+    private static Button cancelButton(final IActionType type, final String cid, final String id) {
+        return Button.primary(type.build(cid, Map.of("report", id)), "Abandonner");
+    }
+
+    private static Button confirmButton(final IActionType type, final String cid, final String id) {
+        return Button.danger(type.build(cid, Map.of("report", id)), "Confirmer");
+    }
+
+    private static Button deleteButton(final IActionType type, final String cid, final String id) {
+        return Button.danger(type.build(cid, Map.of("report", id)), "Supprimer");
+    }
+
+    private static Button returnButton(final IActionType type, final String cid) {
+        return Button.secondary(type.build(cid), "Retour en arrière");
+    }
+
+    /* Components */
+    public static LayoutComponent displayComponent(final String cid, final String id) {
+        return ActionRow.of(deleteButton(ReportButtonType.DELETE, cid, id), returnButton(ReportButtonType.OVERVIEW, cid));
+    }
+
     private static ActionRow nextRow(final String cid) {
         return ActionRow.of(clearButton(cid), fillButton(cid), nextButton(cid));
     }
@@ -287,6 +334,11 @@ public class ReportBuilderUtils {
         return ActionRow.of(clearButton(cid), fillButton(cid), prevButton(cid), nextButton(cid));
     }
 
+    public static LayoutComponent deleteComponent(final String cid, final String id) {
+        return ActionRow.of(cancelButton(ReportButtonType.DELETE_CANCEL, cid, id), confirmButton(ReportButtonType.DELETE_CONFIRM, cid, id));
+    }
+
+    /* Components */
     public static ActionRow pageRow(final ReportModel report) {
         final String cid = report.getEmployeeCid();
 

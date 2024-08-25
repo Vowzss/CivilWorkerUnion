@@ -3,6 +3,15 @@ package com.oneliferp.cwu.commands.modules.session.misc.actions;
 import com.oneliferp.cwu.misc.IActionType;
 
 public enum SessionButtonType implements IActionType {
+    OVERVIEW("btn#cwu_manage", "session/overview"),
+    HISTORY("btn#cwu_manage", "session/history"),
+    MANAGE("btn#cwu_manage", "session/manage"),
+    PAGE("btn#cwu_manage", "session/page"),
+
+    DELETE("btn#cwu_session", "delete"),
+    DELETE_CONFIRM("btn#cwu_session", "delete/confirm"),
+    DELETE_CANCEL("btn#cwu_session", "delete/cancel"),
+
     BEGIN("btn#cwu_session", "begin"),
     ABORT("btn#cwu_session", "abort"),
     RESUME("btn#cwu_session", "resume"),

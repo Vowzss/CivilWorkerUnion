@@ -2,8 +2,6 @@ package com.oneliferp.cwu.commands.utils;
 
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.WorkforceButtonType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
-import com.oneliferp.cwu.commands.modules.manage.misc.actions.ReportChoiceType;
-import com.oneliferp.cwu.commands.modules.manage.misc.actions.SessionChoiceType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileButtonType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileMenuType;
 import com.oneliferp.cwu.misc.IActionType;
@@ -15,10 +13,7 @@ import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionMenuType;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionModalType;
 import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class CommandContext {
     public final String type;
@@ -53,19 +48,23 @@ public class CommandContext {
     }
 
     public String getCid() {
-        return this.getParam("cid");
+        return this.getAsString("cid");
     }
 
     public SessionType getSession() {
-        return SessionType.valueOf(this.getParam("session"));
+        return SessionType.valueOf(this.getAsString("session"));
     }
 
     public String getRoot() {
         return String.format("%s#%s", this.type, this.identifier);
     }
 
-    public String getParam(final String key) {
+    public String getAsString(final String key) {
         return this.params.get(key);
+    }
+
+    public int getAsInt(final String key) {
+        return Integer.parseInt(this.params.get(key));
     }
 
     public String getCommand() {
@@ -108,9 +107,9 @@ public class CommandContext {
             case "mnu#cwu_report" -> ReportMenuType.class;
 
             case "btn#cwu_manage" -> switch (this.specifiers.get(0)) {
-                case "report" -> ReportChoiceType.class;
+                case "report" -> ReportButtonType.class;
                 case "workforce" -> WorkforceButtonType.class;
-                case "session" -> SessionChoiceType.class;
+                case "session" -> SessionButtonType.class;
                 default -> throw new IllegalStateException("Unexpected value: " + this.specifiers.get(0));
             };
 

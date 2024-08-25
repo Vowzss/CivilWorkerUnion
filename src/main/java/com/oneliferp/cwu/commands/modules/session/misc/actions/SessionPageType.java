@@ -3,7 +3,7 @@ package com.oneliferp.cwu.commands.modules.session.misc.actions;
 public enum SessionPageType {
     ZONE("zone", "Emplacement de la session :"),
     LOYALISTS("loyalists", "Loyaliste(s) présent(s) :"),
-    CITIZENS("citizens", "Citoyen(s) présent(s) :"),
+    CIVILIANS("citizens", "Citoyen(s) présent(s) :"),
     VORTIGAUNTS("vortigaunts", "Vortigaunt(s) présent(s) :"),
     ANTI_CITIZENS("anticitizens", "Anti Citoyens(s) présent(s) :"),
     INFO("info", "Informations supplémentaires :"),

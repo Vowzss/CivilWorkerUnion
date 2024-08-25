@@ -47,6 +47,6 @@ public enum SessionType {
     }
 
     public static List<SessionPageType> getDefaultPages() {
-        return List.of(SessionPageType.LOYALISTS, SessionPageType.CITIZENS, SessionPageType.VORTIGAUNTS, SessionPageType.ANTI_CITIZENS, SessionPageType.INFO);
+        return List.of(SessionPageType.LOYALISTS, SessionPageType.CIVILIANS, SessionPageType.VORTIGAUNTS, SessionPageType.ANTI_CITIZENS, SessionPageType.INFO);
     }
 }

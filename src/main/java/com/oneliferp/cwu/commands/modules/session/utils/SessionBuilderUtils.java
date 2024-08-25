@@ -1,12 +1,14 @@
 package com.oneliferp.cwu.commands.modules.session.utils;
 
-import com.oneliferp.cwu.commands.modules.session.misc.ParticipantType;
+import com.oneliferp.cwu.commands.modules.session.misc.CitizenType;
 import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
 import com.oneliferp.cwu.commands.modules.session.misc.ZoneType;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionMenuType;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
+import com.oneliferp.cwu.misc.IActionType;
+import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.SimpleDate;
@@ -15,12 +17,15 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.LayoutComponent;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 public class SessionBuilderUtils {
     /* Embeds */
@@ -31,7 +36,7 @@ public class SessionBuilderUtils {
 
         embed.setTitle(title);
         embed.setDescription("""
-                Cette interface vous permet d'enregistrer une Session de travail.
+                Cette interface vous permet d'enregistrer une session de travail.
                                 
                 Vous allez procéder au remplissage des informations.
                 S'ensuivra un résumé de votre session."""
@@ -58,126 +63,18 @@ public class SessionBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed participantMessage(final SessionModel session) {
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle(buildStepTitle(session));
-
-        {
-            final var participants = session.getParticipants(ParticipantType.fromPage(session.getCurrentPage()));
-
-            final String name = String.format("%s  %s", EmojiUtils.getGreenOrYellowCircle(session.hasParticipants()), session.getCurrentPage().getDescription());
-            final String value = String.format("%s", !participants.isEmpty() ? Toolbox.flatten(participants) : "Aucun.");
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-
-        return embed.build();
-    }
-
-    public static MessageEmbed infoMessage(final SessionModel session) {
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle(buildStepTitle(session));
-
-        {
-            final var info = session.getInfo();
-
-            final String name = String.format("%s  %s", EmojiUtils.getGreenCircle(), SessionPageType.INFO.getDescription());
-            final String value = info != null ? info : "Rien à signaler";
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-
-        return embed.build();
-    }
-
-    public static MessageEmbed zoneMessage(final SessionModel session) {
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle(buildStepTitle(session));
-
-        {
-            final var zone = session.getZone();
-            final boolean hasValue = zone != ZoneType.UNKNOWN;
-
-            final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), SessionPageType.ZONE.getDescription());
-            final String value = hasValue ? zone.getLabel() : "`Information manquante`";
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-
-        return embed.build();
-    }
-
-    public static MessageEmbed earningsMessage(final SessionModel session) {
-        final EmbedBuilder embed = EmbedUtils.createDefault();
-        embed.setTitle(buildStepTitle(session));
-
-        {
-            final var earnings = session.getIncome().getEarnings();
-            final boolean hasValue = earnings != null;
-
-            final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), SessionPageType.TOKENS.getDescription());
-            final String value = String.format("%s", (hasValue ? earnings : 0) + " Tokens");
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-
-        return embed.build();
-    }
-
     public static MessageEmbed previewMessage(final SessionModel session) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(buildPreviewTitle(session));
-        {
-            final var zone = session.getZone();
-            final boolean hasValue = zone != ZoneType.UNKNOWN;
+        embed.addField(zoneField(session.getZone()));
 
-            final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), SessionPageType.ZONE.getDescription());
-            final String value = hasValue ? zone.getLabel() : "`Information manquante`";
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
+        embed.addField(participantField(session.getCitizens(CitizenType.LOYALIST), SessionPageType.LOYALISTS.getDescription()));
+        embed.addField(participantField(session.getCitizens(CitizenType.CIVILIAN), SessionPageType.CIVILIANS.getDescription()));
+        embed.addField(participantField(session.getCitizens(CitizenType.VORTIGAUNT), SessionPageType.VORTIGAUNTS.getDescription()));
+        embed.addField(participantField(session.getCitizens(CitizenType.ANTI_CITIZEN), SessionPageType.ANTI_CITIZENS.getDescription()));
 
-        final boolean hasParticipants = session.hasParticipants();
-        final String participantStatus = EmojiUtils.getGreenOrYellowCircle(hasParticipants);
-        {
-            final var participants = session.getParticipants(ParticipantType.LOYALIST);
-
-            final String name = String.format("%s  %s", participantStatus, SessionPageType.LOYALISTS.getDescription());
-            final String value = String.format("%s", !participants.isEmpty() ? Toolbox.flatten(participants) : "Aucun.");
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-        {
-            final var participants = session.getParticipants(ParticipantType.CITIZEN);
-
-            final String name = String.format("%s  %s", participantStatus, SessionPageType.CITIZENS.getDescription());
-            final String value = String.format("%s", !participants.isEmpty() ? Toolbox.flatten(participants) : "Aucun.");
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-        {
-            final var participants = session.getParticipants(ParticipantType.VORTIGAUNT);
-
-            final String name = String.format("%s  %s", participantStatus, SessionPageType.VORTIGAUNTS.getDescription());
-            final String value = String.format("%s", !participants.isEmpty() ? Toolbox.flatten(participants) : "Aucun.");
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-        {
-            final var participants = session.getParticipants(ParticipantType.ANTI_CITIZEN);
-
-            final String name = String.format("%s  %s", participantStatus, SessionPageType.ANTI_CITIZENS.getDescription());
-            final String value = String.format("%s", !participants.isEmpty() ? Toolbox.flatten(participants) : "Aucun.");
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-        if (session.hasPage(SessionPageType.TOKENS)) {
-            final var earnings = session.getIncome().getEarnings();
-            final boolean hasValue = earnings != null;
-
-            final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), SessionPageType.TOKENS.getDescription());
-            final String value = String.format("%s", (hasValue ? earnings : 0) + " Tokens");
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-        {
-            final var info = session.getInfo();
-
-            final String name = String.format("%s  %s", EmojiUtils.getGreenCircle(), SessionPageType.INFO.getDescription());
-            final String value = info != null ? info : "Rien à signaler";
-            embed.addField(new MessageEmbed.Field(name, value, false));
-        }
-
+        embed.addField(tokenField(session.getIncome().getEarnings()));
+        embed.addField(infoField(session.getInfo()));
         return embed.build();
     }
 
@@ -198,6 +95,86 @@ public class SessionBuilderUtils {
         return embed.build();
     }
 
+    public static MessageEmbed displayMessage(final SessionModel session) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("Informations de la session");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append(session.getDisplayFormat()).append("\n");
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    public static MessageEmbed deleteMessage(final SessionModel session) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("\uD83D\uDDD1 Action en cours - Suppression d'une session de travail");
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("Afin de terminer la procédure, veuillez confirmer votre choix.").append("\n\n");
+        sb.append("**Aperçu de la session concernée :**").append("\n");
+        sb.append(session.getDescriptionFormat()).append("\n");
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    /* Fields */
+    private static MessageEmbed.Field participantField(final HashSet<IdentityModel> identities, final String description) {
+        final boolean hasValue = !identities.isEmpty();
+
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrYellowCircle(hasValue), description);
+        final String value = String.format("%s", hasValue ? Toolbox.flatten(identities) : "Aucun.");
+        return new MessageEmbed.Field(name, value, false);
+    }
+    public static MessageEmbed participantMessage(final SessionModel session) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(buildStepTitle(session));
+
+        final var participants = session.getCitizens(CitizenType.fromPage(session.getCurrentPage()));
+        embed.addField(participantField(participants, session.getCurrentPage().getDescription()));
+
+        return embed.build();
+    }
+
+    private static MessageEmbed.Field infoField(final String info) {
+        final String name = String.format("%s  %s", EmojiUtils.getGreenCircle(), SessionPageType.INFO.getDescription());
+        final String value = info != null ? info : "Rien à signaler";
+        return new MessageEmbed.Field(name, value, false);
+    }
+    public static MessageEmbed infoMessage(final SessionModel session) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(buildStepTitle(session));
+        embed.addField(infoField(session.getInfo()));
+        return embed.build();
+    }
+
+    private static MessageEmbed.Field zoneField(final ZoneType zone) {
+        final boolean hasValue = zone != ZoneType.UNKNOWN;
+
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), SessionPageType.ZONE.getDescription());
+        final String value = hasValue ? zone.getLabel() : "`Information manquante`";
+        return new MessageEmbed.Field(name, value, false);
+    }
+    public static MessageEmbed zoneMessage(final SessionModel session) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(buildStepTitle(session));
+        embed.addField(zoneField(session.getZone()));
+        return embed.build();
+    }
+
+    private static MessageEmbed.Field tokenField(final Integer token) {
+        final boolean hasValue = token != null;
+
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), SessionPageType.TOKENS.getDescription());
+        final String value = String.format("%s", (hasValue ? token : 0) + " Tokens");
+        return new MessageEmbed.Field(name, value, false);
+    }
+    public static MessageEmbed earningsMessage(final SessionModel session) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(buildStepTitle(session));
+        embed.addField(tokenField(session.getIncome().getEarnings()));
+        return embed.build();
+    }
+
     /* Menus */
     private static StringSelectMenu zoneMenu(final String cid, final ZoneType type) {
         final var menu = StringSelectMenu.create(SessionMenuType.SELECT_ZONE.build(cid));
@@ -205,7 +182,7 @@ public class SessionBuilderUtils {
                 .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
         options.forEach(menu::addOptions);
 
-        if (type != ZoneType.UNKNOWN) Toolbox.setDefaulMenuOption(menu, options, type.name());
+        if (type != ZoneType.UNKNOWN) Toolbox.setDefaultMenuOption(menu, options, type.name());
         return menu.build();
     }
 
@@ -215,7 +192,7 @@ public class SessionBuilderUtils {
                 .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
         options.forEach(menu::addOptions);
 
-        if (type != SessionType.UNKNOWN) Toolbox.setDefaulMenuOption(menu, options, type.name());
+        if (type != SessionType.UNKNOWN) Toolbox.setDefaultMenuOption(menu, options, type.name());
         return menu.build();
     }
 
@@ -264,7 +241,23 @@ public class SessionBuilderUtils {
         return Button.primary(SessionButtonType.FILL.build(cid), "Remplir");
     }
 
-    /* Rows */
+    private static Button returnButton(final IActionType type, final String cid) {
+        return Button.secondary(type.build(cid), "Retour en arrière");
+    }
+
+    private static Button deleteButton(final IActionType type, final String cid, final String id) {
+        return Button.danger(type.build(cid, Map.of("session", id)), "Supprimer");
+    }
+
+    private static Button cancelButton(final IActionType type, final String cid, final String id) {
+        return Button.primary(type.build(cid, Map.of("session", id)), "Abandonner");
+    }
+
+    private static Button confirmButton(final IActionType type, final String cid, final String id) {
+        return Button.danger(type.build(cid, Map.of("session", id)), "Confirmer");
+    }
+
+    /* Components */
     private static ActionRow nextRow(final String cid) {
         return ActionRow.of(clearButton(cid), fillButton(cid), nextButton(cid));
     }
@@ -285,6 +278,15 @@ public class SessionBuilderUtils {
         return ActionRow.of(clearButton(cid), fillButton(cid), prevButton(cid), nextButton(cid));
     }
 
+    public static LayoutComponent displayComponent(final String cid, final String id) {
+        return ActionRow.of(deleteButton(SessionButtonType.DELETE, cid, id), returnButton(SessionButtonType.OVERVIEW, cid));
+    }
+
+    public static LayoutComponent deleteComponent(final String cid, final String id) {
+        return ActionRow.of(cancelButton(SessionButtonType.DELETE_CANCEL, cid, id), confirmButton(SessionButtonType.DELETE_CONFIRM, cid, id));
+    }
+
+    /*  */
     public static List<ActionRow> zoneRows(final SessionModel session) {
         final String cid = session.getEmployeeCid();
 

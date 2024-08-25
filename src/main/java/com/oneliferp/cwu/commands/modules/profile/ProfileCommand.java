@@ -2,8 +2,6 @@ package com.oneliferp.cwu.commands.modules.profile;
 
 import com.oneliferp.cwu.cache.ProfileCache;
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.commands.modules.manage.exceptions.EmployeeNotFoundException;
-import com.oneliferp.cwu.commands.modules.manage.models.EmployeeModel;
 import com.oneliferp.cwu.commands.modules.profile.exceptions.ProfileNotFoundException;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileButtonType;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
@@ -34,7 +32,7 @@ public class ProfileCommand extends CwuCommand {
         final ProfileModel profile = this.profileDatabase.getFromId(event.getUser().getIdLong());
         if (profile == null) throw new ProfileNotFoundException(event);
 
-        event.replyEmbeds(ProfileBuilderUtils.infoMessage(profile))
+        event.replyEmbeds(ProfileBuilderUtils.displayMessage(profile))
                 .setEphemeral(true).queue();
     }
 
@@ -75,8 +73,8 @@ public class ProfileCommand extends CwuCommand {
             case UPDATE_CANCEL -> {
                 System.out.println();
                 //TODO: ROLLBACK RANK AND BRANCH
-                event.editMessageEmbeds(ProfileBuilderUtils.infoMessage(profile))
-                        .setComponents(ProfileBuilderUtils.infoComponent(profile.getCid()))
+                event.editMessageEmbeds(ProfileBuilderUtils.displayMessage(profile))
+                        .setComponents(ProfileBuilderUtils.displayComponent(profile.getCid()))
                         .queue();
             }
             case DELETE -> {
@@ -97,8 +95,8 @@ public class ProfileCommand extends CwuCommand {
                 event.getMessage().delete().queue();
             }
             case STATS -> {
-                event.editMessageEmbeds(ProfileBuilderUtils.infoMessage(profile))
-                        .setComponents(ProfileBuilderUtils.infoComponent(profile.getCid()))
+                event.editMessageEmbeds(ProfileBuilderUtils.displayMessage(profile))
+                        .setComponents(ProfileBuilderUtils.displayComponent(profile.getCid()))
                         .queue();
             }
         }

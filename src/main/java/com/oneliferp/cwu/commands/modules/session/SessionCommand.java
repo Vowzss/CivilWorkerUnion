@@ -2,11 +2,12 @@ package com.oneliferp.cwu.commands.modules.session;
 
 import com.oneliferp.cwu.cache.SessionCache;
 import com.oneliferp.cwu.commands.CwuCommand;
+import com.oneliferp.cwu.commands.modules.profile.utils.ProfileBuilderUtils;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
 import com.oneliferp.cwu.commands.utils.CommandContext;
-import com.oneliferp.cwu.commands.modules.session.misc.ParticipantType;
+import com.oneliferp.cwu.commands.modules.session.misc.CitizenType;
 import com.oneliferp.cwu.commands.modules.session.misc.ZoneType;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.*;
@@ -68,18 +69,41 @@ public class SessionCommand extends CwuCommand {
 
     @Override
     public void handleButtonInteraction(final ButtonInteractionEvent event, final CommandContext ctx) throws CwuException {
-        final ProfileModel cwu = this.profileDatabase.getFromCid(ctx.getCid());
-        if (cwu == null) throw new ProfileNotFoundException(event);
+        final ProfileModel profile = this.profileDatabase.getFromCid(ctx.getCid());
+        if (profile == null) throw new ProfileNotFoundException(event);
 
-        final SessionModel session = this.sessionCache.get(cwu.getCid());
+        final SessionButtonType type = ctx.getEnumType();
+        if (type == SessionButtonType.DELETE) {
+            final SessionModel session = this.sessionDatabase.get(ctx.getAsString("session"));
+            if (session == null) throw new SessionNotFoundException(event);
+
+            event.editMessageEmbeds(SessionBuilderUtils.deleteMessage(session))
+                    .setComponents(SessionBuilderUtils.deleteComponent(profile.getCid(), session.getId())).queue();
+            return;
+        } else if (type == SessionButtonType.DELETE_CONFIRM) {
+            this.sessionDatabase.removeOne(ctx.getAsString("session"));
+            this.sessionDatabase.save();
+
+            event.reply("Suppression de la session de travail avec succès.")
+                    .setEphemeral(true).queue();
+            event.getMessage().delete().queue();
+            return;
+        } else if (type == SessionButtonType.DELETE_CANCEL) {
+            event.reply("Vous avez annulé la suppression de la session de travail.")
+                    .setEphemeral(true).queue();
+            event.getMessage().delete().queue();
+            return;
+        }
+
+        final SessionModel session = this.sessionCache.get(profile.getCid());
         if (session == null) throw new SessionNotFoundException(event);
 
-        switch ((SessionButtonType) ctx.getEnumType()) {
+        switch (type) {
             default -> throw new IllegalArgumentException();
             case BEGIN -> this.handleBeginButton(event, session);
             case ABORT -> this.handleCancelButton(event, session.getEmployeeCid());
             case RESUME -> this.handleResumeButton(event, session);
-            case OVERWRITE -> this.handleOverwriteButton(event, cwu.getIdentity());
+            case OVERWRITE -> this.handleOverwriteButton(event, profile.getIdentity());
             case EDIT -> this.handleEditButton(event, session);
             case SUBMIT -> this.handleSubmitButton(event, session);
             case CLEAR -> this.handleClearButton(event, session);
@@ -104,9 +128,8 @@ public class SessionCommand extends CwuCommand {
         switch ((SessionModalType) ctx.getEnumType()) {
             default -> throw new IllegalArgumentException();
             case FILL_PARTICIPANTS -> {
-
                 try {
-                    session.addParticipants(ParticipantType.fromPage(currentPage), IdentityModel.parseIdentities(content));
+                    session.addCitizens(CitizenType.fromPage(currentPage), IdentityModel.parseIdentities(content));
                 } catch (final IdentityMalformedException ex) {
                     throw new IdentityException(event);
                 }
@@ -207,11 +230,11 @@ public class SessionCommand extends CwuCommand {
         SessionModalType modalType;
         switch (currentPage) {
             default -> throw new IllegalArgumentException();
-            case LOYALISTS, CITIZENS, VORTIGAUNTS, ANTI_CITIZENS -> {
+            case LOYALISTS, CIVILIANS, VORTIGAUNTS, ANTI_CITIZENS -> {
                 modalType = SessionModalType.FILL_PARTICIPANTS;
                 inputBuilder.setPlaceholder("Nom Prénom, #12345");
 
-                final var participants = session.getParticipants(ParticipantType.fromPage(currentPage));
+                final var participants = session.getCitizens(CitizenType.fromPage(currentPage));
                 if (participants.isEmpty()) break;
                 inputBuilder.setValue(Toolbox.flatten(participants));
             }
@@ -246,7 +269,7 @@ public class SessionCommand extends CwuCommand {
             case INFO -> session.setInfo(null);
             case TOKENS -> session.setEarnings(null);
             case ZONE -> session.setZone(ZoneType.UNKNOWN);
-            default -> session.clearParticipants(ParticipantType.fromPage(currentPage));
+            default -> session.clearCitizens(CitizenType.fromPage(currentPage));
         }
 
         this.goToPage(event, session);
@@ -258,7 +281,7 @@ public class SessionCommand extends CwuCommand {
             return;
         }
 
-        session.begin();
+        session.start();
         this.goToPage(event, session);
     }
 
@@ -268,7 +291,7 @@ public class SessionCommand extends CwuCommand {
     }
 
     private void handleSubmitButton(final ButtonInteractionEvent event, final SessionModel session) throws SessionValidationException {
-        if (!session.isValid()) throw new SessionValidationException(event);
+        if (!session.verify()) throw new SessionValidationException(event);
 
         session.end();
         this.sessionCache.remove(session.getEmployeeCid());
@@ -295,7 +318,7 @@ public class SessionCommand extends CwuCommand {
 
         final MessageEmbed embed = (switch (page) {
             case ZONE -> SessionBuilderUtils.zoneMessage(session);
-            case LOYALISTS, CITIZENS, VORTIGAUNTS, ANTI_CITIZENS -> SessionBuilderUtils.participantMessage(session);
+            case LOYALISTS, CIVILIANS, VORTIGAUNTS, ANTI_CITIZENS -> SessionBuilderUtils.participantMessage(session);
             case INFO -> SessionBuilderUtils.infoMessage(session);
             case TOKENS -> SessionBuilderUtils.earningsMessage(session);
             case PREVIEW -> SessionBuilderUtils.previewMessage(session);
