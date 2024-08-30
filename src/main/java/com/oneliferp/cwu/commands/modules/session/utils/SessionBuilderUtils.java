@@ -8,7 +8,8 @@ import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionMenuType;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.misc.IActionType;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CitizenIdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.SimpleDate;
@@ -68,10 +69,10 @@ public class SessionBuilderUtils {
         embed.setTitle(buildPreviewTitle(session));
         embed.addField(zoneField(session.getZone()));
 
-        embed.addField(participantField(session.getCitizens(CitizenType.LOYALIST), SessionPageType.LOYALISTS.getDescription()));
-        embed.addField(participantField(session.getCitizens(CitizenType.CIVILIAN), SessionPageType.CIVILIANS.getDescription()));
-        embed.addField(participantField(session.getCitizens(CitizenType.VORTIGAUNT), SessionPageType.VORTIGAUNTS.getDescription()));
-        embed.addField(participantField(session.getCitizens(CitizenType.ANTI_CITIZEN), SessionPageType.ANTI_CITIZENS.getDescription()));
+        embed.addField(participantField(session.getCitizensWithType(CitizenType.LOYALIST), SessionPageType.LOYALISTS.getDescription()));
+        embed.addField(participantField(session.getCitizensWithType(CitizenType.CIVILIAN), SessionPageType.CIVILIANS.getDescription()));
+        embed.addField(participantField(session.getCitizensWithType(CitizenType.VORTIGAUNT), SessionPageType.VORTIGAUNTS.getDescription()));
+        embed.addField(participantField(session.getCitizensWithType(CitizenType.ANTI_CITIZEN), SessionPageType.ANTI_CITIZENS.getDescription()));
 
         embed.addField(tokenField(session.getIncome().getEarnings()));
         embed.addField(infoField(session.getInfo()));
@@ -86,8 +87,8 @@ public class SessionBuilderUtils {
         sb.append(String.format("""
                 La session a été enregistrée avec succès.
                                 
-                "Somme à **déposer** dans la caisse commune: **%s Tokens**."
-                "Somme à **verser** aux participants: **%s Tokens**."
+                Somme à **déposer** dans la caisse commune: **%s Tokens**.
+                Somme à **verser** aux participants: **%s Tokens**.
                 """, Math.max(session.getIncome().getDeposit(), 0),
                 session.getIncome().getWages())
         );
@@ -118,7 +119,7 @@ public class SessionBuilderUtils {
     }
 
     /* Fields */
-    private static MessageEmbed.Field participantField(final HashSet<IdentityModel> identities, final String description) {
+    private static MessageEmbed.Field participantField(final List<CitizenIdentityModel> identities, final String description) {
         final boolean hasValue = !identities.isEmpty();
 
         final String name = String.format("%s  %s", EmojiUtils.getGreenOrYellowCircle(hasValue), description);
@@ -129,7 +130,7 @@ public class SessionBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(buildStepTitle(session));
 
-        final var participants = session.getCitizens(CitizenType.fromPage(session.getCurrentPage()));
+        final var participants = session.getCitizensWithType(CitizenType.fromPage(session.getCurrentPage()));
         embed.addField(participantField(participants, session.getCurrentPage().getDescription()));
 
         return embed.build();
@@ -189,7 +190,7 @@ public class SessionBuilderUtils {
     private static StringSelectMenu typeMenu(final String cid, final SessionType type) {
         final var menu = StringSelectMenu.create(SessionMenuType.SELECT_TYPE.build(cid));
         final var options = Arrays.stream(SessionType.values()).skip(1)
-                .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
+                .map(v -> SelectOption.of(v.getLabel(), v.name()).withEmoji(EmojiUtils.asDiscordEmoji(v.getEmoji()))).toList();
         options.forEach(menu::addOptions);
 
         if (type != SessionType.UNKNOWN) Toolbox.setDefaultMenuOption(menu, options, type.name());

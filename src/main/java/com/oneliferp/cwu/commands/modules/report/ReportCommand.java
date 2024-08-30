@@ -19,11 +19,10 @@ import com.oneliferp.cwu.commands.modules.report.exceptions.ReportNotFoundExcept
 import com.oneliferp.cwu.commands.modules.report.exceptions.ReportValidationException;
 import com.oneliferp.cwu.commands.modules.report.misc.*;
 import com.oneliferp.cwu.commands.modules.report.utils.ReportBuilderUtils;
-import com.oneliferp.cwu.commands.modules.session.exceptions.SessionNotFoundException;
 import com.oneliferp.cwu.exceptions.IdentityException;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
 import com.oneliferp.cwu.misc.CwuBranch;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CitizenIdentityModel;
 import com.oneliferp.cwu.utils.RegexUtils;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -173,7 +172,7 @@ public class ReportCommand extends CwuCommand {
             default -> throw new IllegalArgumentException();
             case FILL_TENANT -> {
                 try {
-                    report.setIdentity(IdentityModel.parseIdentity(content));
+                    report.setIdentity(CitizenIdentityModel.parseCitizenIdentity(content));
                 } catch (IdentityMalformedException e) {
                     throw new IdentityException(event);
                 }
@@ -184,7 +183,7 @@ public class ReportCommand extends CwuCommand {
             }
             case FILL_PATIENT -> {
                 try {
-                    report.setIdentity(IdentityModel.parseIdentity(content));
+                    report.setIdentity(CitizenIdentityModel.parseCitizenIdentity(content));
                 } catch (IdentityMalformedException e) {
                     throw new IdentityException(event);
                 }
@@ -277,7 +276,7 @@ public class ReportCommand extends CwuCommand {
 
         event.replyEmbeds(ReportBuilderUtils.initMessage(branch, report.getType()))
                 .setComponents(ReportBuilderUtils.beginRow(branch, report))
-                .queue();
+                .setEphemeral(true).queue();
     }
 
     private void handleClearButton(final ButtonInteractionEvent event, final ReportModel report) {

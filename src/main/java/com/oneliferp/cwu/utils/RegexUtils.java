@@ -1,10 +1,5 @@
 package com.oneliferp.cwu.utils;
 
-import com.oneliferp.cwu.models.IdentityModel;
-import com.oneliferp.cwu.exceptions.IdentityMalformedException;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -1,5 +1,6 @@
 package com.oneliferp.cwu.commands.modules.session.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.modules.session.misc.CitizenType;
@@ -11,26 +12,27 @@ import com.oneliferp.cwu.misc.IdFactory;
 import com.oneliferp.cwu.misc.pagination.Pageable;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CitizenIdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.models.IncomeModel;
 import com.oneliferp.cwu.models.PeriodModel;
 import com.oneliferp.cwu.utils.Toolbox;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SessionModel extends Pageable<SessionPageType> {
     @JsonProperty("id")
     private String id;
 
     @JsonProperty("employee")
-    private IdentityModel employee;
+    private CwuIdentityModel employee;
 
     @JsonProperty("citizens")
-    private HashMap<CitizenType, HashSet<IdentityModel>> citizens;
+    private HashSet<CitizenIdentityModel> citizens;
 
     @JsonProperty("type")
     private SessionType type;
@@ -47,9 +49,10 @@ public class SessionModel extends Pageable<SessionPageType> {
     @JsonProperty("income")
     private IncomeModel income;
 
-    private SessionModel() {}
+    private SessionModel() {
+    }
 
-    public SessionModel(final IdentityModel identity) {
+    public SessionModel(final CwuIdentityModel identity) {
         this.id = IdFactory.get().generateID();
 
         this.period = new PeriodModel();
@@ -65,7 +68,7 @@ public class SessionModel extends Pageable<SessionPageType> {
         return this.id;
     }
 
-    public IdentityModel getEmployee() {
+    public CwuIdentityModel getEmployee() {
         return this.employee;
     }
 
@@ -97,6 +100,10 @@ public class SessionModel extends Pageable<SessionPageType> {
         return this.info;
     }
 
+    public HashSet<CitizenIdentityModel> getCitizens() {
+        return this.citizens;
+    }
+
     public PeriodModel getPeriod() {
         return this.period;
     }
@@ -107,30 +114,23 @@ public class SessionModel extends Pageable<SessionPageType> {
 
     /* Methods */
     public String getEmployeeCid() {
-        return this.employee.cid;
-    }
-
-    public HashSet<IdentityModel> getCitizens(final CitizenType type) {
-        return this.citizens.get(type);
+        return this.employee.getCid();
     }
 
     public boolean hasCitizens() {
-        boolean isValid = false;
-        for (final CitizenType type : CitizenType.values()) {
-            if (this.citizens.get(type).isEmpty()) continue;
-            isValid = true;
-            break;
-        }
-        return isValid;
+        return this.citizens.isEmpty();
     }
 
-    public void addCitizens(final CitizenType type, final List<IdentityModel> identities) {
-        final var entries = this.citizens.computeIfAbsent(type, k -> new HashSet<>());
-        entries.addAll(identities);
+    public void addCitizens(final List<CitizenIdentityModel> identities) {
+        this.citizens.addAll(identities);
     }
 
-    public void clearCitizens(final CitizenType type) {
-        this.citizens.get(type).clear();
+    public List<CitizenIdentityModel> getCitizensWithType(final CitizenType type) {
+        return this.citizens.stream().filter(c -> c.getType() == type).toList();
+    }
+
+    public void removeCitizensWithType(final CitizenType type) {
+        this.citizens.removeIf(c -> c.getType() == type);
     }
 
     public void setEarnings(final Integer earnings) {
@@ -139,7 +139,7 @@ public class SessionModel extends Pageable<SessionPageType> {
 
     /* Utils */
     public ProfileModel resolveEmployee() {
-        return ProfileDatabase.get().getFromCid(this.employee.cid);
+        return ProfileDatabase.get().getFromCid(this.employee.getCid());
     }
 
     public boolean isWithinWeek() {
@@ -147,12 +147,11 @@ public class SessionModel extends Pageable<SessionPageType> {
     }
 
     public void computeWages() {
-        final AtomicInteger wages = new AtomicInteger(
-                citizens.entrySet().stream()
-                        .mapToInt(entry -> entry.getKey().getWage() * entry.getValue().size())
-                        .sum()
-        );
-        this.income.setWages(wages.get());
+        final int wages = this.citizens.stream()
+                .mapToInt(entry -> entry.getType().getWage())
+                .sum();
+
+        this.income.setWages(wages);
     }
 
     public void computeDeposit() {
@@ -160,22 +159,20 @@ public class SessionModel extends Pageable<SessionPageType> {
         this.income.setDeposit(earnings == null ? 0 : earnings - this.income.getWages());
     }
 
-    public int getParticipantCount(final CitizenType type) {
-        return this.citizens.entrySet().stream()
-                .filter(e -> e.getKey() == type)
-                .mapToInt(e -> e.getValue().size())
-                .sum();
+    public int getParticipantCount() {
+        return this.citizens.size();
     }
 
     public int getAntiCitizenCount() {
-        return this.getParticipantCount(CitizenType.ANTI_CITIZEN);
+        return this.citizens.stream()
+                .filter(e -> e.getType() == CitizenType.ANTI_CITIZEN)
+                .toList().size();
     }
 
     public int getCitizenCount() {
-        return this.citizens.entrySet().stream()
-                .filter(e -> e.getKey() != CitizenType.ANTI_CITIZEN)
-                .mapToInt(e -> e.getValue().size())
-                .sum();
+        return this.citizens.stream()
+                .filter(e -> e.getType() != CitizenType.ANTI_CITIZEN)
+                .toList().size();
     }
 
     /* Helpers */
@@ -202,7 +199,7 @@ public class SessionModel extends Pageable<SessionPageType> {
         sb.append(String.format("**Nombre de citoyens :** %d", this.getCitizenCount())).append("\n");
         sb.append(String.format("**Nombre d'anti-citoyens :** %d", this.getAntiCitizenCount())).append("\n\n");
 
-        this.citizens.forEach((type, identities) -> {
+        this.citizens.stream().collect(Collectors.groupingBy(CitizenIdentityModel::getType)).forEach((type, identities) -> {
             sb.append(String.format("**%s(s) présent(s) :**", type.getLabel())).append("\n");
             sb.append(identities.isEmpty() ? "Aucun" : Toolbox.flatten(identities, false)).append("\n");
         });
@@ -219,14 +216,9 @@ public class SessionModel extends Pageable<SessionPageType> {
     public void start() {
         this.period.start();
         this.income = new IncomeModel();
-        this.citizens = new HashMap<>();
+        this.citizens = new HashSet<>();
 
         this.pagination = new PaginationContext<>(PaginationRegistry.getSessionPages(this.type), SessionPageType.PREVIEW);
-
-        // Prefill participants with available types
-        for (final CitizenType type : CitizenType.values()) {
-            this.citizens.put(type, new HashSet<>());
-        }
     }
 
     public void end() {
@@ -242,10 +234,7 @@ public class SessionModel extends Pageable<SessionPageType> {
 
     @Override
     public void reset() {
-        for (final CitizenType type : CitizenType.values()) {
-            this.clearCitizens(type);
-        }
-
+        this.citizens.clear();
         this.type = SessionType.UNKNOWN;
         this.zone = ZoneType.UNKNOWN;
         this.info = null;

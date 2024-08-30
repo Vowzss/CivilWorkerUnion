@@ -11,7 +11,7 @@ import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.misc.pagination.Pageable;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 
 import java.util.Collection;
@@ -23,7 +23,7 @@ public class ProfileModel extends Pageable<ProfilePageType> {
     private Long id;
 
     @JsonProperty("identity")
-    private IdentityModel identity;
+    private CwuIdentityModel identity;
 
     @JsonProperty("branch")
     private CwuBranch branch;
@@ -42,10 +42,10 @@ public class ProfileModel extends Pageable<ProfilePageType> {
         return this.id;
     }
 
-    public void setIdentity(final IdentityModel identity) {
+    public void setIdentity(final CwuIdentityModel identity) {
         this.identity = identity;
     }
-    public IdentityModel getIdentity() {
+    public CwuIdentityModel getIdentity() {
         return this.identity;
     }
 
@@ -65,15 +65,15 @@ public class ProfileModel extends Pageable<ProfilePageType> {
 
     /* Methods */
     public String getCid() {
-        return this.identity.cid;
+        return this.identity.getCid();
     }
 
     public void setRank(final CwuRank rank) {
-        this.identity.rank = rank;
+        this.identity.setRank(rank);
     }
 
     public CwuRank getRank() {
-        return this.identity.rank;
+        return this.identity.getRank();
     }
 
     public boolean isAdministration() {
@@ -115,7 +115,7 @@ public class ProfileModel extends Pageable<ProfilePageType> {
     }
 
     public Integer resolveSalaryTokens(final Collection<SessionModel> sessions, final Collection<ReportModel> reports) {
-        final CwuRank rank = this.identity.rank;
+        final CwuRank rank = this.identity.getRank();
 
         return (int) Math.floor(SessionDatabase.resolveEarnings(sessions) * rank.getSessionRoyalty()) +
                (int) Math.floor(ReportDatabase.resolveEarnings(reports) * rank.getBranchRoyalty());
@@ -127,7 +127,7 @@ public class ProfileModel extends Pageable<ProfilePageType> {
 
     @Override
     public String toString() {
-        return String.format("[%s] %s", this.identity.rank.getLabel(), this.identity);
+        return String.format("[%s] %s", this.identity.getRank().getLabel(), this.identity);
     }
 
     public String getWeekStats() {
@@ -162,7 +162,7 @@ public class ProfileModel extends Pageable<ProfilePageType> {
 
         sb.append("**Informations CWU :**").append("\n");
         sb.append(String.format("Division : %s (%s)\n", this.branch, this.branch.getMeaning()));
-        sb.append(String.format("Grade : %s\n", this.identity.rank.getLabel()));
+        sb.append(String.format("Grade : %s\n", this.identity.getRank().getLabel()));
         return sb.toString();
     }
 

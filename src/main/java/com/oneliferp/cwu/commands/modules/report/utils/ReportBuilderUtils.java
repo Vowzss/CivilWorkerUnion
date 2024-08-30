@@ -8,7 +8,8 @@ import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportMenuType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
 import com.oneliferp.cwu.misc.IActionType;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CitizenIdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.Toolbox;
@@ -114,7 +115,7 @@ public class ReportBuilderUtils {
         return embed.build();
     }
 
-    private static MessageEmbed.Field identityField(final IdentityModel identity, final String description) {
+    private static MessageEmbed.Field identityField(final CitizenIdentityModel identity, final String description) {
         final boolean hasValue = identity != null;
 
         final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), description);

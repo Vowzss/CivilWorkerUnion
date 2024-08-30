@@ -1,13 +1,16 @@
 package com.oneliferp.cwu.commands.modules.report.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.misc.CwuBranch;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CitizenIdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class DtlReportModel extends ReportModel {
     @JsonProperty("tenant")
-    protected IdentityModel tenant;
+    protected CitizenIdentityModel tenant;
 
     @JsonProperty("rent")
     private Integer rent;
@@ -25,11 +28,11 @@ public class DtlReportModel extends ReportModel {
 
     /* Getter & Setter */
     @Override
-    public void setIdentity(final IdentityModel identity) {
+    public void setIdentity(final CitizenIdentityModel identity) {
         this.tenant = identity;
     }
     @Override
-    public IdentityModel getIdentity() {
+    public CitizenIdentityModel getIdentity() {
         return this.tenant;
     }
 

@@ -1,5 +1,6 @@
 plugins {
     id("java")
+    id("application")
 }
 
 group = "com.onliferp"
@@ -9,6 +10,9 @@ repositories {
     mavenCentral()
 }
 
+application {
+    applicationDefaultJvmArgs = listOf("-Duser.timezone=Europe/Paris")
+}
 
 dependencies {
     // https://mvnrepository.com/artifact/net.dv8tion/JDA

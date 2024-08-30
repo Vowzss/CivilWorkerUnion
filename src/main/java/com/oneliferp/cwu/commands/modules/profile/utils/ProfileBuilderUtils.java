@@ -8,7 +8,7 @@ import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.misc.IActionType;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.Toolbox;
@@ -38,7 +38,7 @@ public class ProfileBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed deleteMessage(final IdentityModel identity) {
+    public static MessageEmbed deleteMessage(final CwuIdentityModel identity) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDDD1  Suppression de l'employé");
         embed.setDescription("Afin de terminer la procédure, veuillez confirmer votre choix.");

@@ -18,7 +18,8 @@ import com.oneliferp.cwu.commands.modules.session.misc.*;
 import com.oneliferp.cwu.commands.modules.session.utils.SessionBuilderUtils;
 import com.oneliferp.cwu.exceptions.IdentityException;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CitizenIdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.RegexUtils;
 import com.oneliferp.cwu.utils.Toolbox;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -34,6 +35,7 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class SessionCommand extends CwuCommand {
     private final SessionDatabase sessionDatabase;
@@ -128,7 +130,11 @@ public class SessionCommand extends CwuCommand {
             default -> throw new IllegalArgumentException();
             case FILL_PARTICIPANTS -> {
                 try {
-                    session.addCitizens(CitizenType.fromPage(currentPage), IdentityModel.parseIdentities(content));
+                    final CitizenType citizenType = CitizenType.fromPage(currentPage);
+                    final List<CitizenIdentityModel> identities = CitizenIdentityModel.parseCitizenIdentities(content);
+                    identities.forEach(identity -> identity.setType(citizenType));
+
+                    session.addCitizens(identities);
                 } catch (final IdentityMalformedException ex) {
                     throw new IdentityException(event);
                 }
@@ -184,16 +190,16 @@ public class SessionCommand extends CwuCommand {
     private void sessionAlreadyExistFeedback(final SlashCommandInteractionEvent event, final SessionModel session) {
         event.replyEmbeds(SessionBuilderUtils.existMessage(session))
                 .setComponents(SessionBuilderUtils.resumeOrOverwriteRow(session.getEmployeeCid()))
-                .queue();
+                .setEphemeral(true).queue();
     }
 
-    private void sessionInitFeedback(final IReplyCallback callback, final IdentityModel identity) {
+    private void sessionInitFeedback(final IReplyCallback callback, final CwuIdentityModel identity) {
         final SessionModel session = new SessionModel(identity);
-        this.sessionCache.add(identity.cid, session);
+        this.sessionCache.add(identity.getCid(), session);
 
         callback.replyEmbeds(SessionBuilderUtils.initMessage(SessionType.UNKNOWN))
                 .setComponents(SessionBuilderUtils.initRow(session.getEmployeeCid(), SessionType.UNKNOWN))
-                .queue();
+                .setEphemeral(true).queue();
     }
 
     /* Button handlers */
@@ -210,8 +216,8 @@ public class SessionCommand extends CwuCommand {
         this.goToPage(event, session);
     }
 
-    private void handleOverwriteButton(final ButtonInteractionEvent event, final IdentityModel identity) {
-        this.sessionCache.delete(identity.cid);
+    private void handleOverwriteButton(final ButtonInteractionEvent event, final CwuIdentityModel identity) {
+        this.sessionCache.delete(identity.getCid());
         this.sessionInitFeedback(event, identity);
     }
 
@@ -233,7 +239,7 @@ public class SessionCommand extends CwuCommand {
                 modalType = SessionModalType.FILL_PARTICIPANTS;
                 inputBuilder.setPlaceholder("Nom Prénom, #12345");
 
-                final var participants = session.getCitizens(CitizenType.fromPage(currentPage));
+                final var participants = session.getCitizensWithType(CitizenType.fromPage(currentPage));
                 if (participants.isEmpty()) break;
                 inputBuilder.setValue(Toolbox.flatten(participants));
             }
@@ -268,7 +274,7 @@ public class SessionCommand extends CwuCommand {
             case INFO -> session.setInfo(null);
             case TOKENS -> session.setEarnings(null);
             case ZONE -> session.setZone(ZoneType.UNKNOWN);
-            default -> session.clearCitizens(CitizenType.fromPage(currentPage));
+            default -> session.removeCitizensWithType(CitizenType.fromPage(currentPage));
         }
 
         this.goToPage(event, session);

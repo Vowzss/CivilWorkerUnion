@@ -14,7 +14,8 @@ import com.oneliferp.cwu.misc.IdFactory;
 import com.oneliferp.cwu.misc.pagination.Pageable;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CitizenIdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.utils.json.StockTypeFilter;
 import org.jetbrains.annotations.Nullable;
@@ -30,12 +31,13 @@ import org.jetbrains.annotations.Nullable;
         @JsonSubTypes.Type(value = DmsReportModel.class, name = "DMS"),
         @JsonSubTypes.Type(value = DmsReportModel.class, name = "DRT"),
 })
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public abstract class ReportModel extends Pageable<ReportPageType>  {
     @JsonProperty("id")
     protected String id;
 
     @JsonProperty("employee")
-    protected IdentityModel employee;
+    protected CwuIdentityModel employee;
 
     @JsonProperty("branch")
     protected CwuBranch branch;
@@ -74,7 +76,7 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
         return this.id;
     }
 
-    public IdentityModel getEmployee() {
+    public CwuIdentityModel getEmployee() {
         return this.employee;
     }
 
@@ -114,8 +116,8 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
         return this.createdAt;
     }
 
-    public abstract void setIdentity(final IdentityModel identity);
-    public abstract IdentityModel getIdentity();
+    public abstract void setIdentity(final CitizenIdentityModel identity);
+    public abstract CitizenIdentityModel getIdentity();
 
     public void setTax(final Integer tax) {
         throw new UnsupportedOperationException("Tax is not available for this type of report.");
@@ -154,11 +156,11 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
 
     /* Utils */
     public String getEmployeeCid() {
-        return this.employee.cid;
+        return this.employee.getCid();
     }
 
     public ProfileModel resolveEmployee() {
-        return ProfileDatabase.get().getFromCid(this.employee.cid);
+        return ProfileDatabase.get().getFromCid(this.employee.getCid());
     }
 
     public boolean isWithinWeek() {

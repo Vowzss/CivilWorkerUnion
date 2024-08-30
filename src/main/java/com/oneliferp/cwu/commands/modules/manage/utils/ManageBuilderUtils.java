@@ -15,7 +15,7 @@ import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.misc.IActionType;
-import com.oneliferp.cwu.models.IdentityModel;
+import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.SimpleDate;
@@ -193,7 +193,7 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    public static MessageEmbed employeeAlreadyExistMessage(final IdentityModel identity, final Long id) {
+    public static MessageEmbed employeeAlreadyExistMessage(final CwuIdentityModel identity, final Long id) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Vous avez un profil en cours de création!");
 
@@ -223,7 +223,7 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    private static MessageEmbed.Field employeeIdentityField(final IdentityModel identity) {
+    private static MessageEmbed.Field employeeIdentityField(final CwuIdentityModel identity) {
         final boolean hasValue = identity != null;
 
         final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), ProfilePageType.IDENTITY.getDescription());
@@ -231,7 +231,7 @@ public class ManageBuilderUtils {
         return new MessageEmbed.Field(name, value, false);
     }
 
-    public static MessageEmbed employeeIdentityMessage(final IdentityModel identity) {
+    public static MessageEmbed employeeIdentityMessage(final CwuIdentityModel identity) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 1/5");
         embed.addField(employeeIdentityField(identity));

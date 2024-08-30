@@ -64,7 +64,7 @@ public class ReportDatabase extends JsonDatabase<String, ReportModel> {
         if (collection.isEmpty()) return 0;
         return collection.stream()
                 .filter(c -> c.getType() == ReportType.BUSINESS_ORDER || c.getType() == ReportType.MEDICAL_ORDER)
-                .mapToInt(r ->  (int) Math.floor(r.getTax() * r.getEmployee().rank.getBranchRoyalty()))
+                .mapToInt(r ->  (int) Math.floor(r.getTax() * r.getEmployee().getRank().getBranchRoyalty()))
                 .sum();
     }
 
