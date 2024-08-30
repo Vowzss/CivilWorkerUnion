@@ -33,6 +33,7 @@ public class ProfileBuilderUtils {
         final StringBuilder sb = new StringBuilder();
         sb.append(profile.getDescriptionFormat()).append("\n");
         sb.append(profile.getStatsFormat()).append("\n");
+        sb.append(profile.getSalaryFormat());
         embed.setDescription(sb.toString());
         return embed.build();
     }

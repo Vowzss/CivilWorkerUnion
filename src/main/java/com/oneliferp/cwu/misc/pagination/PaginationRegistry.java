@@ -32,20 +32,20 @@ public class PaginationRegistry {
     private static Map<ReportType, List<ReportPageType>> fillReportPages() {
         final Map<ReportType, List<ReportPageType>> map = new EnumMap<>(ReportType.class);
 
-        map.put(ReportType.STOCK, List.of(ReportPageType.STOCK, ReportPageType.TOKENS, ReportPageType.INFO));
+        map.put(ReportType.STOCK, List.of(ReportPageType.STOCK, ReportPageType.COST, ReportPageType.INFO));
 
-        map.put(ReportType.HOUSING_ATTRIBUTION, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
-        map.put(ReportType.HOUSING_PAYMENT, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
+        map.put(ReportType.HOUSING_ATTRIBUTION, List.of(ReportPageType.TENANT, ReportPageType.RENT, ReportPageType.INFO));
+        map.put(ReportType.HOUSING_PAYMENT, List.of(ReportPageType.TENANT, ReportPageType.RENT, ReportPageType.INFO));
         map.put(ReportType.HOUSING_EVICTION, List.of(ReportPageType.TENANT, ReportPageType.INFO));
         map.put(ReportType.HOUSING_CLEANING, List.of(ReportPageType.HEALTHINESS, ReportPageType.INFO));
 
-        map.put(ReportType.BUSINESS_ATTRIBUTION, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
-        map.put(ReportType.BUSINESS_PAYMENT, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.INFO));
-        map.put(ReportType.BUSINESS_ORDER, List.of(ReportPageType.TENANT, ReportPageType.TOKENS, ReportPageType.TAX, ReportPageType.INFO));
+        map.put(ReportType.BUSINESS_ATTRIBUTION, List.of(ReportPageType.MERCHANT, ReportPageType.RENT, ReportPageType.INFO));
+        map.put(ReportType.BUSINESS_PAYMENT, List.of(ReportPageType.MERCHANT, ReportPageType.RENT, ReportPageType.INFO));
+        map.put(ReportType.BUSINESS_ORDER, List.of(ReportPageType.MERCHANT, ReportPageType.COST, ReportPageType.TAX, ReportPageType.INFO));
         map.put(ReportType.BUSINESS_CLEANING, List.of(ReportPageType.HEALTHINESS, ReportPageType.INFO));
 
         map.put(ReportType.MEDICAL_INTERVENTION, List.of(ReportPageType.PATIENT, ReportPageType.MEDICAL, ReportPageType.INFO));
-        map.put(ReportType.MEDICAL_ORDER, List.of(ReportPageType.TOKENS, ReportPageType.TAX, ReportPageType.INFO));
+        map.put(ReportType.MEDICAL_ORDER, List.of(ReportPageType.COST, ReportPageType.TAX, ReportPageType.INFO));
 
         map.put(ReportType.OTHER, List.of(ReportPageType.INFO));
 

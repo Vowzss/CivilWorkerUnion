@@ -1,6 +1,7 @@
 package com.oneliferp.cwu.commands.modules.report.misc;
 
 import com.oneliferp.cwu.misc.CwuBranch;
+import com.oneliferp.cwu.utils.EmojiUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -17,7 +18,7 @@ public enum ReportType {
 
     BUSINESS_ATTRIBUTION("Attribution d'un commerce", CwuBranch.DRT, CwuBranch.CWU),
     BUSINESS_PAYMENT("Paiement d'un commerce", CwuBranch.DRT, CwuBranch.CWU),
-    BUSINESS_ORDER("Commande de stock", CwuBranch.DRT, CwuBranch.CWU),
+    BUSINESS_ORDER("Commande d'un commerce", CwuBranch.DRT, CwuBranch.CWU),
     BUSINESS_CLEANING("Salubrité d'un commerce", CwuBranch.DRT, CwuBranch.CWU),
 
     MEDICAL_INTERVENTION("Intervention médicale", CwuBranch.DMS, CwuBranch.CWU),
@@ -49,7 +50,8 @@ public enum ReportType {
 
     /* Utils */
     public String getBranchEmoji() {
-        return this.branches.size() == 1 ? branches.get(0).getEmoji() : "\uD83D\uDCDD";
+        if (!hasMainBranch()) return EmojiUtils.getPencilMemo();
+        return this.getMainBranch().getEmoji();
     }
 
     public static List<ReportType> getAvailableReportTypes(final CwuBranch branch) {

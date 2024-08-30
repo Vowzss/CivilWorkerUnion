@@ -5,8 +5,10 @@ import com.oneliferp.cwu.misc.IActionType;
 public enum ReportModalType implements IActionType {
     FILL_TENANT("mdl#cwu_report", "fill/tenent"),
     FILL_PATIENT("mdl#cwu_report", "fill/patient"),
+    FILL_MERCHANT("mdl#cwu_report", "fill/merchant"),
     FILL_TAX("mdl#cwu_report", "fill/tax"),
-    FILL_TOKENS("mdl#cwu_report", "fill/tokens"),
+    FILL_RENT("mdl#cwu_report", "fill/rent"),
+    FILL_COST("mdl#cwu_report", "fill/cost"),
     FILL_HEALTHINESS("mdl#cwu_report", "fill/healthiness"),
     FILL_INFO("mdl#cwu_report", "fill/info");
 

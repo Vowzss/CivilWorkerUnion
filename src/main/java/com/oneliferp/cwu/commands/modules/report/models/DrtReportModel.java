@@ -6,11 +6,17 @@ import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.IdentityModel;
 
 public class DrtReportModel extends ReportModel {
-    @JsonProperty("tenant")
-    protected IdentityModel tenant;
+    @JsonProperty("merchant")
+    protected IdentityModel merchant;
 
     @JsonProperty("tax")
     private Integer tax;
+
+    @JsonProperty("rent")
+    private Integer rent;
+
+    @JsonProperty("cost")
+    private Integer cost;
 
     @JsonProperty("healthiness")
     private String healthiness;
@@ -26,29 +32,44 @@ public class DrtReportModel extends ReportModel {
     /* Getter & Setter */
     @Override
     public void setIdentity(final IdentityModel identity) {
-        this.tenant = identity;
+        this.merchant = identity;
     }
-
     @Override
     public IdentityModel getIdentity() {
-        return this.tenant;
+        return this.merchant;
     }
 
     @Override
     public void setTax(final Integer tax) {
         this.tax = tax;
     }
-
     @Override
     public Integer getTax() {
         return this.tax;
     }
 
     @Override
+    public void setRent(final Integer rent) {
+        this.rent = rent;
+    }
+    @Override
+    public Integer getRent() {
+        return this.rent;
+    }
+
+    @Override
+    public void setCost(final Integer cost) {
+        this.cost = cost;
+    }
+    @Override
+    public Integer getCost() {
+        return this.cost;
+    }
+
+    @Override
     public void setHealthiness(final String healthiness) {
         this.healthiness = healthiness;
     }
-
     @Override
     public String getHealthiness() {
         return this.healthiness;
@@ -59,8 +80,20 @@ public class DrtReportModel extends ReportModel {
     public void reset() {
         super.reset();
 
+        this.merchant = null;
         this.tax = null;
-        this.tenant = null;
+        this.rent = null;
+        this.cost = null;
         this.healthiness = null;
+    }
+
+    @Override
+    public boolean verify() {
+        return switch (this.type) {
+            default -> throw new IllegalStateException("Unexpected value: " + this.type);
+            case BUSINESS_ATTRIBUTION, BUSINESS_PAYMENT -> super.verify() && this.merchant != null && this.rent != null;
+            case BUSINESS_ORDER -> super.verify() && this.merchant != null && this.tax != null && this.cost != null;
+            case BUSINESS_CLEANING -> super.verify() && this.healthiness != null;
+        };
     }
 }

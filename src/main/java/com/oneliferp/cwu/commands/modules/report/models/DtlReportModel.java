@@ -9,6 +9,9 @@ public class DtlReportModel extends ReportModel {
     @JsonProperty("tenant")
     protected IdentityModel tenant;
 
+    @JsonProperty("rent")
+    private Integer rent;
+
     @JsonProperty("healthiness")
     private String healthiness;
 
@@ -25,17 +28,24 @@ public class DtlReportModel extends ReportModel {
     public void setIdentity(final IdentityModel identity) {
         this.tenant = identity;
     }
-
     @Override
     public IdentityModel getIdentity() {
         return this.tenant;
     }
 
     @Override
+    public void setRent(final Integer rent) {
+        this.rent = rent;
+    }
+    @Override
+    public Integer getRent() {
+        return this.rent;
+    }
+
+    @Override
     public void setHealthiness(final String healthiness) {
         this.healthiness = healthiness;
     }
-
     @Override
     public String getHealthiness() {
         return this.healthiness;
@@ -48,5 +58,15 @@ public class DtlReportModel extends ReportModel {
 
         this.tenant = null;
         this.healthiness = null;
+    }
+
+    @Override
+    public boolean verify() {
+        return switch (this.type) {
+            default -> throw new IllegalStateException("Unexpected value: " + this.type);
+            case HOUSING_ATTRIBUTION, HOUSING_PAYMENT -> super.verify() && this.tenant != null && this.rent != null;
+            case HOUSING_EVICTION -> super.verify() && this.tenant != null;
+            case HOUSING_CLEANING -> super.verify() && this.healthiness != null;
+        };
     }
 }

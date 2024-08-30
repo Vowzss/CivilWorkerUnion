@@ -4,11 +4,13 @@ public enum ReportPageType {
     TYPE("type", "Type de rapport :"),
     STOCK("stock", "Réapprovisionnement en :"),
     TENANT("tenant", "Identité du locataire :"),
+    MERCHANT("merchant", "Identité du commerçant :"),
     PATIENT("patient", "Identité du patient :"),
     HEALTHINESS("healthiness", "Salubrité :"),
     MEDICAL("medical", "Détails de l'intervention :"),
     TAX("tax", "Montant de la TVA :"),
-    TOKENS("tokens", "Somme à déclarer :"),
+    RENT("rent", "Montant du loyé :"),
+    COST("cost", "Montant de la commande :"),
     INFO("info", "Informations supplémentaires :"),
     PREVIEW("preview", "Apperçu du rapport");
 

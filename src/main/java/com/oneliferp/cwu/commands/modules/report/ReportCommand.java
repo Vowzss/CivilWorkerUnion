@@ -3,6 +3,10 @@ package com.oneliferp.cwu.commands.modules.report;
 import com.oneliferp.cwu.cache.ReportCache;
 import com.oneliferp.cwu.commands.CwuCommand;
 import com.oneliferp.cwu.commands.modules.report.models.*;
+import com.oneliferp.cwu.commands.modules.report.models.CwuReportModel;
+import com.oneliferp.cwu.commands.modules.report.models.DmsReportModel;
+import com.oneliferp.cwu.commands.modules.report.models.DrtReportModel;
+import com.oneliferp.cwu.commands.modules.report.models.DtlReportModel;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
@@ -126,8 +130,7 @@ public class ReportCommand extends CwuCommand {
         if (profile == null) throw new ProfileNotFoundException(event);
 
         ReportModel report = this.reportCache.find(ctx.getCid());
-        if (report == null) throw new SessionNotFoundException(event);
-
+        if (report == null) throw new ReportNotFoundException(event);
         report.reset();
 
         switch ((ReportMenuType) ctx.getEnumType()) {
@@ -135,11 +138,15 @@ public class ReportCommand extends CwuCommand {
                 report.setType(ReportType.valueOf(event.getValues().get(0)));
 
                 if (report instanceof CwuReportModel cwuReport && cwuReport.isRecastAvailable()) {
-                    switch (report.getType().getMainBranch()) {
-                        case DTL -> report = cwuReport.convertToDtlReport();
-                        case DMS -> report = cwuReport.convertToDmsReport();
-                        case DRT -> report = cwuReport.convertToDrtReport();
-                    }
+                    report = switch (report.getType().getMainBranch()) {
+                        default -> throw new IllegalArgumentException();
+                        case DTL -> cwuReport.convertToDtlReport();
+                        case DMS -> cwuReport.convertToDmsReport();
+                        case DRT -> cwuReport.convertToDrtReport();
+                    };
+
+                    // Update report instance in cache
+                    this.reportCache.add(ctx.getCid(), report);
                 }
 
                 event.editMessageEmbeds(ReportBuilderUtils.initMessage(report.getBranch(), report.getType()))
@@ -199,9 +206,15 @@ public class ReportCommand extends CwuCommand {
                             .queue();
                 }
             }
-            case FILL_TOKENS -> {
-                report.setTokens(RegexUtils.parseTokens(content));
-                event.editMessageEmbeds(ReportBuilderUtils.tokenMessage(report))
+            case FILL_RENT -> {
+                report.setRent(RegexUtils.parseTokens(content));
+                event.editMessageEmbeds(ReportBuilderUtils.rentMessage(report))
+                        .setComponents(ReportBuilderUtils.pageRow(report))
+                        .queue();
+            }
+            case FILL_COST -> {
+                report.setCost(RegexUtils.parseTokens(content));
+                event.editMessageEmbeds(ReportBuilderUtils.costMessage(report))
                         .setComponents(ReportBuilderUtils.pageRow(report))
                         .queue();
             }
@@ -273,10 +286,11 @@ public class ReportCommand extends CwuCommand {
         switch (currentPage) {
             case TYPE -> report.setType(ReportType.UNKNOWN);
             case STOCK -> report.setStock(null);
-            case TENANT, PATIENT -> report.setIdentity(null);
+            case TENANT, PATIENT, MERCHANT -> report.setIdentity(null);
             case HEALTHINESS -> report.setHealthiness(null);
             case TAX -> report.setTax(null);
-            case TOKENS -> report.setTokens(null);
+            case RENT -> report.setRent(null);
+            case COST -> report.setCost(null);
             case INFO -> report.setInfo(null);
         }
 
@@ -318,13 +332,29 @@ public class ReportCommand extends CwuCommand {
                 if (identity == null) break;
                 inputBuilder.setValue(identity.toString());
             }
-            case TOKENS -> {
-                modalType = ReportModalType.FILL_TOKENS;
+            case MERCHANT -> {
+                modalType = ReportModalType.FILL_MERCHANT;
+                inputBuilder.setPlaceholder("Nom Prénom, #12345");
+
+                final var identity = report.getIdentity();
+                if (identity == null) break;
+                inputBuilder.setValue(identity.toString());
+            }
+            case RENT -> {
+                modalType = ReportModalType.FILL_RENT;
                 inputBuilder.setPlaceholder("ex: 1438");
 
-                final var tokens = report.getTokens();
-                if (tokens == null) break;
-                inputBuilder.setValue(tokens.toString());
+                final var rent = report.getRent();
+                if (rent == null) break;
+                inputBuilder.setValue(rent.toString());
+            }
+            case COST -> {
+                modalType = ReportModalType.FILL_COST;
+                inputBuilder.setPlaceholder("ex: 1438");
+
+                final var cost = report.getCost();
+                if (cost == null) break;
+                inputBuilder.setValue(cost.toString());
             }
             case HEALTHINESS -> {
                 modalType = ReportModalType.FILL_HEALTHINESS;
@@ -370,13 +400,17 @@ public class ReportCommand extends CwuCommand {
                     .setComponents(ReportBuilderUtils.pageRow(report));
             case PATIENT -> event.editMessageEmbeds(ReportBuilderUtils.patientMessage(report))
                     .setComponents(ReportBuilderUtils.pageRow(report));
+            case MERCHANT -> event.editMessageEmbeds(ReportBuilderUtils.merchantMessage(report))
+                    .setComponents(ReportBuilderUtils.pageRow(report));
             case HEALTHINESS -> event.editMessageEmbeds(ReportBuilderUtils.healthinessMessage(report))
                     .setComponents(ReportBuilderUtils.pageRow(report));
             case MEDICAL -> event.editMessageEmbeds(ReportBuilderUtils.medicalMessage(report))
                     .setComponents(ReportBuilderUtils.pageRow(report));
             case TAX -> event.editMessageEmbeds(ReportBuilderUtils.taxMessage(report))
                     .setComponents(ReportBuilderUtils.pageRow(report));
-            case TOKENS -> event.editMessageEmbeds(ReportBuilderUtils.tokenMessage(report))
+            case RENT -> event.editMessageEmbeds(ReportBuilderUtils.rentMessage(report))
+                    .setComponents(ReportBuilderUtils.pageRow(report));
+            case COST -> event.editMessageEmbeds(ReportBuilderUtils.costMessage(report))
                     .setComponents(ReportBuilderUtils.pageRow(report));
             case INFO -> event.editMessageEmbeds(ReportBuilderUtils.infoMessage(report))
                     .setComponents(ReportBuilderUtils.pageRow(report));

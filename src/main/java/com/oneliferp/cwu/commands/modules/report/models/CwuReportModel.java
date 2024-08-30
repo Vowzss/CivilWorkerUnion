@@ -1,35 +1,26 @@
 package com.oneliferp.cwu.commands.modules.report.models;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.IdentityModel;
 
 public class CwuReportModel extends ReportModel {
-    @JsonProperty("identity")
-    protected IdentityModel identity;
-
-    private CwuReportModel() {
-        super(CwuBranch.CWU);
-    }
-
     public CwuReportModel(final ProfileModel profile) {
         super(profile);
     }
 
     @Override
     public void setIdentity(final IdentityModel identity) {
-        this.identity = identity;
     }
 
     @Override
     public IdentityModel getIdentity() {
-        return this.identity;
+        return null;
     }
 
     /* Utils */
     public boolean isRecastAvailable() {
-        return this.getType().hasMainBranch();
+        return this.type.hasMainBranch();
     }
 
     /* Helpers */
@@ -43,7 +34,9 @@ public class CwuReportModel extends ReportModel {
             case DRT -> report = new DrtReportModel();
         }
 
+        report.id = this.id;
         report.employee = this.employee;
+        report.createdAt = this.createdAt;
         report.branch = branch;
         report.type = this.type;
 
@@ -61,6 +54,4 @@ public class CwuReportModel extends ReportModel {
     public DtlReportModel convertToDtlReport() {
         return (DtlReportModel) this.convert(CwuBranch.DTL);
     }
-
-    /* Pageable implementation */
 }

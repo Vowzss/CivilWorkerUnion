@@ -2,6 +2,7 @@ package com.oneliferp.cwu.commands.modules.report.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.IdentityModel;
 
@@ -28,7 +29,6 @@ public class DmsReportModel extends ReportModel {
     public void setIdentity(final IdentityModel identity) {
         this.patient = identity;
     }
-
     @Override
     public IdentityModel getIdentity() {
         return this.patient;
@@ -38,7 +38,6 @@ public class DmsReportModel extends ReportModel {
     public void setTax(final Integer tax) {
         this.tax = tax;
     }
-
     @Override
     public Integer getTax() {
         return this.tax;
@@ -48,7 +47,6 @@ public class DmsReportModel extends ReportModel {
     public void setMedical(final String medical) {
         this.medical = medical;
     }
-
     @Override
     public String getMedical() {
         return this.medical;
@@ -61,5 +59,15 @@ public class DmsReportModel extends ReportModel {
 
         this.patient = null;
         this.tax = null;
+        this.medical = null;
+    }
+
+    @Override
+    public boolean verify() {
+        return switch (this.type) {
+            default -> throw new IllegalStateException("Unexpected value: " + this.type);
+            case BUSINESS_ATTRIBUTION -> super.verify() && this.patient != null && this.medical != null;
+            case MEDICAL_ORDER -> super.verify() && this.tax != null;
+        };
     }
 }

@@ -1,12 +1,12 @@
 package com.oneliferp.cwu.commands.modules.report.models;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
 import com.oneliferp.cwu.commands.modules.report.misc.StockType;
-import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportModalType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
@@ -16,10 +16,8 @@ import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
-import com.oneliferp.cwu.utils.Toolbox;
+import com.oneliferp.cwu.utils.json.StockTypeFilter;
 import org.jetbrains.annotations.Nullable;
-
-import java.lang.reflect.InvocationTargetException;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -27,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
         property = "branch"
 )
 @JsonSubTypes({
+        @JsonSubTypes.Type(value = CwuReportModel.class, name = "CWU"),
         @JsonSubTypes.Type(value = DtlReportModel.class, name = "DTL"),
         @JsonSubTypes.Type(value = DmsReportModel.class, name = "DMS"),
         @JsonSubTypes.Type(value = DmsReportModel.class, name = "DRT"),
@@ -48,10 +47,8 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
     protected ReportType type;
 
     @JsonProperty("stock")
+    @JsonInclude(value = JsonInclude.Include.CUSTOM, valueFilter = StockTypeFilter.class)
     protected StockType stock;
-
-    @JsonProperty("tokens")
-    protected Integer tokens;
 
     @JsonProperty("information")
     protected String info;
@@ -69,7 +66,6 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
 
         this.stock = StockType.UNKNOWN;
         this.type = ReportType.UNKNOWN;
-        this.tokens = null;
         this.info = null;
     }
 
@@ -88,6 +84,13 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
 
     public void setType(final ReportType type) {
         this.type = type;
+
+        // update branch if mismatch to avoid data corruption
+        if (!this.type.hasMainBranch()) {
+            this.branch = CwuBranch.CWU;
+            return;
+        }
+        this.branch = this.type.getMainBranch();
     }
     public ReportType getType() {
         return this.type;
@@ -98,13 +101,6 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
     }
     public StockType getStock() {
         return this.stock;
-    }
-
-    public void setTokens(final Integer tokens) {
-        this.tokens = tokens;
-    }
-    public Integer getTokens() {
-        return this.tokens;
     }
 
     public void setInfo(@Nullable final String info) {
@@ -140,6 +136,20 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
     }
     public String getMedical() {
         throw new UnsupportedOperationException("Medical is not available for this type of report.");
+    }
+
+    public void setRent(final Integer rent) {
+        throw new UnsupportedOperationException("Rent is not available for this type of report.");
+    }
+    public Integer getRent() {
+        throw new UnsupportedOperationException("Rent is not available for this type of report.");
+    }
+
+    public void setCost(final Integer cost) {
+        throw new UnsupportedOperationException("Cost is not available for this type of report.");
+    }
+    public Integer getCost() {
+        throw new UnsupportedOperationException("Cost is not available for this type of report.");
     }
 
     /* Utils */
@@ -195,6 +205,7 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
         this.pagination = new PaginationContext<>(PaginationRegistry.getReportPages(this.type), ReportPageType.PREVIEW);
     }
 
+    @Override
     public void end() {
 
     }
@@ -202,9 +213,8 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
     @Override
     public void reset() {
         this.type = ReportType.UNKNOWN;
-        this.info = null;
         this.stock = StockType.UNKNOWN;
-        this.tokens = null;
+        this.info = null;
     }
 
     @Override

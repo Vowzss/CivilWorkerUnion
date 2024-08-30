@@ -182,7 +182,7 @@ public class ManageBuilderUtils {
 
         final StringBuilder sb = new StringBuilder();
         ProfileDatabase.get().getAsGroupAndOrder().forEach((branch, profiles) -> {
-            sb.append(String.format("%s  **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
+            sb.append(String.format("%s **Branche %s (%s)**", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
 
             if (profiles.isEmpty()) return;
             profiles.forEach(profile -> sb.append(profile.getWeekStats()).append("\n"));

@@ -168,26 +168,42 @@ public class ProfileModel extends Pageable<ProfilePageType> {
 
     public String getStatsFormat() {
         final StringBuilder sb = new StringBuilder();
+
+        sb.append("**Statistiques de la semaine :**").append("\n");
+        sb.append(String.format("Nombre de session(s) : %d", this.resolveWeekSessions().size())).append("\n");
+        sb.append(String.format("Nombre de rapport(s) : %d", this.resolveWeekReports().size())).append("\n\n");
+
+        sb.append("**Statistiques globale :**").append("\n");
+        sb.append(String.format("Nombre de session(s) : %d", this.resolveSessions().size())).append("\n");
+        sb.append(String.format("Nombre de rapport(s) : %d", this.resolveReports().size())).append("\n\n");
+
         {
             final SessionModel s = this.resolveLatestSession();
             sb.append("**Dernière session effectuée :**").append("\n");
             sb.append(s == null ? "`Information inexistante`" : s.getDescriptionFormat(false)).append("\n\n");
         }
 
-        /*
-        sb.append(String.format("**Nombre de sessions:** %d\n", cwu.getSessionCount()));
-        sb.append(String.format("**Compteur hebdomadaire:** %d\n", cwu.getWeeklySessionCount()));
-        */
-
         {
             final ReportModel r = this.resolveLatestReport();
             sb.append("**Dernier rapport soumis :**").append("\n");
-            sb.append(r == null ? "`Information inexistante`" : r.getDescriptionFormat(false)).append("\n\n");
+            sb.append(r == null ? "`Information inexistante`" : r.getDescriptionFormat(false)).append("\n");
         }
-        /*
-        sb.append(String.format("**Nombre de rapports:** %d\n", cwu.getReportCount()));
-        sb.append(String.format("**Compteur hebdomadaire:** %d\n", cwu.getWeeklyReportCount()));
-        */
+
+        return sb.toString();
+    }
+
+    public String getSalaryFormat() {
+        final StringBuilder sb = new StringBuilder();
+
+        sb.append("**Salaire de la semaine :**").append("\n");
+
+        {
+            final var sessions = this.resolveWeekSessions();
+            final var reports = this.resolveWeekReports();
+
+            sb.append(String.format("Tokens : %d", this.resolveSalaryTokens(sessions, reports))).append("\n");
+            sb.append(String.format("Points de loyauté : %d", this.resolveSalaryPoints(sessions, reports)));
+        }
 
         return sb.toString();
     }

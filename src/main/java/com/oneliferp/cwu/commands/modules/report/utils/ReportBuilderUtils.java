@@ -1,7 +1,5 @@
 package com.oneliferp.cwu.commands.modules.report.utils;
 
-import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType;
-import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.commands.modules.report.misc.StockType;
 import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
@@ -135,20 +133,30 @@ public class ReportBuilderUtils {
     public static MessageEmbed patientMessage(final ReportModel report) {
         return identityMessage(report, ReportPageType.PATIENT.getDescription());
     }
+    public static MessageEmbed merchantMessage(final ReportModel report) {
+        return identityMessage(report, ReportPageType.MERCHANT.getDescription());
+    }
 
-    private static MessageEmbed.Field tokenField(final Integer tokens) {
+    private static MessageEmbed.Field tokenField(final Integer tokens, final String description) {
         final boolean hasValue = tokens != null;
 
-        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), ReportPageType.TOKENS.getDescription());
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), description);
         final String value = String.format("%s", hasValue ? (tokens + " Tokens") : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
-    public static MessageEmbed tokenMessage(final ReportModel report) {
+    public static MessageEmbed rentMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
-        embed.addField(tokenField(report.getTokens()));
+        embed.addField(tokenField(report.getRent(), ReportPageType.RENT.getDescription()));
         return embed.build();
     }
+    public static MessageEmbed costMessage(final ReportModel report) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(report.getStepTitle());
+        embed.addField(tokenField(report.getCost(), ReportPageType.COST.getDescription()));
+        return embed.build();
+    }
+
 
     private static MessageEmbed.Field healthinessField(final String healthiness) {
         final boolean hasValue = healthiness != null;
@@ -213,8 +221,11 @@ public class ReportBuilderUtils {
         if (report.hasPage(ReportPageType.HEALTHINESS)) {
             embed.addField(healthinessField(report.getHealthiness()));
         }
-        if (report.hasPage(ReportPageType.TOKENS)) {
-            embed.addField(tokenField(report.getTokens()));
+        if (report.hasPage(ReportPageType.RENT)) {
+            embed.addField(tokenField(report.getRent(), ReportPageType.RENT.getDescription()));
+        }
+        if (report.hasPage(ReportPageType.COST)) {
+            embed.addField(tokenField(report.getCost(), ReportPageType.COST.getDescription()));
         }
         if (report.hasPage(ReportPageType.MEDICAL)) {
             embed.addField(medicalField(report.getMedical()));
@@ -229,7 +240,7 @@ public class ReportBuilderUtils {
     private static StringSelectMenu typeMenu(final CwuBranch branch, final String cid, final ReportType type) {
         final var menu = StringSelectMenu.create(ReportMenuType.SELECT_TYPE.build(cid));
         final var options = ReportType.getAvailableReportTypes(branch)
-                .stream().map(v -> SelectOption.of(v.getLabel(), v.name()))
+                .stream().map(v -> SelectOption.of(v.getLabel(), v.name()).withEmoji(EmojiUtils.asDiscordEmoji(v.getBranchEmoji())))
                 .toList();
         options.forEach(menu::addOptions);
 
