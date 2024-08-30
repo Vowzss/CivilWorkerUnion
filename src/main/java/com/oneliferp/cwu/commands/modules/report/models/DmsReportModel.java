@@ -6,16 +6,16 @@ import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.IdentityModel;
 
 public class DmsReportModel extends ReportModel {
+    @JsonProperty("patient")
+    protected IdentityModel patient;
+
     @JsonProperty("tax")
     private Integer tax;
-
-    @JsonProperty("patient")
-    private IdentityModel patient;
 
     @JsonProperty("medical")
     private String medical;
 
-    private DmsReportModel() {
+    DmsReportModel() {
         super(CwuBranch.DMS);
     }
 

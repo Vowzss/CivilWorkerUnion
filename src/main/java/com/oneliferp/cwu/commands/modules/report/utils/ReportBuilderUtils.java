@@ -365,11 +365,11 @@ public class ReportBuilderUtils {
         );
     }
 
-    public static List<ActionRow> beginRow(final ReportModel report) {
+    public static List<ActionRow> beginRow(final CwuBranch branch, final ReportModel report) {
         final String cid = report.getEmployeeCid();
 
         return List.of(
-                ActionRow.of(typeMenu(report.getBranch(), cid, report.getType())),
+                ActionRow.of(typeMenu(branch, cid, report.getType())),
                 ActionRow.of(abortButton(cid), startButton(cid))
         );
     }

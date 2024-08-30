@@ -19,6 +19,7 @@ public interface IActionType {
     }
 
     default String build(final String cid, final Map<String, String> params) {
+        if (params == null) return this.build(cid);
         return CommandContext.buildPatternWithArgs(this.getRoot(), this.getAction(), cid, params);
     }
 }

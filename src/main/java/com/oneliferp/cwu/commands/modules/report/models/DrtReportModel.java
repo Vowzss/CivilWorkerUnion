@@ -6,16 +6,16 @@ import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.IdentityModel;
 
 public class DrtReportModel extends ReportModel {
+    @JsonProperty("tenant")
+    protected IdentityModel tenant;
+
     @JsonProperty("tax")
     private Integer tax;
-
-    @JsonProperty("tenant")
-    private IdentityModel tenant;
 
     @JsonProperty("healthiness")
     private String healthiness;
 
-    private DrtReportModel() {
+    DrtReportModel() {
         super(CwuBranch.DRT);
     }
 

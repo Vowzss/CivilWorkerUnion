@@ -7,12 +7,12 @@ import com.oneliferp.cwu.models.IdentityModel;
 
 public class DtlReportModel extends ReportModel {
     @JsonProperty("tenant")
-    private IdentityModel tenant;
+    protected IdentityModel tenant;
 
     @JsonProperty("healthiness")
     private String healthiness;
 
-    private DtlReportModel() {
+    DtlReportModel() {
         super(CwuBranch.DTL);
     }
 

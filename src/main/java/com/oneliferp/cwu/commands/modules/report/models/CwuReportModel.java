@@ -7,8 +7,7 @@ import com.oneliferp.cwu.models.IdentityModel;
 
 public class CwuReportModel extends ReportModel {
     @JsonProperty("identity")
-    private IdentityModel identity;
-
+    protected IdentityModel identity;
 
     private CwuReportModel() {
         super(CwuBranch.CWU);
@@ -26,6 +25,41 @@ public class CwuReportModel extends ReportModel {
     @Override
     public IdentityModel getIdentity() {
         return this.identity;
+    }
+
+    /* Utils */
+    public boolean isRecastAvailable() {
+        return this.getType().hasMainBranch();
+    }
+
+    /* Helpers */
+    private ReportModel convert(final CwuBranch branch) {
+        final ReportModel report;
+
+        switch (branch) {
+            default -> throw new IllegalArgumentException("Unsupported branch");
+            case DTL -> report = new DtlReportModel();
+            case DMS -> report = new DmsReportModel();
+            case DRT -> report = new DrtReportModel();
+        }
+
+        report.employee = this.employee;
+        report.branch = branch;
+        report.type = this.type;
+
+        return report;
+    }
+
+    public DmsReportModel convertToDmsReport() {
+        return (DmsReportModel) this.convert(CwuBranch.DMS);
+    }
+
+    public DrtReportModel convertToDrtReport() {
+        return (DrtReportModel) this.convert(CwuBranch.DRT);
+    }
+
+    public DtlReportModel convertToDtlReport() {
+        return (DtlReportModel) this.convert(CwuBranch.DTL);
     }
 
     /* Pageable implementation */

@@ -3,6 +3,7 @@ package com.oneliferp.cwu.commands.modules.manage.utils;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.WorkforceButtonType;
 import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
+import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileButtonType;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.modules.profile.utils.ProfileBuilderUtils;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
@@ -300,7 +301,7 @@ public class ManageBuilderUtils {
                 .setPlaceholder("ex: (#)12345")
                 .setRequired(true);
 
-        return Modal.create(ManageModalType.PROFILE_SEARCH.build(cid), "Recherche d'un employé")
+        return Modal.create(ManageModalType.EMPLOYEE_SEARCH.build(cid), "Recherche d'un employé")
                 .addComponents(ActionRow.of(searchInput.build()))
                 .build();
     }
@@ -326,7 +327,7 @@ public class ManageBuilderUtils {
 
     /* Buttons */
     private static Button startButton(final String cid) {
-        return Button.primary(WorkforceButtonType.START.build(cid), "Commencer");
+        return Button.primary(ProfileButtonType.START.build(cid), "Commencer");
     }
 
     public static Button cancelButton(final IActionType type, final String cid) {
@@ -386,7 +387,7 @@ public class ManageBuilderUtils {
     }
 
     private static Button resumeButton(final String cid) {
-        return Button.primary(WorkforceButtonType.RESUME.build(cid), "Reprendre");
+        return Button.primary(ProfileButtonType.RESUME.build(cid), "Reprendre");
     }
 
     private static Button deleteButton(final IActionType type, final String cid) {
@@ -394,12 +395,16 @@ public class ManageBuilderUtils {
     }
 
     private static Button overwriteButton(final String cid) {
-        return Button.danger(WorkforceButtonType.OVERWRITE.build(cid), "Écraser");
+        return Button.danger(ProfileButtonType.OVERWRITE.build(cid), "Écraser");
+    }
+
+    private static Button createButton(final String cid) {
+        return Button.secondary(ProfileButtonType.CREATE.build(cid), "Nouvel employé");
     }
 
     /* Single Components */
     public static ActionRow workforceOverviewComponent(final String cid) {
-        return ActionRow.of(statsButton(WorkforceButtonType.STATS, cid), manageButton(WorkforceButtonType.MANAGE, cid));
+        return ActionRow.of(statsButton(WorkforceButtonType.STATS, cid), createButton(cid), manageButton(WorkforceButtonType.MANAGE, cid));
     }
 
     public static ActionRow sessionOverviewComponent(final String cid) {
@@ -432,9 +437,9 @@ public class ManageBuilderUtils {
         final List<Button> buttons = new ArrayList<>();
         if (maxIndex > 1) {
             if (currIndex > 1)
-                buttons.add(prevButton(ReportButtonType.PAGE, cid, Map.of("index", String.valueOf(currIndex - 1), "type", "prev")));
+                buttons.add(prevButton(ReportButtonType.PAGE, cid, Map.of("page", String.valueOf(currIndex - 1), "type", "prev")));
             if (currIndex < maxIndex)
-                buttons.add(nextButton(ReportButtonType.PAGE, cid, Map.of("index", String.valueOf(currIndex + 1), "type", "next")));
+                buttons.add(nextButton(ReportButtonType.PAGE, cid, Map.of("page", String.valueOf(currIndex + 1), "type", "next")));
         }
 
         buttons.addAll(List.of(
@@ -466,7 +471,7 @@ public class ManageBuilderUtils {
     }
 
     public static ActionRow createEmployeeComponent(final String cid) {
-        return ActionRow.of(startButton(cid), cancelButton(WorkforceButtonType.ABORT, cid));
+        return ActionRow.of(startButton(cid), cancelButton(ProfileButtonType.ABORT, cid));
     }
 
     public static LayoutComponent employeeIdentityComponent(final String cid) {
@@ -482,7 +487,7 @@ public class ManageBuilderUtils {
     }
 
     public static LayoutComponent employeePreviewComponents(final String cid) {
-        return submitOrEditRow(WorkforceButtonType.SUBMIT, WorkforceButtonType.EDIT, cid);
+        return submitOrEditRow(ProfileButtonType.SUBMIT, ProfileButtonType.EDIT, cid);
     }
 
     public static LayoutComponent employeeResumeOrOverwriteComponent(final String cid) {

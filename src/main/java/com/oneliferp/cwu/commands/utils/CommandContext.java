@@ -4,6 +4,7 @@ import com.oneliferp.cwu.commands.modules.manage.misc.actions.WorkforceButtonTyp
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileButtonType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileMenuType;
+import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileModalType;
 import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportMenuType;
@@ -100,6 +101,7 @@ public class CommandContext {
             case "mnu#cwu_session" -> SessionMenuType.class;
 
             case "btn#cwu_profile" -> ProfileButtonType.class;
+            case "mdl#cwu_profile" -> ProfileModalType.class;
             case "mnu#cwu_profile" -> ProfileMenuType.class;
 
             case "btn#cwu_report" -> ReportButtonType.class;

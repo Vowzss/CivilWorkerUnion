@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
 import com.oneliferp.cwu.commands.modules.report.misc.StockType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportModalType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.misc.CwuBranch;
@@ -17,6 +18,8 @@ import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 import com.oneliferp.cwu.utils.Toolbox;
 import org.jetbrains.annotations.Nullable;
+
+import java.lang.reflect.InvocationTargetException;
 
 @JsonTypeInfo(
         use = JsonTypeInfo.Id.NAME,
@@ -30,28 +33,28 @@ import org.jetbrains.annotations.Nullable;
 })
 public abstract class ReportModel extends Pageable<ReportPageType>  {
     @JsonProperty("id")
-    private String id;
+    protected String id;
 
     @JsonProperty("employee")
-    private IdentityModel employee;
+    protected IdentityModel employee;
 
     @JsonProperty("branch")
     protected CwuBranch branch;
 
     @JsonProperty("createdAt")
-    private SimpleDate createdAt;
+    protected SimpleDate createdAt;
 
     @JsonProperty("type")
-    private ReportType type;
+    protected ReportType type;
 
     @JsonProperty("stock")
-    private StockType stock;
+    protected StockType stock;
 
     @JsonProperty("tokens")
-    private Integer tokens;
+    protected Integer tokens;
 
     @JsonProperty("information")
-    private String info;
+    protected String info;
 
     protected ReportModel(final CwuBranch branch) {
         this.branch = branch;

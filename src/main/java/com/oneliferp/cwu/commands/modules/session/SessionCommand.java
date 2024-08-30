@@ -2,7 +2,6 @@ package com.oneliferp.cwu.commands.modules.session;
 
 import com.oneliferp.cwu.cache.SessionCache;
 import com.oneliferp.cwu.commands.CwuCommand;
-import com.oneliferp.cwu.commands.modules.profile.utils.ProfileBuilderUtils;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
@@ -58,7 +57,7 @@ public class SessionCommand extends CwuCommand {
         final ProfileModel cwu = this.profileDatabase.getFromId(event.getUser().getIdLong());
         if (cwu == null) throw new ProfileNotFoundException(event);
 
-        final SessionModel ongoingSession = this.sessionCache.get(cwu.getCid());
+        final SessionModel ongoingSession = this.sessionCache.find(cwu.getCid());
         if (ongoingSession != null && ongoingSession.getType() != SessionType.UNKNOWN) {
             this.sessionAlreadyExistFeedback(event, ongoingSession);
             return;
@@ -95,7 +94,7 @@ public class SessionCommand extends CwuCommand {
             return;
         }
 
-        final SessionModel session = this.sessionCache.get(profile.getCid());
+        final SessionModel session = this.sessionCache.find(profile.getCid());
         if (session == null) throw new SessionNotFoundException(event);
 
         switch (type) {
@@ -119,7 +118,7 @@ public class SessionCommand extends CwuCommand {
         final ProfileModel cwu = this.profileDatabase.getFromCid(ctx.getCid());
         if (cwu == null) throw new ProfileNotFoundException(event);
 
-        final SessionModel session = this.sessionCache.get(cwu.getCid());
+        final SessionModel session = this.sessionCache.find(cwu.getCid());
         if (session == null) throw new SessionNotFoundException(event);
 
         final SessionPageType currentPage = session.getCurrentPage();
@@ -158,7 +157,7 @@ public class SessionCommand extends CwuCommand {
         final ProfileModel cwu = this.profileDatabase.getFromCid(ctx.getCid());
         if (cwu == null) throw new ProfileNotFoundException(event);
 
-        final SessionModel session = this.sessionCache.get(cwu.getCid());
+        final SessionModel session = this.sessionCache.find(cwu.getCid());
         if (session == null) throw new SessionNotFoundException(event);
 
         switch ((SessionMenuType) ctx.getEnumType()) {
@@ -199,7 +198,7 @@ public class SessionCommand extends CwuCommand {
 
     /* Button handlers */
     private void handleCancelButton(final ButtonInteractionEvent event, final String cid) {
-        this.sessionCache.remove(cid);
+        this.sessionCache.delete(cid);
 
         event.reply("❌ Vous avez annuler votre session de travail.")
                 .setEphemeral(true).queue();
@@ -212,7 +211,7 @@ public class SessionCommand extends CwuCommand {
     }
 
     private void handleOverwriteButton(final ButtonInteractionEvent event, final IdentityModel identity) {
-        this.sessionCache.remove(identity.cid);
+        this.sessionCache.delete(identity.cid);
         this.sessionInitFeedback(event, identity);
     }
 
@@ -294,7 +293,7 @@ public class SessionCommand extends CwuCommand {
         if (!session.verify()) throw new SessionValidationException(event);
 
         session.end();
-        this.sessionCache.remove(session.getEmployeeCid());
+        this.sessionCache.delete(session.getEmployeeCid());
 
         // Save session within database
         this.sessionDatabase.addOne(session);

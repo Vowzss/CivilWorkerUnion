@@ -6,7 +6,7 @@ public abstract class RuntimeCache<A, B> {
     private final HashMap<A, B> objects;
 
     protected RuntimeCache() {
-        objects = new HashMap<>();
+        this.objects = new HashMap<>();
     }
 
     public void add(final A key, final B object) {
@@ -14,12 +14,13 @@ public abstract class RuntimeCache<A, B> {
         this.objects.put(key, object);
     }
 
-    public B get(final A key) {
+    public B find(final A key) {
         return this.objects.get(key);
     }
 
-    public void remove(final A key) {
-        this.objects.remove(key);
+    public void delete(final A key) {
+        final var object = this.objects.remove(key);
+        System.out.println("Deleted object: '" + object + "' with key: '" + key + "'");
     }
 
     public boolean exist(final A key) {

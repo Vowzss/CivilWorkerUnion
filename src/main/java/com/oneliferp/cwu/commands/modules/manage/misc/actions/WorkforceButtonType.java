@@ -5,23 +5,7 @@ import com.oneliferp.cwu.misc.IActionType;
 public enum WorkforceButtonType implements IActionType {
     STATS("btn#cwu_manage", "workforce/stats"),
     OVERVIEW("btn#cwu_manage", "workforce/overview"),
-    MANAGE("btn#cwu_manage", "workforce/manage"),
-
-    EDIT("btn#cwu_manage", "workforce/profile/edit"),
-
-    CREATE("btn#cwu_manage", "workforce/employee/create"),
-    OVERWRITE("btn#cwu_manage", "workforce/profile/overwrite"),
-
-    START("", "profile/start"),
-    ABORT("", "profile/abort"),
-    PAGE_NEXT("", "profile/next"),
-    PAGE_PREV("", "profile/prev"),
-    FILL("", "profile/fill"),
-    CLEAR("", "profile/clear"),
-    PREVIEW("", "profile/preview"),
-    SUBMIT("", "profile/submit"),
-
-    RESUME("", "profile/resume");
+    MANAGE("btn#cwu_manage", "workforce/manage");
 
     public final String root;
     public final String action;

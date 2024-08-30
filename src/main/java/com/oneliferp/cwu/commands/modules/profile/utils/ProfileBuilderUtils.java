@@ -22,6 +22,7 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class ProfileBuilderUtils {
     /* Messages */
@@ -74,19 +75,19 @@ public class ProfileBuilderUtils {
 
     /* Buttons */
     private static Button deleteButton(final String cid) {
-        return Button.danger(ProfileButtonType.DELETE.build(cid), "Supprimer");
+        return Button.danger(ProfileButtonType.DELETE_REQUEST.build(cid), "Supprimer");
     }
 
     private static Button returnButton(final IActionType type, final String cid) {
         return Button.secondary(type.build(cid), "Retour en arrière");
     }
 
-    private static Button confirmButton(final IActionType type, final String cid) {
-        return Button.danger(type.build(cid), "Confirmer");
+    private static Button confirmButton(final IActionType type, final String cid, final Map<String, String> params) {
+        return Button.danger(type.build(cid, params), "Confirmer");
     }
 
-    private static Button updateButton(final String cid) {
-        return Button.primary(ProfileButtonType.UPDATE.build(cid), "Mettre à jour");
+    private static Button updateButton(final String cid, final Map<String, String> params) {
+        return Button.primary(ProfileButtonType.UPDATE_REQUEST.build(cid, params), "Mettre à jour");
     }
 
     private static Button cancelButton(final IActionType type, final String cid) {
@@ -94,8 +95,8 @@ public class ProfileBuilderUtils {
     }
 
     /* Menus */
-    private static ActionRow branchMenu(final CwuBranch branch, final String cid) {
-        final var menu = StringSelectMenu.create(ProfileMenuType.SELECT_BRANCH.build(cid));
+    private static ActionRow branchMenu(final CwuBranch branch, final String cid, final Map<String, String> params) {
+        final var menu = StringSelectMenu.create(ProfileMenuType.SELECT_BRANCH.build(cid, params));
         final var options = Arrays.stream(CwuBranch.values())
                 .map(v -> SelectOption.of(String.format("%s - %s", v.name(), v.getMeaning()), v.name())).toList();
         options.forEach(menu::addOptions);
@@ -104,8 +105,8 @@ public class ProfileBuilderUtils {
         return ActionRow.of(menu.build());
     }
 
-    private static ActionRow rankMenu(final CwuRank rank, final String cid) {
-        final var menu = StringSelectMenu.create(ProfileMenuType.SELECT_RANK.build(cid));
+    private static ActionRow rankMenu(final CwuRank rank, final String cid, final Map<String, String> params) {
+        final var menu = StringSelectMenu.create(ProfileMenuType.SELECT_RANK.build(cid, params));
         final var options = Arrays.stream(CwuRank.values())
                 .map(v -> SelectOption.of(v.getLabel(), v.name())).toList();
         options.forEach(menu::addOptions);
@@ -116,18 +117,21 @@ public class ProfileBuilderUtils {
 
     /* Components */
     public static LayoutComponent deleteComponent(final String cid) {
-        return ActionRow.of(cancelButton(ProfileButtonType.DELETE_CANCEL, cid), confirmButton(ProfileButtonType.DELETE_CONFIRM, cid));
+        return ActionRow.of(cancelButton(ProfileButtonType.DELETE_CANCEL, cid), confirmButton(ProfileButtonType.DELETE_CONFIRM, cid, null));
     }
 
-    public static LayoutComponent displayComponent(final String cid) {
-        return ActionRow.of(deleteButton(cid), updateButton(cid), returnButton(WorkforceButtonType.OVERVIEW, cid));
+    public static LayoutComponent displayComponent(final String cid, final CwuBranch branch, final CwuRank rank) {
+        final var params = Map.of("branch", branch.name(), "rank", rank.name());
+        return ActionRow.of(deleteButton(cid), updateButton(cid, params), returnButton(WorkforceButtonType.OVERVIEW, cid));
     }
 
     public static List<LayoutComponent> updateComponent(final String cid, final CwuBranch branch, final CwuRank rank) {
+        final var params = Map.of("branch", branch.name(), "rank", rank.name());
+
         return List.of(
-                branchMenu(branch, cid),
-                rankMenu(rank, cid),
-                ActionRow.of(cancelButton(ProfileButtonType.UPDATE_CANCEL, cid), confirmButton(ProfileButtonType.UPDATE_CONFIRM, cid))
+                branchMenu(branch, cid, params),
+                rankMenu(rank, cid, params),
+                ActionRow.of(cancelButton(ProfileButtonType.UPDATE_CANCEL, cid), confirmButton(ProfileButtonType.UPDATE_CONFIRM, cid, params))
         );
     }
 }

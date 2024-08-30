@@ -3,9 +3,6 @@ package com.oneliferp.cwu.commands.modules.report;
 import com.oneliferp.cwu.cache.ReportCache;
 import com.oneliferp.cwu.commands.CwuCommand;
 import com.oneliferp.cwu.commands.modules.report.models.*;
-import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType;
-import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
-import com.oneliferp.cwu.commands.modules.session.utils.SessionBuilderUtils;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
@@ -21,6 +18,7 @@ import com.oneliferp.cwu.commands.modules.report.utils.ReportBuilderUtils;
 import com.oneliferp.cwu.commands.modules.session.exceptions.SessionNotFoundException;
 import com.oneliferp.cwu.exceptions.IdentityException;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
+import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.RegexUtils;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -54,11 +52,11 @@ public class ReportCommand extends CwuCommand {
         final ProfileModel cwu = this.profileDatabase.getFromId(event.getUser().getIdLong());
         if (cwu == null) throw new ProfileNotFoundException(event);
 
-        final ReportModel ongoingReport = this.reportCache.get(cwu.getCid());
+        final ReportModel ongoingReport = this.reportCache.find(cwu.getCid());
         if (ongoingReport != null && ongoingReport.getType() != ReportType.UNKNOWN) {
             event.replyEmbeds(ReportBuilderUtils.alreadyExistMessage(ongoingReport.getType()))
                     .setComponents(ReportBuilderUtils.resumeOrOverwriteRow(cwu.getCid()))
-                    .queue();
+                    .setEphemeral(true).queue();
             return;
         }
 
@@ -72,7 +70,7 @@ public class ReportCommand extends CwuCommand {
 
         event.replyEmbeds(ReportBuilderUtils.initMessage(cwu.getBranch(), ReportType.UNKNOWN))
                 .setComponents(ReportBuilderUtils.initRow(cwu.getBranch(), cwu.getCid()))
-                .queue();
+                .setEphemeral(true).queue();
     }
 
     @Override
@@ -103,7 +101,7 @@ public class ReportCommand extends CwuCommand {
             return;
         }
 
-        final ReportModel report = this.reportCache.get(ctx.getCid());
+        final ReportModel report = this.reportCache.find(ctx.getCid());
         if (report == null) throw new ReportNotFoundException(event);
 
         switch (type) {
@@ -111,7 +109,7 @@ public class ReportCommand extends CwuCommand {
             case BEGIN -> this.handleBeginButton(event, report);
             case FILL -> this.handleFillButton(event, report);
             case EDIT -> this.handleEditButton(event, report);
-            case OVERWRITE -> this.handleOverwriteButton(event, report);
+            case OVERWRITE -> this.handleOverwriteButton(event, profile.getBranch(), report);
             case PREVIEW -> this.handlePreviewButton(event, report);
             case ABORT -> this.handleCancelButton(event, report);
             case CLEAR -> this.handleClearButton(event, report);
@@ -124,21 +122,32 @@ public class ReportCommand extends CwuCommand {
 
     @Override
     public void handleSelectionInteraction(final StringSelectInteractionEvent event, final CommandContext ctx) throws CwuException {
-        final ReportModel report = this.reportCache.get(ctx.getCid());
+        final ProfileModel profile = this.profileDatabase.getFromCid(ctx.getCid());
+        if (profile == null) throw new ProfileNotFoundException(event);
+
+        ReportModel report = this.reportCache.find(ctx.getCid());
         if (report == null) throw new SessionNotFoundException(event);
+
+        report.reset();
 
         switch ((ReportMenuType) ctx.getEnumType()) {
             case SELECT_TYPE -> {
                 report.setType(ReportType.valueOf(event.getValues().get(0)));
-                report.setStock(StockType.UNKNOWN);
-                report.setTokens(null);
+
+                if (report instanceof CwuReportModel cwuReport && cwuReport.isRecastAvailable()) {
+                    switch (report.getType().getMainBranch()) {
+                        case DTL -> report = cwuReport.convertToDtlReport();
+                        case DMS -> report = cwuReport.convertToDmsReport();
+                        case DRT -> report = cwuReport.convertToDrtReport();
+                    }
+                }
 
                 event.editMessageEmbeds(ReportBuilderUtils.initMessage(report.getBranch(), report.getType()))
-                        .setComponents(ReportBuilderUtils.beginRow(report)).queue();
+                        .setComponents(ReportBuilderUtils.beginRow(profile.getBranch(), report)).queue();
             }
             case SELECT_STOCK -> {
+                report.setType(ReportType.STOCK);
                 report.setStock(StockType.valueOf(event.getValues().get(0)));
-                report.setTokens(null);
 
                 event.editMessageEmbeds(ReportBuilderUtils.stockMessage(report))
                         .setComponents(ReportBuilderUtils.stockRow(report)).queue();
@@ -148,7 +157,7 @@ public class ReportCommand extends CwuCommand {
 
     @Override
     public void handleModalInteraction(final ModalInteractionEvent event, final CommandContext ctx) throws CwuException {
-        final ReportModel report = this.reportCache.get(ctx.getCid());
+        final ReportModel report = this.reportCache.find(ctx.getCid());
         if (report == null) throw new ReportNotFoundException(event);
 
         final String content = event.getValue("cwu_report.fill/data").getAsString();
@@ -228,7 +237,7 @@ public class ReportCommand extends CwuCommand {
     }
 
     private void handleCancelButton(final ButtonInteractionEvent event, final ReportModel report) {
-        this.reportCache.remove(report.getEmployeeCid());
+        this.reportCache.delete(report.getEmployeeCid());
 
         event.reply("❌ Vous avez annuler votre rapport.")
                 .queue();
@@ -239,7 +248,7 @@ public class ReportCommand extends CwuCommand {
         if (!report.verify()) throw new ReportValidationException(event);
 
         report.end();
-        this.reportCache.remove(report.getEmployeeCid());
+        this.reportCache.delete(report.getEmployeeCid());
 
         // Save session within database
         this.reportDatabase.addOne(report);
@@ -250,11 +259,11 @@ public class ReportCommand extends CwuCommand {
                 .queue();
     }
 
-    private void handleOverwriteButton(final ButtonInteractionEvent event, final ReportModel report) {
+    private void handleOverwriteButton(final ButtonInteractionEvent event, final CwuBranch branch, final ReportModel report) {
         report.reset();
 
-        event.replyEmbeds(ReportBuilderUtils.initMessage(report.getBranch(), report.getType()))
-                .setComponents(ReportBuilderUtils.beginRow(report))
+        event.replyEmbeds(ReportBuilderUtils.initMessage(branch, report.getType()))
+                .setComponents(ReportBuilderUtils.beginRow(branch, report))
                 .queue();
     }
 
