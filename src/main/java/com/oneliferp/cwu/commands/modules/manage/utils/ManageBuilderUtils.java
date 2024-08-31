@@ -15,7 +15,7 @@ import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.SimpleDateTime;
 import com.oneliferp.cwu.utils.Toolbox;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -141,7 +141,7 @@ public class ManageBuilderUtils {
         return embed.build();
     }
 
-    private static MessageEmbed.Field employeeJoinedAtField(final SimpleDate joinedAt) {
+    private static MessageEmbed.Field employeeJoinedAtField(final SimpleDateTime joinedAt) {
         final boolean hasValue = joinedAt != null;
 
         final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), ProfilePageType.JOINED_AT.getDescription());
@@ -149,7 +149,7 @@ public class ManageBuilderUtils {
         return new MessageEmbed.Field(name, value, false);
     }
 
-    public static MessageEmbed employeeJoinedAtMessage(final SimpleDate joinedAt) {
+    public static MessageEmbed employeeJoinedAtMessage(final SimpleDateTime joinedAt) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Enregistrement d'un employé | 5/5");
         embed.addField(employeeJoinedAtField(joinedAt));

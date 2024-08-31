@@ -2,6 +2,8 @@ package com.oneliferp.cwu.commands.utils;
 
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.ManageModalType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.WorkforceButtonType;
+import com.oneliferp.cwu.commands.modules.panel.misc.actions.PanelButtonType;
+import com.oneliferp.cwu.commands.modules.panel.misc.actions.PanelModalType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileButtonType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileMenuType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileModalType;
@@ -110,6 +112,9 @@ public class CommandContext {
             case "btn#cwu_report" -> ReportButtonType.class;
             case "mdl#cwu_report" -> ReportModalType.class;
             case "mnu#cwu_report" -> ReportMenuType.class;
+
+            case "btn#cwu_panel" -> PanelButtonType.class;
+            case "mdl#cwu_panel" -> PanelModalType.class;
 
             case "btn#cwu_manage" -> switch (this.specifiers.get(0)) {
                 case "report" -> ReportButtonType.class;

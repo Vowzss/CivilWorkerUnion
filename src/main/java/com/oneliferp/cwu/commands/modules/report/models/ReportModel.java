@@ -16,7 +16,7 @@ import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import com.oneliferp.cwu.models.CitizenIdentityModel;
 import com.oneliferp.cwu.models.CwuIdentityModel;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.SimpleDateTime;
 import com.oneliferp.cwu.utils.json.StockTypeFilter;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +43,7 @@ public abstract class ReportModel extends Pageable<ReportPageType> {
     protected CwuBranch branch;
 
     @JsonProperty("createdAt")
-    protected SimpleDate createdAt;
+    protected SimpleDateTime createdAt;
 
     @JsonProperty("type")
     protected ReportType type;
@@ -64,7 +64,7 @@ public abstract class ReportModel extends Pageable<ReportPageType> {
 
         this.employee = profile.getIdentity();
         this.branch = profile.getBranch();
-        this.createdAt = SimpleDate.now();
+        this.createdAt = SimpleDateTime.now();
 
         this.stock = StockType.UNKNOWN;
         this.type = ReportType.UNKNOWN;
@@ -115,7 +115,7 @@ public abstract class ReportModel extends Pageable<ReportPageType> {
         this.info = (info == null || info.isBlank()) ? null : info;
     }
 
-    public SimpleDate getCreatedAt() {
+    public SimpleDateTime getCreatedAt() {
         return this.createdAt;
     }
 

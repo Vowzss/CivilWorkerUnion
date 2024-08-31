@@ -12,7 +12,7 @@ import com.oneliferp.cwu.misc.pagination.Pageable;
 import com.oneliferp.cwu.misc.pagination.PaginationContext;
 import com.oneliferp.cwu.misc.pagination.PaginationRegistry;
 import com.oneliferp.cwu.models.CwuIdentityModel;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.SimpleDateTime;
 
 import java.util.Collection;
 import java.util.Comparator;
@@ -26,7 +26,7 @@ public class ProfileModel extends Pageable<ProfilePageType> {
     private CwuIdentityModel identity;
 
     @JsonProperty("joinedAt")
-    private SimpleDate joinedAt;
+    private SimpleDateTime joinedAt;
 
     public ProfileModel() {
     }
@@ -48,11 +48,11 @@ public class ProfileModel extends Pageable<ProfilePageType> {
         this.identity = identity;
     }
 
-    public SimpleDate getJoinedAt() {
+    public SimpleDateTime getJoinedAt() {
         return this.joinedAt;
     }
 
-    public void setJoinedAt(final SimpleDate joinedAt) {
+    public void setJoinedAt(final SimpleDateTime joinedAt) {
         this.joinedAt = joinedAt;
     }
 
@@ -215,7 +215,7 @@ public class ProfileModel extends Pageable<ProfilePageType> {
     @Override
     public void start() {
         this.pagination = new PaginationContext<>(PaginationRegistry.getProfilePages(), ProfilePageType.PREVIEW);
-        this.joinedAt = SimpleDate.now();
+        this.joinedAt = SimpleDateTime.now();
     }
 
     @Override

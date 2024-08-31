@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.SimpleDateTime;
 import com.oneliferp.cwu.utils.SimpleDuration;
 import com.oneliferp.cwu.utils.json.SimpleDateDeserializer;
 import com.oneliferp.cwu.utils.json.SimpleDurationDeserializer;
@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 
 public abstract class JsonDatabase<A, B> {
-    private static final ObjectMapper MAPPER = new ObjectMapper()
+    public static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
 
     static {
@@ -31,7 +31,7 @@ public abstract class JsonDatabase<A, B> {
         MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         final SimpleModule module = new SimpleModule();
-        module.addDeserializer(SimpleDate.class, new SimpleDateDeserializer());
+        module.addDeserializer(SimpleDateTime.class, new SimpleDateDeserializer());
         module.addDeserializer(SimpleDuration.class, new SimpleDurationDeserializer());
 
         MAPPER.registerModule(module);

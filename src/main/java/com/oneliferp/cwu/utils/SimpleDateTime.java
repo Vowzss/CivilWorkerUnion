@@ -1,6 +1,7 @@
 package com.oneliferp.cwu.utils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.time.DayOfWeek;
@@ -11,10 +12,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
 
-
-public class SimpleDate implements Comparable<SimpleDate> {
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class SimpleDateTime implements Comparable<SimpleDateTime> {
     public static final DateTimeFormatter DATE_TIME_FORMATTER = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH'h'mm");
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     @JsonIgnore
     private final int day;
@@ -26,18 +28,18 @@ public class SimpleDate implements Comparable<SimpleDate> {
     private final int year;
 
     @JsonIgnore
-    private final int hour;
+    private final Integer hour;
 
     @JsonIgnore
-    private final int minute;
+    private final Integer minute;
 
     @JsonProperty("date")
     private final String date;
 
     @JsonProperty("time")
-    private final String time;
+    private String time;
 
-    public SimpleDate(final int day, final int month, final int year, final int hour, final int minute) {
+    public SimpleDateTime(final int day, final int month, final int year, final int hour, final int minute) {
         this.day = day;
         this.month = month;
         this.year = year;
@@ -49,7 +51,7 @@ public class SimpleDate implements Comparable<SimpleDate> {
         this.time = this.formatToTime();
     }
 
-    public SimpleDate(final LocalDate date, final LocalTime time) {
+    public SimpleDateTime(final LocalDate date, final LocalTime time) {
         this.day = date.getDayOfMonth();
         this.month = date.getMonthValue();
         this.year = date.getYear();
@@ -58,58 +60,20 @@ public class SimpleDate implements Comparable<SimpleDate> {
             this.hour = time.getHour();
             this.minute = time.getMinute();
         } else {
-            this.hour = 0;
-            this.minute = 0;
+            this.hour = null;
+            this.minute = null;
         }
 
         this.date = this.formatToDate();
         this.time = this.formatToTime();
     }
 
-    public SimpleDate(final LocalDateTime dateTime) {
+    public SimpleDateTime(final LocalDateTime dateTime) {
         this(dateTime.toLocalDate(), dateTime.toLocalTime());
     }
 
-    public SimpleDate(final LocalDate date) {
+    public SimpleDateTime(final LocalDate date) {
         this(date, null);
-    }
-
-    public static SimpleDate parseDate(final String str) {
-        try {
-            return new SimpleDate(LocalDateTime.parse(str, DATE_TIME_FORMATTER));
-        } catch (final DateTimeParseException e) {
-            return new SimpleDate(LocalDate.parse(str, DATE_FORMATTER));
-        }
-    }
-
-    /* Utils */
-    public static SimpleDate now() {
-        final LocalDateTime currentDateTime = LocalDateTime.now();
-        return new SimpleDate(currentDateTime.getDayOfMonth(), currentDateTime.getMonthValue(), currentDateTime.getYear(), currentDateTime.getHour(), currentDateTime.getMinute());
-    }
-
-    public static SimpleDuration between(final SimpleDate startInclusive, final SimpleDate endExclusive) {
-        final int hoursDifference = endExclusive.hour - startInclusive.hour;
-        final int minutesDifference = endExclusive.minute - startInclusive.minute;
-
-        return new SimpleDuration(hoursDifference, minutesDifference);
-    }
-
-    /* Helpers */
-    public static LocalDate getFirstMonthDay() {
-        return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-    }
-
-    public static LocalDate getLastMonthDay() {
-        return LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
-    }
-
-    public static LocalDate getFirstWeekDay() {
-        return LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-    }
-
-    public static LocalDate getLastWeekDay() {
-        return LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
     }
 
     /* Getters */
@@ -121,6 +85,7 @@ public class SimpleDate implements Comparable<SimpleDate> {
         return this.time;
     }
 
+    /* Utils */
     public boolean isWithinWeek() {
         final var date = LocalDate.of(this.year, this.month, this.day);
         final var firstWeekDay = getFirstWeekDay();
@@ -139,20 +104,26 @@ public class SimpleDate implements Comparable<SimpleDate> {
                (date.isEqual(lastMonthDay) || date.isBefore(lastMonthDay));
     }
 
-    public boolean isAfter(final SimpleDate other) {
+    public boolean isAfter(final SimpleDateTime other) {
         return this.compareTo(other) > 0;
     }
 
-    public boolean isBefore(final SimpleDate other) {
+    public boolean isBefore(final SimpleDateTime other) {
         return this.compareTo(other) < 0;
     }
 
-    private boolean isEqual(final SimpleDate other) {
+    public boolean isEqual(final SimpleDateTime other) {
         return this.compareTo(other) == 0;
     }
 
+    public LocalDateTime toLocalDateTime() {
+        if (this.hour == null || this.minute == null) return LocalDateTime.of(this.year, this.month, this.day, 0, 0);
+        return LocalDateTime.of(this.year, this.month, this.day, this.hour, this.minute);
+    }
+
+    /* Object */
     @Override
-    public int compareTo(final SimpleDate other) {
+    public int compareTo(final SimpleDateTime other) {
         if (this.year != other.year) {
             return Integer.compare(this.year, other.year);
         }
@@ -179,6 +150,44 @@ public class SimpleDate implements Comparable<SimpleDate> {
     }
 
     private String formatToTime() {
+        if (this.hour == null || this.minute == null) return null;
         return String.format("%02d:%02d", this.hour, this.minute);
+    }
+
+    /* Helpers */
+    public static SimpleDateTime now() {
+        final LocalDateTime currentDateTime = LocalDateTime.now();
+        return new SimpleDateTime(currentDateTime.getDayOfMonth(), currentDateTime.getMonthValue(), currentDateTime.getYear(), currentDateTime.getHour(), currentDateTime.getMinute());
+    }
+
+    public static SimpleDuration between(final SimpleDateTime startInclusive, final SimpleDateTime endExclusive) {
+        final int hoursDifference = endExclusive.hour - startInclusive.hour;
+        final int minutesDifference = endExclusive.minute - startInclusive.minute;
+
+        return new SimpleDuration(hoursDifference, minutesDifference);
+    }
+
+    public static SimpleDateTime parseDate(final String str) {
+        try {
+            return new SimpleDateTime(LocalDateTime.parse(str, DATE_TIME_FORMATTER));
+        } catch (final DateTimeParseException e) {
+            return new SimpleDateTime(LocalDate.parse(str, DATE_FORMATTER));
+        }
+    }
+
+    public static LocalDate getFirstMonthDay() {
+        return LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+    }
+
+    public static LocalDate getLastMonthDay() {
+        return LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
+    }
+
+    public static LocalDate getFirstWeekDay() {
+        return LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+    }
+
+    public static LocalDate getLastWeekDay() {
+        return LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY));
     }
 }

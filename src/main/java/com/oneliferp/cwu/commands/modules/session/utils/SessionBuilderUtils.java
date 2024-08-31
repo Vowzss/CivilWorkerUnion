@@ -14,7 +14,7 @@ import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.models.CitizenIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.SimpleDateTime;
 import com.oneliferp.cwu.utils.Toolbox;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -118,7 +118,7 @@ public class SessionBuilderUtils {
         embed.setTitle("Vous avez une session en cours!");
 
         final SessionType type = session.getType();
-        final SimpleDate startedAt = session.getPeriod().getStartedAt();
+        final SimpleDateTime startedAt = session.getPeriod().getStartedAt();
 
         embed.setDescription(String.format("""
                         Vous ne pouvez faire qu'une session en simultané.

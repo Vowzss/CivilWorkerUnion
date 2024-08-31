@@ -15,18 +15,25 @@ import com.oneliferp.cwu.utils.Environment;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 
 public class CivilWorkerUnion {
     private static CivilWorkerUnion instance;
     private final JDA jda;
     private final HashMap<String, CwuCommand> commands;
+    private final Config config;
+
     public CivilWorkerUnion() {
-        commands = new HashMap<>();
+        this.config = Config.load();
+        this.config.ensureReady();
+
+        this.commands = new HashMap<>();
 
         try {
-            jda = JDABuilder.createLight(Environment.getToken())
+            this.jda = JDABuilder.createLight(Environment.getToken())
                     .addEventListeners(new CommandListener(), new ButtonListener(), new ModalListener(), new MenuSelectionListener())
                     .build().awaitReady();
         } catch (InterruptedException e) {
@@ -48,6 +55,8 @@ public class CivilWorkerUnion {
     }
 
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone(ZoneId.of("Europe/Paris")));
+
         CivilWorkerUnion.get();
     }
 
@@ -66,5 +75,9 @@ public class CivilWorkerUnion {
 
     public JDA getJda() {
         return this.jda;
+    }
+
+    public Config getConfig() {
+        return this.config;
     }
 }

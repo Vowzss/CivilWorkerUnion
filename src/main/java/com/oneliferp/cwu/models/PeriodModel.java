@@ -1,15 +1,15 @@
 package com.oneliferp.cwu.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.SimpleDateTime;
 import com.oneliferp.cwu.utils.SimpleDuration;
 
 public class PeriodModel {
     @JsonProperty("startedAt")
-    private SimpleDate startedAt;
+    private SimpleDateTime startedAt;
 
     @JsonProperty("endedAt")
-    private SimpleDate endedAt;
+    private SimpleDateTime endedAt;
 
     @JsonProperty("duration")
     private SimpleDuration duration;
@@ -18,11 +18,11 @@ public class PeriodModel {
     }
 
     /* Getters */
-    public SimpleDate getStartedAt() {
+    public SimpleDateTime getStartedAt() {
         return this.startedAt;
     }
 
-    public SimpleDate getEndedAt() {
+    public SimpleDateTime getEndedAt() {
         return this.endedAt;
     }
 
@@ -32,11 +32,11 @@ public class PeriodModel {
 
     /* Methods */
     public void start() {
-        this.startedAt = SimpleDate.now();
+        this.startedAt = SimpleDateTime.now();
     }
 
     public void end() {
-        this.endedAt = SimpleDate.now();
-        this.duration = SimpleDate.between(this.startedAt, this.endedAt);
+        this.endedAt = SimpleDateTime.now();
+        this.duration = SimpleDateTime.between(this.startedAt, this.endedAt);
     }
 }

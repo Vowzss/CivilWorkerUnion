@@ -3,7 +3,7 @@ package com.oneliferp.cwu.database;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
-import com.oneliferp.cwu.utils.SimpleDate;
+import com.oneliferp.cwu.utils.SimpleDateTime;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,10 +25,10 @@ public class SessionDatabase extends JsonDatabase<String, SessionModel> {
         super(new TypeReference<>() {
         }, Path.of("persistence/sessions"));
 
-        final LocalDate firstWeekDay = SimpleDate.getFirstWeekDay();
-        final LocalDate lastWeekDay = SimpleDate.getLastWeekDay();
+        final LocalDate firstWeekDay = SimpleDateTime.getFirstWeekDay();
+        final LocalDate lastWeekDay = SimpleDateTime.getLastWeekDay();
 
-        final String fileName = firstWeekDay.format(SimpleDate.DATE_FORMATTER) + "_" + lastWeekDay.format(SimpleDate.DATE_FORMATTER) + ".json";
+        final String fileName = firstWeekDay.format(SimpleDateTime.DATE_FORMATTER) + "_" + lastWeekDay.format(SimpleDateTime.DATE_FORMATTER) + ".json";
         this.currFile = Paths.get(fileName).toFile();
 
         try (var stream = Files.list(this.directory)) {
