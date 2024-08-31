@@ -11,10 +11,9 @@ public class SessionValidationException extends CwuException {
 
     @Override
     public String getMessage() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("L'enregistrement de la session a échoué car des données sont manquantes.");
-        sb.append("\n\n");
-        sb.append(EmojiUtils.getAnnotationGuide());
-        return sb.toString();
+        String sb = "L'enregistrement de la session a échoué car des données sont manquantes." +
+                    "\n\n" +
+                    EmojiUtils.getAnnotationGuide();
+        return sb;
     }
 }

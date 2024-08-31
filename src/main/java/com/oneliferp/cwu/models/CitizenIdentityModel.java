@@ -18,13 +18,6 @@ public class CitizenIdentityModel extends IdentityModel {
         super(firstName, lastName, cid);
     }
 
-    public void setType(final CitizenType type) {
-        this.type = type;
-    }
-    public CitizenType getType() {
-        return this.type;
-    }
-
     /* Helpers */
     public static CitizenIdentityModel parseCitizenIdentity(final String str) throws IdentityMalformedException {
         final var parts = IdentityModel.parseIdentity(str);
@@ -34,5 +27,13 @@ public class CitizenIdentityModel extends IdentityModel {
     public static List<CitizenIdentityModel> parseCitizenIdentities(final String str) throws IdentityMalformedException {
         final var parts = IdentityModel.parseIdentities(str);
         return parts.stream().map(p -> new CitizenIdentityModel(p.getValue0(), p.getValue1(), p.getValue2())).toList();
+    }
+
+    public CitizenType getType() {
+        return this.type;
+    }
+
+    public void setType(final CitizenType type) {
+        this.type = type;
     }
 }

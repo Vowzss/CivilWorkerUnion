@@ -26,6 +26,7 @@ public class PaginationContext<A> {
     public void setFirst() {
         this.currentPageIndex = 0;
     }
+
     public void setLast() {
         this.currentPageIndex = this.pages.size() - 1;
     }
@@ -33,6 +34,7 @@ public class PaginationContext<A> {
     public void setNext() {
         this.currentPageIndex += 1;
     }
+
     public void setPrev() {
         this.currentPageIndex -= 1;
     }
@@ -49,6 +51,7 @@ public class PaginationContext<A> {
     public boolean isFirst() {
         return this.currentPageIndex == 0 && !this.isLast();
     }
+
     public boolean isLast() {
         return this.currentPageIndex == this.pages.size() - 1;
     }
@@ -56,6 +59,7 @@ public class PaginationContext<A> {
     public int getCurrentStep() {
         return this.currentPageIndex + 1;
     }
+
     public int getMaxSteps() {
         return this.pages.size();
     }

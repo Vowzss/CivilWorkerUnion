@@ -31,6 +31,7 @@ public class EmojiUtils {
     public static String getPenBall() {
         return EmojiManager.getByAlias(":pen_ballpoint:").get().getUnicode();
     }
+
     public static String getPenFountain() {
         return EmojiManager.getByAlias(":pen_fountain:").get().getUnicode();
     }
@@ -74,11 +75,10 @@ public class EmojiUtils {
     }
 
     public static String getAnnotationGuide() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("**Détails des annotations:**").append("\n");
-        sb.append(String.format("%s  le champ annoté doit être spécifié.", EmojiUtils.getRedCircle())).append("\n");
-        sb.append(String.format("%s  un des champs annoté doit être défini.", EmojiUtils.getYellowCircle())).append("\n");
-        sb.append(String.format("%s  le champ est optionnel ou déjà rempli.", EmojiUtils.getGreenCircle())).append("\n");
-        return sb.toString();
+        String sb = "**Détails des annotations:**" + "\n" +
+                    String.format("%s  le champ annoté doit être spécifié.", EmojiUtils.getRedCircle()) + "\n" +
+                    String.format("%s  un des champs annoté doit être défini.", EmojiUtils.getYellowCircle()) + "\n" +
+                    String.format("%s  le champ est optionnel ou déjà rempli.", EmojiUtils.getGreenCircle()) + "\n";
+        return sb;
     }
 }

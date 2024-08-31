@@ -13,32 +13,32 @@ public class IncomeModel {
     private Integer earnings = null;
 
     /*
-    Setters
-    */
-    public void setEarnings(final Integer earnings) {
-        this.earnings = earnings;
-    }
-
-    public void setWages(final int wages) {
-        this.wages = wages;
-    }
-
-    public void setDeposit(final int deposit) {
-        this.deposit = deposit;
-    }
-
-    /*
     Getters
     */
     public Integer getEarnings() {
         return this.earnings;
     }
 
+    /*
+    Setters
+    */
+    public void setEarnings(final Integer earnings) {
+        this.earnings = earnings;
+    }
+
     public int getWages() {
         return this.wages;
     }
 
+    public void setWages(final int wages) {
+        this.wages = wages;
+    }
+
     public int getDeposit() {
         return this.deposit;
+    }
+
+    public void setDeposit(final int deposit) {
+        this.deposit = deposit;
     }
 }

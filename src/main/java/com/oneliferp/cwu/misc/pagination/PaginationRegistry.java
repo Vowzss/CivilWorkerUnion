@@ -1,10 +1,10 @@
 package com.oneliferp.cwu.misc.pagination;
 
 import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
-import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
-import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
 import com.oneliferp.cwu.utils.Toolbox;
 
 import java.util.Collections;
@@ -14,16 +14,17 @@ import java.util.Map;
 
 public class PaginationRegistry {
     private static final Map<ReportType, List<ReportPageType>> reportPages = fillReportPages();
+    private static final Map<SessionType, List<SessionPageType>> sessionPages = fillSessionPages();
+    private static final List<ProfilePageType> employeePages = List.of(ProfilePageType.IDENTITY, ProfilePageType.ID, ProfilePageType.BRANCH, ProfilePageType.RANK, ProfilePageType.JOINED_AT);
+
     public static List<ReportPageType> getReportPages(final ReportType type) {
         return reportPages.getOrDefault(type, Collections.emptyList());
     }
 
-    private static final Map<SessionType, List<SessionPageType>> sessionPages = fillSessionPages();
     public static List<SessionPageType> getSessionPages(final SessionType type) {
         return sessionPages.getOrDefault(type, Collections.emptyList());
     }
 
-    private static final List<ProfilePageType> employeePages = List.of(ProfilePageType.IDENTITY, ProfilePageType.ID, ProfilePageType.BRANCH, ProfilePageType.RANK, ProfilePageType.JOINED_AT);
     public static List<ProfilePageType> getProfilePages() {
         return employeePages;
     }
@@ -59,7 +60,7 @@ public class PaginationRegistry {
         final Map<SessionType, List<SessionPageType>> map = new EnumMap<>(SessionType.class);
 
         final var defaults = SessionType.getDefaultPages();
-        final var earningsPages = Toolbox.insert(defaults, defaults.size()- 1, SessionPageType.TOKENS);
+        final var earningsPages = Toolbox.insert(defaults, defaults.size() - 1, SessionPageType.TOKENS);
         final var zonePages = Toolbox.insert(defaults, 0, SessionPageType.ZONE);
 
         map.put(SessionType.RATION, earningsPages);

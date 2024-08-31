@@ -2,7 +2,7 @@
 .DS_Store
 
 # Ignore project related files
-Databases/*
+persistence/*
 .env
 .idea
 

@@ -20,7 +20,8 @@ public abstract class IdentityModel {
     @JsonProperty("cid")
     protected String cid;
 
-    protected IdentityModel() {}
+    protected IdentityModel() {
+    }
 
     public IdentityModel(final String firstName, final String lastName, final String cid) {
         this.firstName = firstName;
@@ -29,40 +30,6 @@ public abstract class IdentityModel {
     }
 
     /* Getters & Setters */
-
-    public String getFirstName() {
-        return this.firstName;
-    }
-
-    public String getLastName() {
-        return this.lastName;
-    }
-
-    public String getCid() {
-        return this.cid;
-    }
-
-
-    /* Object */
-    @Override
-    public String toString() {
-        if (this.lastName == null || this.lastName.isEmpty()) return String.format("%s, #%s", firstName, cid);
-        return String.format("%s %s, #%s", this.firstName, this.lastName, this.cid);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        final CwuIdentityModel that = (CwuIdentityModel) o;
-        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(cid, that.cid);
-    }
-
-    @Override
-    public int hashCode() {
-        if (this.lastName == null) return Objects.hash(firstName, cid);
-        return Objects.hash(firstName, lastName, cid);
-    }
 
     /* Helpers */
     protected static Triplet<String, String, String> parseIdentity(final String str) throws IdentityMalformedException {
@@ -87,6 +54,39 @@ public abstract class IdentityModel {
 
         if (list.isEmpty()) throw new IdentityMalformedException();
         return list;
+    }
+
+    public String getFirstName() {
+        return this.firstName;
+    }
+
+    public String getLastName() {
+        return this.lastName;
+    }
+
+    public String getCid() {
+        return this.cid;
+    }
+
+    /* Object */
+    @Override
+    public String toString() {
+        if (this.lastName == null || this.lastName.isEmpty()) return String.format("%s, #%s", firstName, cid);
+        return String.format("%s %s, #%s", this.firstName, this.lastName, this.cid);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        final CwuIdentityModel that = (CwuIdentityModel) o;
+        return Objects.equals(firstName, that.firstName) && Objects.equals(lastName, that.lastName) && Objects.equals(cid, that.cid);
+    }
+
+    @Override
+    public int hashCode() {
+        if (this.lastName == null) return Objects.hash(firstName, cid);
+        return Objects.hash(firstName, lastName, cid);
     }
 
 }

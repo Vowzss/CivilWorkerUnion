@@ -8,7 +8,9 @@ public abstract class Pageable<T> {
 
     /* State methods */
     public abstract void start();
+
     public abstract void end();
+
     public abstract void reset();
 
     public abstract boolean verify();
@@ -21,12 +23,15 @@ public abstract class Pageable<T> {
     public void goNextPage() {
         this.pagination.setNext();
     }
+
     public void goPrevPage() {
         this.pagination.setPrev();
     }
+
     public void goPreviewPage() {
         this.pagination.setPreview();
     }
+
     public void goFirstPage() {
         this.pagination.setFirst();
     }
@@ -34,6 +39,7 @@ public abstract class Pageable<T> {
     public boolean isFirstPage() {
         return this.pagination.isFirst();
     }
+
     public boolean isLastPage() {
         return this.pagination.isLast();
     }
@@ -41,6 +47,7 @@ public abstract class Pageable<T> {
     public int getCurrentStep() {
         return this.pagination.getCurrentStep();
     }
+
     public int getMaxSteps() {
         return this.pagination.getMaxSteps();
     }

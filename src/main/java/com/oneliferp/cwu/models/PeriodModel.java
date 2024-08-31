@@ -14,7 +14,8 @@ public class PeriodModel {
     @JsonProperty("duration")
     private SimpleDuration duration;
 
-    public PeriodModel() {}
+    public PeriodModel() {
+    }
 
     /* Getters */
     public SimpleDate getStartedAt() {

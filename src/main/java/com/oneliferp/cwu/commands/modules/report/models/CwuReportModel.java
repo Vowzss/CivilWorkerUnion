@@ -12,11 +12,12 @@ public class CwuReportModel extends ReportModel {
     }
 
     @Override
-    public void setIdentity(final CitizenIdentityModel identity) {
-    }
-    @Override
     public CitizenIdentityModel getIdentity() {
         return null;
+    }
+
+    @Override
+    public void setIdentity(final CitizenIdentityModel identity) {
     }
 
     /* Utils */

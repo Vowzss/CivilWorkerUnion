@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.models.CitizenIdentityModel;
-import com.oneliferp.cwu.models.CwuIdentityModel;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class DmsReportModel extends ReportModel {
@@ -26,32 +25,35 @@ public class DmsReportModel extends ReportModel {
         super(profile);
     }
 
-    /* Getter & Setter */
-    @Override
-    public void setIdentity(final CitizenIdentityModel identity) {
-        this.patient = identity;
-    }
     @Override
     public CitizenIdentityModel getIdentity() {
         return this.patient;
     }
 
+    /* Getter & Setter */
     @Override
-    public void setTax(final Integer tax) {
-        this.tax = tax;
+    public void setIdentity(final CitizenIdentityModel identity) {
+        this.patient = identity;
     }
+
     @Override
     public Integer getTax() {
         return this.tax;
     }
 
     @Override
-    public void setMedical(final String medical) {
-        this.medical = medical;
+    public void setTax(final Integer tax) {
+        this.tax = tax;
     }
+
     @Override
     public String getMedical() {
         return this.medical;
+    }
+
+    @Override
+    public void setMedical(final String medical) {
+        this.medical = medical;
     }
 
     /* Pageable implementation */

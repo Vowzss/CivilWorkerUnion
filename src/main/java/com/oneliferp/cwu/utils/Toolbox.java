@@ -12,15 +12,23 @@ public class Toolbox {
                 .map(T::toString)
                 .collect(Collectors.joining(newLine ? "\n" : " "));
     }
+
     public static <T> String flatten(final Collection<T> collection) {
-       return flatten(collection, true);
+        return flatten(collection, true);
     }
 
     public static <T> List<T> merge(final Collection<T> collection1, final Collection<T> collection2) {
-        final List<T> collection = new ArrayList<>();
+        final List<T> collection = new ArrayList<>(collection1);
         collection.addAll(collection1);
         collection.addAll(collection2);
         return collection;
+    }
+
+    public static <A, B> Map<A, B> merge(final Map<A, B> map1, final Map<A, B> map2) {
+        final Map<A, B> map = new HashMap<>();
+        map.putAll(map1);
+        map.putAll(map2);
+        return map;
     }
 
     public static <T> List<T> insert(final List<T> list, final int index, final T object) {
@@ -39,7 +47,7 @@ public class Toolbox {
                 .ifPresent(menu::setDefaultOptions);
     }
 
-    public static double getPercent(final Integer num1, final Integer num2) {
+    public static double resolveDistribution(final Integer num1, final Integer num2) {
         return (double) num1 / num2 * 100;
     }
 }

@@ -1,15 +1,17 @@
 package com.oneliferp.cwu.commands.modules.report.utils;
 
-import com.oneliferp.cwu.misc.CwuBranch;
+import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
 import com.oneliferp.cwu.commands.modules.report.misc.StockType;
-import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportMenuType;
 import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
-import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
+import com.oneliferp.cwu.commands.modules.report.models.ReportModel;
+import com.oneliferp.cwu.database.ProfileDatabase;
+import com.oneliferp.cwu.database.ReportDatabase;
+import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.models.CitizenIdentityModel;
-import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.Toolbox;
@@ -23,17 +25,85 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ReportBuilderUtils {
     /* Messages */
+    public static MessageEmbed overviewMessage(final Collection<ReportModel> reports) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("Statistiques de la semaine | Rapports");
+
+        final int totalReportCount = reports.size();
+        final int totalEarnings = ReportDatabase.resolveEarnings(reports);
+
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface vous permet d'accéder aux statistiques de la semaine.
+                Pour toutes actions, munissez vous de l'ID uniquement.
+                """).append("\n");
+
+        sb.append("**Productivité commune :**").append("\n");
+        sb.append(String.format("Total de rapports: %d", totalReportCount)).append("\n");
+        sb.append(String.format("Revenus générés: %d tokens", totalEarnings)).append("\n\n");
+
+        sb.append("**Productivité respective :**").append("\n");
+        ProfileDatabase.get().getAsGroupAndOrder().forEach((branch, profiles) -> {
+            sb.append(String.format("%s  **Branche %s (%s)** ", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
+
+            final var identities = profiles.stream()
+                    .map(ProfileModel::getIdentity)
+                    .collect(Collectors.toSet());
+            final var branchReports = reports.stream()
+                    .filter(s -> identities.contains(s.getEmployee()))
+                    .toList();
+
+            final int branchEarnings = ReportDatabase.resolveEarnings(branchReports);
+            final int branchReportCount = branchReports.size();
+            sb.append(String.format("Rapports : %d **(%.2f%%)**", branchReports.size(), Toolbox.resolveDistribution(branchReportCount, totalReportCount))).append("\n");
+            sb.append(String.format("Revenus générés: %d tokens **(%.2f%%)**", branchEarnings, Toolbox.resolveDistribution(branchEarnings, totalEarnings))).append("\n\n");
+        });
+
+        {
+            final ReportModel latest = ReportDatabase.get().resolveLatest();
+            sb.append("**Dernier rapport :**").append("\n");
+            if (latest == null || !latest.getCreatedAt().isWithinWeek()) {
+                sb.append("`Aucun`").append("\n\n");
+            } else {
+                sb.append(latest.getDescriptionFormat()).append("\n");
+            }
+        }
+
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    public static MessageEmbed historyMessage(final Collection<ReportModel> reports, final int pageIndex, final int maxIndex) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(String.format("Historique des rapports | Page %d sur %d", pageIndex, maxIndex == 0 ? maxIndex + 1 : maxIndex));
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface recense tous les rapports.
+                Pour toutes actions, munissez vous de l'ID uniquement.
+                """).append("\n");
+
+        if (maxIndex == 0) sb.append("`Aucun rapport n'a été trouvé.`");
+        reports.forEach(r -> sb.append(r.getDescriptionFormat()).append("\n\n"));
+
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
     public static MessageEmbed initMessage(final CwuBranch branch, final ReportType type) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(type == ReportType.UNKNOWN ? buildTitleWithBranch(branch) : buildTitleWithBranchAndType(branch, type));
         embed.setDescription("""
                 Cette interface vous permet de créer un rapport.
-                
+                                
                 Vous allez procéder au remplissage des informations.
                 S'ensuivra un résumé de votre rapport.""");
         return embed.build();
@@ -43,12 +113,11 @@ public class ReportBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Vous avez un rapport en cours!");
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Vous ne pouvez faire qu'un rapport en simultané.\n");
-        sb.append("Souhaitez-vous reprendre ou écraser le rapport en cours ?\n");
-        sb.append("\n");
-        sb.append(String.format("**Rapport :** %s\n", type.getLabel()));
-        embed.setDescription(sb.toString());
+        String sb = "Vous ne pouvez faire qu'un rapport en simultané.\n" +
+                    "Souhaitez-vous reprendre ou écraser le rapport en cours ?\n" +
+                    "\n" +
+                    String.format("**Rapport :** %s\n", type.getLabel());
+        embed.setDescription(sb);
         return embed.build();
     }
 
@@ -56,9 +125,7 @@ public class ReportBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Informations du rapport");
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append(report.getDisplayFormat()).append("\n");
-        embed.setDescription(sb.toString());
+        embed.setDescription(report.getDisplayFormat() + "\n");
         return embed.build();
     }
 
@@ -66,20 +133,20 @@ public class ReportBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDDD1 Action en cours - Suppression d'un rapport'");
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Afin de terminer la procédure, veuillez confirmer votre choix.").append("\n\n");
-        sb.append("**Aperçu du rapport concerné :**").append("\n");
-        sb.append(report.getDescriptionFormat()).append("\n");
-        embed.setDescription(sb.toString());
+        String sb = "Afin de terminer la procédure, veuillez confirmer votre choix." + "\n\n" +
+                    "**Aperçu du rapport concerné :**" + "\n" +
+                    report.getDescriptionFormat() + "\n";
+        embed.setDescription(sb);
         return embed.build();
     }
 
     /* Fields */
     private static MessageEmbed.Field infoField(final String info) {
-        final String name = String.format("%s  %s", EmojiUtils.getGreenCircle(),  ReportPageType.INFO.getDescription());
+        final String name = String.format("%s  %s", EmojiUtils.getGreenCircle(), ReportPageType.INFO.getDescription());
         final String value = info != null ? info : "`Rien à signaler`";
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed infoMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
@@ -90,10 +157,11 @@ public class ReportBuilderUtils {
     private static MessageEmbed.Field medicalField(final String medical) {
         final boolean hasValue = medical != null;
 
-        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue),  ReportPageType.MEDICAL.getDescription());
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), ReportPageType.MEDICAL.getDescription());
         final String value = hasValue ? medical : "`Information manquante`";
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed medicalMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
@@ -104,10 +172,11 @@ public class ReportBuilderUtils {
     private static MessageEmbed.Field stockField(final StockType type) {
         final boolean hasValue = type != StockType.UNKNOWN;
 
-        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue),  ReportPageType.STOCK.getDescription());
+        final String name = String.format("%s  %s", EmojiUtils.getGreenOrRedCircle(hasValue), ReportPageType.STOCK.getDescription());
         final String value = hasValue ? type.getLabel() : "`Information manquante`";
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed stockMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
@@ -122,18 +191,22 @@ public class ReportBuilderUtils {
         final String value = hasValue ? identity.toString() : "`Information manquante`";
         return new MessageEmbed.Field(name, value, false);
     }
+
     private static MessageEmbed identityMessage(final ReportModel report, final String description) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
         embed.addField(identityField(report.getIdentity(), description));
         return embed.build();
     }
+
     public static MessageEmbed tenantMessage(final ReportModel report) {
         return identityMessage(report, ReportPageType.TENANT.getDescription());
     }
+
     public static MessageEmbed patientMessage(final ReportModel report) {
         return identityMessage(report, ReportPageType.PATIENT.getDescription());
     }
+
     public static MessageEmbed merchantMessage(final ReportModel report) {
         return identityMessage(report, ReportPageType.MERCHANT.getDescription());
     }
@@ -145,12 +218,14 @@ public class ReportBuilderUtils {
         final String value = String.format("%s", hasValue ? (tokens + " Tokens") : "`Information manquante`");
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed rentMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
         embed.addField(tokenField(report.getRent(), ReportPageType.RENT.getDescription()));
         return embed.build();
     }
+
     public static MessageEmbed costMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
@@ -166,6 +241,7 @@ public class ReportBuilderUtils {
         final String value = hasValue ? healthiness : "`Information manquante`";
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed healthinessMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
@@ -180,6 +256,7 @@ public class ReportBuilderUtils {
         final String value = hasValue ? (tax + " Tokens") : "`Information manquante`";
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed taxMessage(final ReportModel report) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getStepTitle());
@@ -191,11 +268,10 @@ public class ReportBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(report.getEndingTitle());
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Le rapport à été transmit avec succès.\n");
-        sb.append("\n");
+        String sb = "Le rapport à été transmit avec succès.\n" +
+                    "\n";
 
-        embed.setDescription(sb.toString());
+        embed.setDescription(sb);
         return embed.build();
     }
 
@@ -204,7 +280,7 @@ public class ReportBuilderUtils {
         embed.setTitle(report.getPreviewTitle());
 
         {
-            final String name = String.format("%s  %s", EmojiUtils.getGreenCircle() , ReportPageType.TYPE.getDescription());
+            final String name = String.format("%s  %s", EmojiUtils.getGreenCircle(), ReportPageType.TYPE.getDescription());
             embed.addField(new MessageEmbed.Field(name, report.getType().getLabel(), false));
         }
         if (report.hasPage(ReportPageType.STOCK)) {

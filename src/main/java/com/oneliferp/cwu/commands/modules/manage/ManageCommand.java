@@ -48,6 +48,7 @@ public class ManageCommand extends CwuCommand {
         final SubcommandData employeeSucCommand = new SubcommandData("effectif", "Vous permet de gérer l'effectif de la CWU.");
         final SubcommandData sessionSubCommand = new SubcommandData("session", "Vous permet de gérer les sessions de travail.");
         final SubcommandData reportSubCommand = new SubcommandData("rapport", "Vous permet de gérer les rapports.");
+
         slashCommand.addSubcommands(employeeSucCommand, sessionSubCommand, reportSubCommand);
         return super.configure(slashCommand);
     }
@@ -65,15 +66,13 @@ public class ManageCommand extends CwuCommand {
                     .setComponents(ManageBuilderUtils.workforceOverviewComponent(profile.getCid()))
                     .setEphemeral(true).queue();
 
-            case "session" ->
-                    event.replyEmbeds(ManageBuilderUtils.sessionOverviewMessage(this.sessionDB.resolveFromWeek(2)))
-                            .setComponents(ManageBuilderUtils.sessionOverviewComponent(profile.getCid()))
-                            .setEphemeral(true).queue();
+            case "session" -> event.replyEmbeds(SessionBuilderUtils.overviewMessage(this.sessionDB.resolveFromWeek(2)))
+                    .setComponents(ManageBuilderUtils.sessionOverviewComponent(profile.getCid()))
+                    .setEphemeral(true).queue();
 
-            case "rapport" ->
-                    event.replyEmbeds(ManageBuilderUtils.reportOverviewMessage(this.reportDB.resolveFromWeek(2)))
-                            .setComponents(ManageBuilderUtils.reportOverviewComponent(profile.getCid()))
-                            .setEphemeral(true).queue();
+            case "rapport" -> event.replyEmbeds(ReportBuilderUtils.overviewMessage(this.reportDB.resolveFromWeek(2)))
+                    .setComponents(ManageBuilderUtils.reportOverviewComponent(profile.getCid()))
+                    .setEphemeral(true).queue();
         }
     }
 
@@ -131,14 +130,14 @@ public class ManageCommand extends CwuCommand {
     private void handleSessionChoice(final ButtonInteractionEvent event, final SessionButtonType type, final CommandContext ctx) {
         switch (type) {
             case OVERVIEW -> {
-                event.editMessageEmbeds(ManageBuilderUtils.sessionOverviewMessage(this.sessionDB.resolveFromWeek(2)))
+                event.editMessageEmbeds(SessionBuilderUtils.overviewMessage(this.sessionDB.resolveFromWeek(2)))
                         .setComponents(ManageBuilderUtils.sessionOverviewComponent(ctx.getCid()))
                         .queue();
             }
             case HISTORY -> {
                 final int maxPage = (int) Math.ceil((double) this.sessionDB.getCount() / 5);
 
-                event.editMessageEmbeds(ManageBuilderUtils.sessionPageMessage(this.sessionDB.resolveFromWeek(5), 1, maxPage))
+                event.editMessageEmbeds(SessionBuilderUtils.historyMessage(this.sessionDB.resolveFromWeek(5), 1, maxPage))
                         .setComponents(ManageBuilderUtils.sessionPageComponent(ctx.getCid(), 1, maxPage))
                         .queue();
             }
@@ -154,7 +153,7 @@ public class ManageCommand extends CwuCommand {
                 final int startIdx = (currPage - 1) * 5;
                 final int endIdx = Math.min(startIdx + 5, sessions.size());
 
-                event.editMessageEmbeds(ManageBuilderUtils.sessionPageMessage(Toolbox.select(sessions, startIdx, endIdx), currPage, maxPage))
+                event.editMessageEmbeds(SessionBuilderUtils.historyMessage(Toolbox.select(sessions, startIdx, endIdx), currPage, maxPage))
                         .setComponents(ManageBuilderUtils.sessionPageComponent(ctx.getCid(), currPage, maxPage))
                         .queue();
             }
@@ -164,14 +163,14 @@ public class ManageCommand extends CwuCommand {
     private void handleReportChoice(final ButtonInteractionEvent event, final ReportButtonType choice, final CommandContext ctx) {
         switch (choice) {
             case OVERVIEW -> {
-                event.editMessageEmbeds(ManageBuilderUtils.reportOverviewMessage(this.reportDB.resolveFromWeek(2)))
+                event.editMessageEmbeds(ReportBuilderUtils.overviewMessage(this.reportDB.resolveFromWeek(2)))
                         .setComponents(ManageBuilderUtils.reportOverviewComponent(ctx.getCid()))
                         .queue();
             }
             case HISTORY -> {
                 final int maxPage = (int) Math.ceil((double) this.reportDB.getCount() / 5);
 
-                event.editMessageEmbeds(ManageBuilderUtils.reportPageMessage(this.reportDB.resolveFromWeek(5), 1, maxPage))
+                event.editMessageEmbeds(ReportBuilderUtils.historyMessage(this.reportDB.resolveFromWeek(5), 1, maxPage))
                         .setComponents(ManageBuilderUtils.reportPageComponent(ctx.getCid(), 1, maxPage))
                         .queue();
             }
@@ -187,7 +186,7 @@ public class ManageCommand extends CwuCommand {
                 final int startIdx = (currPage - 1) * 5;
                 final int endIdx = Math.min(startIdx + 5, reports.size());
 
-                event.editMessageEmbeds(ManageBuilderUtils.reportPageMessage(Toolbox.select(reports, startIdx, endIdx), currPage, maxPage))
+                event.editMessageEmbeds(ReportBuilderUtils.historyMessage(Toolbox.select(reports, startIdx, endIdx), currPage, maxPage))
                         .setComponents(ManageBuilderUtils.reportPageComponent(ctx.getCid(), currPage, maxPage))
                         .queue();
             }

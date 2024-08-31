@@ -2,23 +2,22 @@ package com.oneliferp.cwu.commands.modules.report;
 
 import com.oneliferp.cwu.cache.ReportCache;
 import com.oneliferp.cwu.commands.CwuCommand;
+import com.oneliferp.cwu.commands.modules.profile.exceptions.ProfileNotFoundException;
+import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.modules.report.exceptions.ReportNotFoundException;
+import com.oneliferp.cwu.commands.modules.report.exceptions.ReportValidationException;
+import com.oneliferp.cwu.commands.modules.report.misc.ReportType;
+import com.oneliferp.cwu.commands.modules.report.misc.StockType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportButtonType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportMenuType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportModalType;
+import com.oneliferp.cwu.commands.modules.report.misc.actions.ReportPageType;
 import com.oneliferp.cwu.commands.modules.report.models.*;
-import com.oneliferp.cwu.commands.modules.report.models.CwuReportModel;
-import com.oneliferp.cwu.commands.modules.report.models.DmsReportModel;
-import com.oneliferp.cwu.commands.modules.report.models.DrtReportModel;
-import com.oneliferp.cwu.commands.modules.report.models.DtlReportModel;
+import com.oneliferp.cwu.commands.modules.report.utils.ReportBuilderUtils;
+import com.oneliferp.cwu.commands.utils.CommandContext;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.ReportDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
-import com.oneliferp.cwu.commands.utils.CommandContext;
-import com.oneliferp.cwu.commands.modules.report.misc.StockType;
-import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
-import com.oneliferp.cwu.commands.modules.report.misc.actions.*;
-import com.oneliferp.cwu.commands.modules.profile.exceptions.ProfileNotFoundException;
-import com.oneliferp.cwu.commands.modules.report.exceptions.ReportNotFoundException;
-import com.oneliferp.cwu.commands.modules.report.exceptions.ReportValidationException;
-import com.oneliferp.cwu.commands.modules.report.misc.*;
-import com.oneliferp.cwu.commands.modules.report.utils.ReportBuilderUtils;
 import com.oneliferp.cwu.exceptions.IdentityException;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
 import com.oneliferp.cwu.misc.CwuBranch;
@@ -414,7 +413,7 @@ public class ReportCommand extends CwuCommand {
             case INFO -> event.editMessageEmbeds(ReportBuilderUtils.infoMessage(report))
                     .setComponents(ReportBuilderUtils.pageRow(report));
             case PREVIEW -> event.editMessageEmbeds(ReportBuilderUtils.previewMessage(report))
-                .setComponents(ReportBuilderUtils.pageRow(report));
+                    .setComponents(ReportBuilderUtils.pageRow(report));
         });
 
         callback.queue();

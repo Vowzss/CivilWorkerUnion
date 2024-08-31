@@ -1,5 +1,6 @@
 package com.oneliferp.cwu.commands.modules.session.utils;
 
+import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.commands.modules.session.misc.CitizenType;
 import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
 import com.oneliferp.cwu.commands.modules.session.misc.ZoneType;
@@ -7,9 +8,10 @@ import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionMenuType;
 import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
 import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
+import com.oneliferp.cwu.database.ProfileDatabase;
+import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.misc.IActionType;
 import com.oneliferp.cwu.models.CitizenIdentityModel;
-import com.oneliferp.cwu.models.CwuIdentityModel;
 import com.oneliferp.cwu.utils.EmbedUtils;
 import com.oneliferp.cwu.utils.EmojiUtils;
 import com.oneliferp.cwu.utils.SimpleDate;
@@ -24,12 +26,78 @@ import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SessionBuilderUtils {
-    /* Embeds */
+    /* Messages */
+    public static MessageEmbed historyMessage(final Collection<SessionModel> sessions, final int pageIndex, final int maxIndex) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle(String.format("Historique des sessions | Page %d sur %d", pageIndex, maxIndex == 0 ? maxIndex + 1 : maxIndex));
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface recense toutes les sessions de travail.
+                Pour toutes actions, munissez vous de l'ID uniquement.
+                """).append("\n");
+
+        if (maxIndex == 0) sb.append("`Aucune session n'a été trouvé.`");
+        sessions.forEach(r -> sb.append(r.getDescriptionFormat()).append("\n\n"));
+
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
+    public static MessageEmbed overviewMessage(final Collection<SessionModel> sessions) {
+        final EmbedBuilder embed = EmbedUtils.createDefault();
+        embed.setTitle("Statistiques de la semaine | Sessions");
+
+        final int totalSessionCount = sessions.size();
+        final int totalEarnings = SessionDatabase.resolveEarnings(sessions);
+
+        final StringBuilder sb = new StringBuilder();
+        sb.append("""
+                Cette interface vous permet d'accéder aux statistiques de la semaine.
+                Pour toutes actions, munissez vous de l'ID uniquement.
+                """).append("\n");
+
+        sb.append("**Productivité commune :**").append("\n");
+        sb.append(String.format("Total de sessions: %d", totalSessionCount)).append("\n");
+        sb.append(String.format("Revenus générés: %d tokens", totalEarnings)).append("\n");
+        sb.append(String.format("Paies distribuées: %d tokens", SessionDatabase.resolveWages(sessions))).append("\n\n");
+
+        sb.append("**Productivité respective :**").append("\n");
+        ProfileDatabase.get().getAsGroupAndOrder().forEach((branch, profiles) -> {
+            sb.append(String.format("%s  **Branche %s (%s)** ", branch.getEmoji(), branch.name(), branch.getMeaning())).append("\n");
+
+            final var identities = profiles.stream()
+                    .map(ProfileModel::getIdentity)
+                    .collect(Collectors.toSet());
+            final var branchSessions = sessions.stream()
+                    .filter(s -> identities.contains(s.getEmployee()))
+                    .toList();
+
+            final int branchEarnings = SessionDatabase.resolveEarnings(branchSessions);
+            final int branchSessionCount = branchSessions.size();
+            sb.append(String.format("Sessions : %d **(%.2f%%)**", branchSessions.size(), Toolbox.resolveDistribution(branchSessionCount, totalSessionCount))).append("\n");
+            sb.append(String.format("Revenus générés: %d tokens **(%.2f%%)**", branchEarnings, Toolbox.resolveDistribution(branchEarnings, totalEarnings))).append("\n\n");
+        });
+
+        {
+            final SessionModel latest = SessionDatabase.get().resolveLatest();
+            sb.append("**Dernière session :**").append("\n");
+            if (latest == null || !latest.getPeriod().getEndedAt().isWithinWeek()) {
+                sb.append("`Aucune`").append("\n\n");
+            } else {
+                sb.append(latest.getDescriptionFormat()).append("\n");
+            }
+        }
+        embed.setDescription(sb.toString());
+        return embed.build();
+    }
+
     public static MessageEmbed initMessage(final SessionType type) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         final String title = type == SessionType.UNKNOWN ? "\uD83D\uDCBC  Session de travail" :
@@ -53,11 +121,11 @@ public class SessionBuilderUtils {
         final SimpleDate startedAt = session.getPeriod().getStartedAt();
 
         embed.setDescription(String.format("""
-                Vous ne pouvez faire qu'une session en simultané.
-                Souhaitez-vous reprendre ou écraser la session en cours ?
-                
-                **Session:** %s %s
-                **Débutée le:** %s, à %s.""",
+                        Vous ne pouvez faire qu'une session en simultané.
+                        Souhaitez-vous reprendre ou écraser la session en cours ?
+                                        
+                        **Session:** %s %s
+                        **Débutée le:** %s, à %s.""",
                 type.getLabel(), type.getEmoji(),
                 startedAt.getDate(), startedAt.getTime())
         );
@@ -69,12 +137,35 @@ public class SessionBuilderUtils {
         embed.setTitle(buildPreviewTitle(session));
         embed.addField(zoneField(session.getZone()));
 
-        embed.addField(participantField(session.getCitizensWithType(CitizenType.LOYALIST), SessionPageType.LOYALISTS.getDescription()));
-        embed.addField(participantField(session.getCitizensWithType(CitizenType.CIVILIAN), SessionPageType.CIVILIANS.getDescription()));
-        embed.addField(participantField(session.getCitizensWithType(CitizenType.VORTIGAUNT), SessionPageType.VORTIGAUNTS.getDescription()));
-        embed.addField(participantField(session.getCitizensWithType(CitizenType.ANTI_CITIZEN), SessionPageType.ANTI_CITIZENS.getDescription()));
+        {
+            final var citizens = session.getCitizensWithType(CitizenType.LOYALIST);
+            if (!citizens.isEmpty()) {
+                embed.addField(participantField(citizens, SessionPageType.LOYALISTS.getDescription()));
+            }
+        }
+        {
+            final var citizens = session.getCitizensWithType(CitizenType.CIVILIAN);
+            if (!citizens.isEmpty()) {
+                embed.addField(participantField(citizens, SessionPageType.CIVILIANS.getDescription()));
+            }
+        }
+        {
+            final var citizens = session.getCitizensWithType(CitizenType.VORTIGAUNT);
+            if (!citizens.isEmpty()) {
+                embed.addField(participantField(citizens, SessionPageType.VORTIGAUNTS.getDescription()));
+            }
+        }
+        {
+            final var citizens = session.getCitizensWithType(CitizenType.ANTI_CITIZEN);
+            if (!citizens.isEmpty()) {
+                embed.addField(participantField(citizens, SessionPageType.ANTI_CITIZENS.getDescription()));
+            }
+        }
 
-        embed.addField(tokenField(session.getIncome().getEarnings()));
+        if (session.hasPage(SessionPageType.TOKENS)) {
+            embed.addField(tokenField(session.getIncome().getEarnings()));
+        }
+
         embed.addField(infoField(session.getInfo()));
         return embed.build();
     }
@@ -83,16 +174,14 @@ public class SessionBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(buildEndingTitle(session));
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append(String.format("""
-                La session a été enregistrée avec succès.
-                                
-                Somme à **déposer** dans la caisse commune: **%s Tokens**.
-                Somme à **verser** aux participants: **%s Tokens**.
-                """, Math.max(session.getIncome().getDeposit(), 0),
-                session.getIncome().getWages())
-        );
-        embed.setDescription(sb.toString());
+        String sb = String.format("""
+                        La session a été enregistrée avec succès.
+                                        
+                        Somme à **déposer** dans la caisse commune: **%s Tokens**.
+                        Somme à **verser** aux participants: **%s Tokens**.
+                        """, Math.max(session.getIncome().getDeposit(), 0),
+                session.getIncome().getWages());
+        embed.setDescription(sb);
         return embed.build();
     }
 
@@ -100,9 +189,7 @@ public class SessionBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Informations de la session");
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append(session.getDisplayFormat()).append("\n");
-        embed.setDescription(sb.toString());
+        embed.setDescription(session.getDisplayFormat() + "\n");
         return embed.build();
     }
 
@@ -110,11 +197,10 @@ public class SessionBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("\uD83D\uDDD1 Action en cours - Suppression d'une session de travail");
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append("Afin de terminer la procédure, veuillez confirmer votre choix.").append("\n\n");
-        sb.append("**Aperçu de la session concernée :**").append("\n");
-        sb.append(session.getDescriptionFormat()).append("\n");
-        embed.setDescription(sb.toString());
+        String sb = "Afin de terminer la procédure, veuillez confirmer votre choix." + "\n\n" +
+                    "**Aperçu de la session concernée :**" + "\n" +
+                    session.getDescriptionFormat() + "\n";
+        embed.setDescription(sb);
         return embed.build();
     }
 
@@ -126,6 +212,7 @@ public class SessionBuilderUtils {
         final String value = String.format("%s", hasValue ? Toolbox.flatten(identities) : "Aucun.");
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed participantMessage(final SessionModel session) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(buildStepTitle(session));
@@ -141,6 +228,7 @@ public class SessionBuilderUtils {
         final String value = info != null ? info : "Rien à signaler";
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed infoMessage(final SessionModel session) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(buildStepTitle(session));
@@ -155,6 +243,7 @@ public class SessionBuilderUtils {
         final String value = hasValue ? zone.getLabel() : "`Information manquante`";
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed zoneMessage(final SessionModel session) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(buildStepTitle(session));
@@ -169,6 +258,7 @@ public class SessionBuilderUtils {
         final String value = String.format("%s", (hasValue ? token : 0) + " Tokens");
         return new MessageEmbed.Field(name, value, false);
     }
+
     public static MessageEmbed earningsMessage(final SessionModel session) {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle(buildStepTitle(session));

@@ -19,14 +19,6 @@ public enum CitizenType {
         this.label = label;
     }
 
-    public int getWage() {
-        return this.wage;
-    }
-
-    public String getLabel() {
-        return this.label;
-    }
-
     /* Utils */
     public static CitizenType fromPage(final SessionPageType type) {
         return switch (type) {
@@ -36,5 +28,13 @@ public enum CitizenType {
             case VORTIGAUNTS -> CitizenType.VORTIGAUNT;
             case ANTI_CITIZENS -> CitizenType.ANTI_CITIZEN;
         };
+    }
+
+    public int getWage() {
+        return this.wage;
+    }
+
+    public String getLabel() {
+        return this.label;
     }
 }

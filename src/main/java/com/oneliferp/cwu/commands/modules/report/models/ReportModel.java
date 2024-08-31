@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
         @JsonSubTypes.Type(value = DmsReportModel.class, name = "DRT"),
 })
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public abstract class ReportModel extends Pageable<ReportPageType>  {
+public abstract class ReportModel extends Pageable<ReportPageType> {
     @JsonProperty("id")
     protected String id;
 
@@ -84,6 +84,10 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
         return this.branch;
     }
 
+    public ReportType getType() {
+        return this.type;
+    }
+
     public void setType(final ReportType type) {
         this.type = type;
 
@@ -94,63 +98,68 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
         }
         this.branch = this.type.getMainBranch();
     }
-    public ReportType getType() {
-        return this.type;
+
+    public StockType getStock() {
+        return this.stock;
     }
 
     public void setStock(final StockType type) {
         this.stock = type;
     }
-    public StockType getStock() {
-        return this.stock;
+
+    public String getInfo() {
+        return this.info;
     }
 
     public void setInfo(@Nullable final String info) {
         this.info = (info == null || info.isBlank()) ? null : info;
-    }
-    public String getInfo() {
-        return this.info;
     }
 
     public SimpleDate getCreatedAt() {
         return this.createdAt;
     }
 
-    public abstract void setIdentity(final CitizenIdentityModel identity);
     public abstract CitizenIdentityModel getIdentity();
+
+    public abstract void setIdentity(final CitizenIdentityModel identity);
+
+    public Integer getTax() {
+        throw new UnsupportedOperationException("Tax is not available for this type of report.");
+    }
 
     public void setTax(final Integer tax) {
         throw new UnsupportedOperationException("Tax is not available for this type of report.");
     }
-    public Integer getTax() {
-        throw new UnsupportedOperationException("Tax is not available for this type of report.");
+
+    public String getHealthiness() {
+        throw new UnsupportedOperationException("Healthiness is not available for this type of report.");
     }
 
     public void setHealthiness(final String healthiness) {
         throw new UnsupportedOperationException("Healthiness is not available for this type of report.");
     }
-    public String getHealthiness() {
-        throw new UnsupportedOperationException("Healthiness is not available for this type of report.");
+
+    public String getMedical() {
+        throw new UnsupportedOperationException("Medical is not available for this type of report.");
     }
 
     public void setMedical(final String medical) {
         throw new UnsupportedOperationException("Medical is not available for this type of report.");
     }
-    public String getMedical() {
-        throw new UnsupportedOperationException("Medical is not available for this type of report.");
+
+    public Integer getRent() {
+        throw new UnsupportedOperationException("Rent is not available for this type of report.");
     }
 
     public void setRent(final Integer rent) {
         throw new UnsupportedOperationException("Rent is not available for this type of report.");
     }
-    public Integer getRent() {
-        throw new UnsupportedOperationException("Rent is not available for this type of report.");
+
+    public Integer getCost() {
+        throw new UnsupportedOperationException("Cost is not available for this type of report.");
     }
 
     public void setCost(final Integer cost) {
-        throw new UnsupportedOperationException("Cost is not available for this type of report.");
-    }
-    public Integer getCost() {
         throw new UnsupportedOperationException("Cost is not available for this type of report.");
     }
 
@@ -181,12 +190,11 @@ public abstract class ReportModel extends Pageable<ReportPageType>  {
     }
 
     public String getDisplayFormat() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append(String.format("%s **Rapport :** %s", this.type.getBranchEmoji(), this.type.getLabel())).append("\n");
-        sb.append(String.format("**Employé :** %s", this.employee)).append("\n");
-        sb.append(String.format("**Date :** %s", this.getCreatedAt())).append("\n\n");
-        sb.append("**Informations supplémentaires :**").append("\n").append(this.info == null ? "Rien à signaler" : info).append("\n\n");
-        return sb.toString();
+        String sb = String.format("%s **Rapport :** %s", this.type.getBranchEmoji(), this.type.getLabel()) + "\n" +
+                    String.format("**Employé :** %s", this.employee) + "\n" +
+                    String.format("**Date :** %s", this.getCreatedAt()) + "\n\n" +
+                    "**Informations supplémentaires :**" + "\n" + (this.info == null ? "Rien à signaler" : info) + "\n\n";
+        return sb;
     }
 
     public String getStepTitle() {

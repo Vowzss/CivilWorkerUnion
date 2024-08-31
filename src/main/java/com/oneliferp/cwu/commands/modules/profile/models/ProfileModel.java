@@ -25,59 +25,63 @@ public class ProfileModel extends Pageable<ProfilePageType> {
     @JsonProperty("identity")
     private CwuIdentityModel identity;
 
-    @JsonProperty("branch")
-    private CwuBranch branch;
-
     @JsonProperty("joinedAt")
     private SimpleDate joinedAt;
 
     public ProfileModel() {
     }
 
+    public Long getId() {
+        return this.id;
+    }
+
     /* Getters & Setters */
     public void setId(final Long id) {
         this.id = id;
     }
-    public Long getId() {
-        return this.id;
+
+    public CwuIdentityModel getIdentity() {
+        return this.identity;
     }
 
     public void setIdentity(final CwuIdentityModel identity) {
         this.identity = identity;
     }
-    public CwuIdentityModel getIdentity() {
-        return this.identity;
-    }
 
-    public void setBranch(final CwuBranch branch) {
-        this.branch = branch;
-    }
-    public CwuBranch getBranch() {
-        return this.branch;
+    public SimpleDate getJoinedAt() {
+        return this.joinedAt;
     }
 
     public void setJoinedAt(final SimpleDate joinedAt) {
         this.joinedAt = joinedAt;
     }
-    public SimpleDate getJoinedAt() {
-        return this.joinedAt;
-    }
 
     /* Methods */
     public String getCid() {
+        if (this.identity == null) return null;
         return this.identity.getCid();
+    }
+
+    public CwuRank getRank() {
+        if (this.identity == null) return null;
+        return this.identity.getRank();
     }
 
     public void setRank(final CwuRank rank) {
         this.identity.setRank(rank);
     }
 
-    public CwuRank getRank() {
-        return this.identity.getRank();
+    public CwuBranch getBranch() {
+        if (this.identity == null) return null;
+        return this.identity.getBranch();
+    }
+
+    public void setBranch(final CwuBranch branch) {
+        this.identity.setBranch(branch);
     }
 
     public boolean isAdministration() {
-        return this.branch == CwuBranch.CWU;
+        return this.getBranch() == CwuBranch.CWU;
     }
 
     /* Utils */
@@ -154,16 +158,15 @@ public class ProfileModel extends Pageable<ProfilePageType> {
 
     /* Helpers */
     public String getDescriptionFormat() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("**Informations général :**").append("\n");
-        sb.append(String.format("Identité : %s", this.identity)).append("\n");
-        sb.append(String.format("Identifiant discord : <@%d>", this.id)).append("\n");
-        sb.append(String.format("Recruté le: %s", this.joinedAt.getDate())).append("\n\n");
 
-        sb.append("**Informations CWU :**").append("\n");
-        sb.append(String.format("Division : %s (%s)\n", this.branch, this.branch.getMeaning()));
-        sb.append(String.format("Grade : %s\n", this.identity.getRank().getLabel()));
-        return sb.toString();
+        String sb = "**Informations général :**" + "\n" +
+                    String.format("Identité : %s", this.identity) + "\n" +
+                    String.format("Identifiant discord : <@%d>", this.id) + "\n" +
+                    String.format("Recruté le: %s", this.joinedAt.getDate()) + "\n\n" +
+                    "**Informations CWU :**" + "\n" +
+                    String.format("Division : %s (%s)\n", this.getBranch(), this.getBranch().getMeaning()) +
+                    String.format("Grade : %s\n", this.identity.getRank().getLabel());
+        return sb;
     }
 
     public String getStatsFormat() {
@@ -212,6 +215,7 @@ public class ProfileModel extends Pageable<ProfilePageType> {
     @Override
     public void start() {
         this.pagination = new PaginationContext<>(PaginationRegistry.getProfilePages(), ProfilePageType.PREVIEW);
+        this.joinedAt = SimpleDate.now();
     }
 
     @Override

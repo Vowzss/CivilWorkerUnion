@@ -1,7 +1,7 @@
 package com.oneliferp.cwu.commands.modules.profile.utils;
 
-import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
 import com.oneliferp.cwu.commands.modules.manage.misc.actions.WorkforceButtonType;
+import com.oneliferp.cwu.commands.modules.profile.misc.ProfilePageType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileButtonType;
 import com.oneliferp.cwu.commands.modules.profile.misc.actions.ProfileMenuType;
 import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
@@ -30,11 +30,10 @@ public class ProfileBuilderUtils {
         final EmbedBuilder embed = EmbedUtils.createDefault();
         embed.setTitle("Fiche d'information de l'employé");
 
-        final StringBuilder sb = new StringBuilder();
-        sb.append(profile.getDescriptionFormat()).append("\n");
-        sb.append(profile.getStatsFormat()).append("\n");
-        sb.append(profile.getSalaryFormat());
-        embed.setDescription(sb.toString());
+        String sb = profile.getDescriptionFormat() + "\n" +
+                    profile.getStatsFormat() + "\n" +
+                    profile.getSalaryFormat();
+        embed.setDescription(sb);
         return embed.build();
     }
 

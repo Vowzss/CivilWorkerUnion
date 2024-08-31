@@ -38,7 +38,9 @@ public abstract class CwuCommand {
     }
 
     /* Getters */
-    public final String getID() { return this.id; }
+    public final String getID() {
+        return this.id;
+    }
 
     public String getName() {
         return this.name;

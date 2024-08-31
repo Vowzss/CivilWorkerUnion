@@ -11,10 +11,9 @@ public class ReportValidationException extends CwuException {
 
     @Override
     public String getMessage() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("La génération du rapport a échoué car des données sont manquantes.");
-        sb.append("\n\n");
-        sb.append(EmojiUtils.getAnnotationGuide());
-        return sb.toString();
+        String sb = "La génération du rapport a échoué car des données sont manquantes." +
+                    "\n\n" +
+                    EmojiUtils.getAnnotationGuide();
+        return sb;
     }
 }

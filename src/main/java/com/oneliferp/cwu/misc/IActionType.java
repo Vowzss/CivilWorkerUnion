@@ -3,7 +3,6 @@ package com.oneliferp.cwu.misc;
 import com.oneliferp.cwu.commands.utils.CommandContext;
 
 import java.util.Map;
-import java.util.Objects;
 
 public interface IActionType {
     String getRoot();

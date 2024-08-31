@@ -34,13 +34,19 @@ public enum ReportType {
         this.branches = branches == null ? null : Arrays.stream(branches).toList();
     }
 
+    public static List<ReportType> getAvailableReportTypes(final CwuBranch branch) {
+        return Arrays.stream(ReportType.values()).skip(1)
+                .filter(type -> type.branches.contains(branch))
+                .toList();
+    }
+
     /* Getters */
     public String getLabel() {
         return this.label;
     }
 
     /* Methods */
-    public boolean hasMainBranch () {
+    public boolean hasMainBranch() {
         return this.branches.size() != CwuBranch.values().length;
     }
 
@@ -52,11 +58,5 @@ public enum ReportType {
     public String getBranchEmoji() {
         if (!hasMainBranch()) return EmojiUtils.getPencilMemo();
         return this.getMainBranch().getEmoji();
-    }
-
-    public static List<ReportType> getAvailableReportTypes(final CwuBranch branch) {
-        return Arrays.stream(ReportType.values()).skip(1)
-                .filter(type -> type.branches.contains(branch))
-                .toList();
     }
 }

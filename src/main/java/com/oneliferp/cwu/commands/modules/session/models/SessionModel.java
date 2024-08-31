@@ -72,6 +72,10 @@ public class SessionModel extends Pageable<SessionPageType> {
         return this.employee;
     }
 
+    public SessionType getType() {
+        return this.type;
+    }
+
     public void setType(final SessionType type) {
         this.type = type;
 
@@ -80,24 +84,20 @@ public class SessionModel extends Pageable<SessionPageType> {
         this.setZone(zone);
     }
 
-    public SessionType getType() {
-        return this.type;
+    public ZoneType getZone() {
+        return this.zone;
     }
 
     public void setZone(final ZoneType zone) {
         this.zone = zone;
     }
 
-    public ZoneType getZone() {
-        return this.zone;
+    public String getInfo() {
+        return this.info;
     }
 
     public void setInfo(@Nullable final String info) {
         this.info = (info == null || info.isBlank()) ? null : info;
-    }
-
-    public String getInfo() {
-        return this.info;
     }
 
     public HashSet<CitizenIdentityModel> getCitizens() {

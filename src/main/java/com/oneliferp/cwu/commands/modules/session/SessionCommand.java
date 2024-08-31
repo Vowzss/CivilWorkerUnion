@@ -2,20 +2,23 @@ package com.oneliferp.cwu.commands.modules.session;
 
 import com.oneliferp.cwu.cache.SessionCache;
 import com.oneliferp.cwu.commands.CwuCommand;
+import com.oneliferp.cwu.commands.modules.profile.exceptions.ProfileNotFoundException;
+import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
+import com.oneliferp.cwu.commands.modules.session.exceptions.SessionNotFoundException;
+import com.oneliferp.cwu.commands.modules.session.exceptions.SessionValidationException;
+import com.oneliferp.cwu.commands.modules.session.misc.CitizenType;
+import com.oneliferp.cwu.commands.modules.session.misc.SessionType;
+import com.oneliferp.cwu.commands.modules.session.misc.ZoneType;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionButtonType;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionMenuType;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionModalType;
+import com.oneliferp.cwu.commands.modules.session.misc.actions.SessionPageType;
+import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
+import com.oneliferp.cwu.commands.modules.session.utils.SessionBuilderUtils;
+import com.oneliferp.cwu.commands.utils.CommandContext;
 import com.oneliferp.cwu.database.ProfileDatabase;
 import com.oneliferp.cwu.database.SessionDatabase;
 import com.oneliferp.cwu.exceptions.CwuException;
-import com.oneliferp.cwu.commands.utils.CommandContext;
-import com.oneliferp.cwu.commands.modules.session.misc.CitizenType;
-import com.oneliferp.cwu.commands.modules.session.misc.ZoneType;
-import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
-import com.oneliferp.cwu.commands.modules.session.misc.actions.*;
-import com.oneliferp.cwu.commands.modules.session.models.SessionModel;
-import com.oneliferp.cwu.commands.modules.profile.exceptions.ProfileNotFoundException;
-import com.oneliferp.cwu.commands.modules.session.exceptions.SessionNotFoundException;
-import com.oneliferp.cwu.commands.modules.session.exceptions.SessionValidationException;
-import com.oneliferp.cwu.commands.modules.session.misc.*;
-import com.oneliferp.cwu.commands.modules.session.utils.SessionBuilderUtils;
 import com.oneliferp.cwu.exceptions.IdentityException;
 import com.oneliferp.cwu.exceptions.IdentityMalformedException;
 import com.oneliferp.cwu.models.CitizenIdentityModel;
@@ -290,7 +293,7 @@ public class SessionCommand extends CwuCommand {
         this.goToPage(event, session);
     }
 
-    private void handlePreviewButton(final ButtonInteractionEvent event, final SessionModel session)  {
+    private void handlePreviewButton(final ButtonInteractionEvent event, final SessionModel session) {
         session.goPreviewPage();
         this.goToPage(event, session);
     }

@@ -17,8 +17,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
 
 public abstract class JsonDatabase<A, B> {
     private static final ObjectMapper MAPPER = new ObjectMapper()
@@ -35,24 +37,23 @@ public abstract class JsonDatabase<A, B> {
         MAPPER.registerModule(module);
     }
 
-    private final TypeReference<List<B>> typeRef;
-    private final File file;
-
+    protected final Path directory;
     protected final HashMap<A, B> map;
+    private final TypeReference<List<B>> typeRef;
 
-    protected JsonDatabase(final TypeReference<List<B>> typeRef, final String fileName) {
+    protected JsonDatabase(final TypeReference<List<B>> typeRef, final Path directory) {
         this.typeRef = typeRef;
+        this.directory = directory;
 
-        final Path directoryPath = Paths.get("Databases");
-        if (!Files.exists(directoryPath)) {
-            try { Files.createDirectories(directoryPath);}
-            catch (IOException e) { throw new RuntimeException("Failed to create Databases directory."); }
+        if (!Files.exists(this.directory)) {
+            try {
+                Files.createDirectories(this.directory);
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to create database directory.");
+            }
         }
 
-        this.file = new File(directoryPath.toFile(), fileName);
         this.map = new HashMap<>();
-
-        this.load();
     }
 
     /* Methods */
@@ -62,12 +63,12 @@ public abstract class JsonDatabase<A, B> {
         values.forEach(this::addOne);
     }
 
-    public void removeOne(final A cid) {
-        this.map.remove(cid);
+    public void removeOne(final A key) {
+        this.map.remove(key);
     }
 
-    public boolean exist(final A cid) {
-        return this.map.containsKey(cid);
+    public boolean exist(final A key) {
+        return this.map.containsKey(key);
     }
 
     public List<B> getAll() {
@@ -83,24 +84,20 @@ public abstract class JsonDatabase<A, B> {
     }
 
     /* Persistence methods */
-    protected void load() {
-        this.addMany(this.readFromCache());
-        System.out.printf("Loaded: '%d' values from file: '%s'.\n\n", this.map.values().size(), this.file);
+    protected void load(final File file) {
+        this.addMany(this.readFromCache(file));
+        System.out.printf("Loaded: '%d' values from file: '%s'.\n\n", this.map.values().size(), file);
     }
 
-    public void save() {
-        this.writeToCache(this.getAll());
-    }
+    public abstract void save();
 
-    public void clear() {
-        this.clearCache();
-    }
+    public abstract void clear();
 
     /* Disk methods */
-    private Collection<B> readFromCache() {
+    protected Collection<B> readFromCache(final File file) {
         if (!file.exists()) return new ArrayList<>();
 
-        try (final FileReader fr = new FileReader(this.file)) {
+        try (final FileReader fr = new FileReader(file)) {
             return MAPPER.readValue(fr, typeRef);
         } catch (Exception e) {
             e.printStackTrace();
@@ -109,16 +106,16 @@ public abstract class JsonDatabase<A, B> {
         return new ArrayList<>();
     }
 
-    private void clearCache() {
-        try (final FileWriter fw = new FileWriter(this.file)) {
+    protected void clearCache(final File file) {
+        try (final FileWriter fw = new FileWriter(file)) {
             fw.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void writeToCache(final Collection<B> objects) {
-        try (final FileWriter fw = new FileWriter(this.file)) {
+    protected void writeToCache(final Collection<B> objects, final File file) {
+        try (final FileWriter fw = new FileWriter(file)) {
             MAPPER.writeValue(fw, objects);
         } catch (Exception e) {
             e.printStackTrace();

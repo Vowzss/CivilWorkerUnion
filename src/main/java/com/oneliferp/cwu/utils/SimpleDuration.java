@@ -7,14 +7,12 @@ import java.time.LocalTime;
 
 public class SimpleDuration {
 
-    @JsonIgnore
-    private int hours;
-
-    @JsonIgnore
-    private int minutes;
-
     @JsonProperty("time")
     public final String time;
+    @JsonIgnore
+    private int hours;
+    @JsonIgnore
+    private int minutes;
 
     public SimpleDuration(final int hour, final int minute) {
         this.hours = hour;

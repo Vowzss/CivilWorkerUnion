@@ -18,7 +18,6 @@ import com.oneliferp.cwu.exceptions.IdentityMalformedException;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 import com.oneliferp.cwu.models.CwuIdentityModel;
-import com.oneliferp.cwu.models.IdentityModel;
 import com.oneliferp.cwu.utils.SimpleDate;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -249,8 +248,11 @@ public class ProfileCommand extends CwuCommand {
                 final ProfileModel profile = this.profileCache.find(ctx.getCid());
                 if (profile == null) throw new ProfileNotFoundException(event);
 
-                if (ctx.getAsString("type").equals("prev")) { profile.goPrevPage(); }
-                else { profile.goNextPage(); }
+                if (ctx.getAsString("type").equals("prev")) {
+                    profile.goPrevPage();
+                } else {
+                    profile.goNextPage();
+                }
                 this.goToPage(event, profile, ctx.getCid());
             }
         }

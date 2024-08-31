@@ -26,6 +26,10 @@ public enum SessionType {
         this.emoji = emoji;
     }
 
+    public static List<SessionPageType> getDefaultPages() {
+        return List.of(SessionPageType.LOYALISTS, SessionPageType.CIVILIANS, SessionPageType.VORTIGAUNTS, SessionPageType.ANTI_CITIZENS, SessionPageType.INFO);
+    }
+
     /* Getters */
     public String getLabel() {
         return this.label;
@@ -45,9 +49,5 @@ public enum SessionType {
             case LAUNDRY -> ZoneType.HANGAR_PLAZA;
             case PRINTING -> ZoneType.PRINTING_HOUSE;
         };
-    }
-
-    public static List<SessionPageType> getDefaultPages() {
-        return List.of(SessionPageType.LOYALISTS, SessionPageType.CIVILIANS, SessionPageType.VORTIGAUNTS, SessionPageType.ANTI_CITIZENS, SessionPageType.INFO);
     }
 }

@@ -24,9 +24,6 @@ dependencies {
     implementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.17.2")
 
-    // https://mvnrepository.com/artifact/io.github.stepio.jgforms/jgforms
-    implementation("io.github.stepio.jgforms:jgforms:1.0.1")
-
     // https://mvnrepository.com/artifact/io.github.cdimascio/dotenv-java
     implementation("io.github.cdimascio:dotenv-java:3.0.1")
 

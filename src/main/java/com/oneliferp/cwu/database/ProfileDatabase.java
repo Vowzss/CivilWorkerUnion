@@ -5,27 +5,45 @@ import com.oneliferp.cwu.commands.modules.profile.models.ProfileModel;
 import com.oneliferp.cwu.misc.CwuBranch;
 import com.oneliferp.cwu.misc.CwuRank;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ProfileDatabase extends JsonDatabase<String, ProfileModel> {
     /* Singleton */
     private static ProfileDatabase instance;
+    protected final File file;
+
+    private ProfileDatabase() {
+        super(new TypeReference<>() {
+        }, Path.of("persistence/profiles"));
+
+        this.file = new File(this.directory.toFile(), "profile_db.json");
+        this.load(this.file);
+    }
 
     public static ProfileDatabase get() {
         if (instance == null) instance = new ProfileDatabase();
         return instance;
     }
 
-    private ProfileDatabase() {
-        super(new TypeReference<>() {
-        }, "profile_db.json");
-    }
-
+    /* Methods */
     @Override
     public void addOne(final ProfileModel cwu) {
         System.out.printf("CID: '%s', IDENTITY: '%s'%n", cwu.getCid(), cwu.getIdentity());
         this.map.put(cwu.getCid(), cwu);
+    }
+
+    /* Persistence methods */
+    @Override
+    public void save() {
+        this.writeToCache(this.map.values(), this.file);
+    }
+
+    @Override
+    public void clear() {
+        this.clearCache(this.file);
     }
 
     /* Utils */
