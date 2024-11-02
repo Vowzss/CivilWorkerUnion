@@ -13,15 +13,24 @@ public class Config {
     @JsonProperty("start_period")
     private SimpleDateTime startPeriodDate;
 
-    private Config() {
-    }
+    @JsonProperty("tokens")
+    private Integer tokens;
 
-    public SimpleDateTime getStartPeriodDate() {
-        return this.startPeriodDate;
+    private Config() {
     }
 
     public void setStartPeriodDate(final SimpleDateTime date) {
         this.startPeriodDate = date;
+    }
+    public SimpleDateTime getStartPeriodDate() {
+        return this.startPeriodDate;
+    }
+
+    public void setTokens(final Integer tokens) {
+        this.tokens = tokens;
+    }
+    public Integer getTokens() {
+        return this.tokens;
     }
 
     /* Persistence */
